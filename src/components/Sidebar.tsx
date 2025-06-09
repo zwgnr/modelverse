@@ -90,8 +90,8 @@ export function Sidebar({
       <div className="flex-shrink-0">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🍑</span>
-            <span className="font-bold text-foreground">Peachy Chat</span>
+            <span className="text-xl">💬</span>
+            <span className="font-bold text-foreground">z3 Chat</span>
           </div>
         </div>
       </div>
@@ -142,8 +142,8 @@ export function Sidebar({
                 key={conversation._id}
                 className={`relative rounded-lg transition-all duration-200 ${
                   currentConversationId === conversation._id
-                    ? "bg-secondary text-secondary-foreground"
-                    : "hover:bg-secondary hover:text-secondary-foreground"
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
                 }`}
                 onMouseEnter={() => setHoveredId(conversation._id)}
                 onMouseLeave={() => setHoveredId(null)}
