@@ -58,7 +58,7 @@ function IndexComponent() {
         <div className="flex h-full flex-col items-center justify-center pb-24">
           <div className="text-center">
             <h1 className="mt-6 text-3xl font-bold text-gray-800 dark:text-gray-200">
-              How can I help you today?
+              What dumb question do you have for me?
             </h1>
           </div>
         </div>
@@ -67,7 +67,7 @@ function IndexComponent() {
       {/* Input Form */}
       <div className="sticky bottom-0 w-full px-4 py-6">
         <div className="container mx-auto max-w-4xl">
-          <div className="rounded-2xl border border-white/20 bg-white/90 p-3 shadow-xl shadow-black/5 backdrop-blur-lg dark:border-slate-700/50 dark:bg-slate-800/90 dark:shadow-black/20">
+          <div className="rounded-2xl border p-3 shadow-xl shadow-black/5 backdrop-blur-lg">
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Row 1: Text Input Only */}
               <div className="flex items-center">
