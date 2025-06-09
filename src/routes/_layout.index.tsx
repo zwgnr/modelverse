@@ -136,7 +136,7 @@ function IndexComponent() {
 
                   {/* Web Search Indicator */}
                   {webSearchEnabled && (
-                    <div className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-1 text-xs font-medium text-primary dark:text-primary">
                       <Globe className="h-3 w-3" />
                       Web search enabled
                     </div>
@@ -148,7 +148,7 @@ function IndexComponent() {
                   type="submit"
                   disabled={!newMessageText.trim()}
                   size="icon"
-                  className="h-9 w-9 flex-shrink-0 rounded-lg bg-blue-500 transition-colors hover:bg-blue-600 disabled:bg-slate-300 dark:disabled:bg-slate-600"
+                  className="h-9 w-9 flex-shrink-0 rounded-lg bg-primary transition-colors hover:bg-primary/90 disabled:bg-muted dark:disabled:bg-muted"
                 >
                   <Send className="h-4 w-4" />
                   <span className="sr-only">Send message</span>

@@ -85,24 +85,25 @@ export function Sidebar({
   };
 
   return (
-    <div className="flex h-screen w-64 flex-col dark:border-slate-700 dark:bg-slate-900 p-2">
+    <div className="flex h-screen w-64 flex-col p-2">
       {/* Header with Branding */}
-      <div className="flex-shrink-0 border-slate-200  dark:border-slate-700">
+      <div className="flex-shrink-0">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
-            <Lollipop className="text-primary h-6 w-6" />
+            <span className="text-xl">🍑</span>
+            <span className="font-bold text-foreground">Peachy Chat</span>
           </div>
         </div>
       </div>
 
       {/* Search and New Chat Actions */}
-      <div className="flex-shrink-0 space-y-2 border-slate-200 p-2 dark:border-slate-700">
+      <div className="flex-shrink-0 space-y-2 p-2">
         <div className="flex gap-2">
           {/* Full width search command palette */}
           <Button
             onClick={onOpenCommandPalette}
             variant="outline"
-            className="h-9 flex-1 justify-start border-dashed bg-white/50 text-left text-sm hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80"
+            className="h-9 flex-1 justify-start border-dashed text-left text-sm hover:bg-secondary hover:text-secondary-foreground"
             title="Command Palette (⌘K)"
           >
             <Search className="mr-3 h-4 w-4" />
@@ -120,15 +121,15 @@ export function Sidebar({
             </div>
           </Button>
 
-          {/* New Chat Button - Just Plus Icon */}
+          {/* New Chat Button - Peach themed */}
           <Button
             onClick={onNewChat}
             variant="outline"
             size="sm"
-            className="h-9 w-9 border-purple-500/30 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 p-0 transition-all duration-200 hover:from-blue-500/30 hover:via-purple-500/30 hover:to-pink-500/30 hover:shadow-lg"
+            className="h-9 w-9 border-primary/20 hover:bg-gradient-to-br bg-gradient-to-br from-primary/10 via-accent/15 to-primary/5 p-0 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-primary/10 active:scale-95"
             title="New Chat (⌘N)"
           >
-            <MessageCirclePlus className="h-4 w-4" />
+            <MessageCirclePlus className="h-4 w-4 text-primary" />
           </Button>
         </div>
       </div>
@@ -142,8 +143,8 @@ export function Sidebar({
                 key={conversation._id}
                 className={`relative rounded-lg transition-all duration-200 ${
                   currentConversationId === conversation._id
-                    ? "bg-slate-200 dark:bg-slate-800"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                    ? "bg-secondary text-secondary-foreground"
+                    : "hover:bg-secondary hover:text-secondary-foreground"
                 }`}
                 onMouseEnter={() => setHoveredId(conversation._id)}
                 onMouseLeave={() => setHoveredId(null)}
@@ -187,7 +188,7 @@ export function Sidebar({
                         ? "max-w-[140px]" 
                         : "max-w-[150px]"
                     }`}>
-                      <div className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                      <div className="truncate text-sm font-medium">
                         {conversation.title}
                       </div>
                     </div>
@@ -205,7 +206,7 @@ export function Sidebar({
                           e.stopPropagation();
                           handleEditStart(conversation);
                         }}
-                        className="h-6 w-6 p-0 text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         title="Edit conversation name"
                       >
                         <Edit2 className="h-3 w-3" />
@@ -232,12 +233,12 @@ export function Sidebar({
       </ScrollArea>
 
       {/* Account Popover - Pinned to Bottom */}
-      <div className="flex-shrink-0 border-t border-slate-200 dark:border-slate-700 p-2">
+      <div className="flex-shrink-0 border-t p-2">
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="w-full justify-start p-2 h-auto hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="w-full justify-start p-2 h-auto hover:bg-secondary hover:text-secondary-foreground"
             >
               <Avatar className="h-8 w-8 mr-3">
                 <AvatarFallback className="text-xs">

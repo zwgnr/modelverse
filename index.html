@@ -1,9 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍑</text></svg>"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acme Chat</title>
+    <title>Peachy Chat</title>
 
     <meta
       name="theme-color"
@@ -19,21 +23,23 @@
   <body>
     <script>
       // Apply dark mode immediately to prevent flash
-      (function() {
+      (function () {
         try {
-          const darkMode = localStorage.getItem('acme-chat-dark-mode');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          
+          const darkMode = localStorage.getItem("acme-chat-dark-mode");
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+
           let shouldBeDark = false;
           if (darkMode !== null) {
-            shouldBeDark = darkMode === 'true';
+            shouldBeDark = darkMode === "true";
           } else {
             // Fall back to system preference if no stored value
             shouldBeDark = prefersDark;
           }
-          
+
           if (shouldBeDark) {
-            document.documentElement.classList.add('dark');
+            document.documentElement.classList.add("dark");
           }
         } catch (e) {
           // Handle localStorage errors gracefully

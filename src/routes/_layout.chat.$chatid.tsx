@@ -103,7 +103,7 @@ function ChatComponent() {
                       <Card
                         className={`${
                           isUser
-                            ? "border-blue-500 bg-blue-500 text-white"
+                            ? "border-border bg-secondary text-secondary-foreground"
                             : "border-transparent bg-transparent shadow-none"
                         } break-words`}
                       >
@@ -183,7 +183,7 @@ function ChatComponent() {
         {/* Input Form */}
         <div className="sticky bottom-0 w-full px-4 py-6">
           <div className="container mx-auto max-w-4xl">
-            <div className="rounded-2xl border border-white/20 bg-white/90 p-3 shadow-xl shadow-black/5 backdrop-blur-lg dark:border-slate-700/50 dark:bg-slate-800/90 dark:shadow-black/20">
+            <div className="rounded-2xl border p-3 shadow-xl shadow-black/5 backdrop-blur-lg">
               <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Row 1: Text Input Only */}
                 <div className="flex items-center">
@@ -223,12 +223,12 @@ function ChatComponent() {
                     onClick={() => setWebSearchEnabled(!webSearchEnabled)}
                     className={`h-8 w-8 rounded-lg transition-colors ${
                       webSearchEnabled
-                        ? "bg-blue-500 hover:bg-blue-600 text-white"
-                        : "hover:bg-slate-100 dark:hover:bg-slate-700"
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                        : "hover:bg-secondary hover:text-secondary-foreground"
                     }`}
                     title={webSearchEnabled ? "Web search enabled" : "Enable web search"}
                   >
-                    <Globe className={`h-4 w-4 ${webSearchEnabled ? "text-white" : "text-slate-500"}`} />
+                    <Globe className={`h-4 w-4 ${webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"}`} />
                     <span className="sr-only">Toggle web search</span>
                   </Button>
 
@@ -247,7 +247,7 @@ function ChatComponent() {
                     
                     {/* Web Search Indicator */}
                     {webSearchEnabled && (
-                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+                      <div className="text-xs text-primary dark:text-primary font-medium flex items-center gap-1">
                         <Globe className="h-3 w-3" />
                         Web search enabled
                       </div>
@@ -270,7 +270,7 @@ function ChatComponent() {
                       type="submit"
                       disabled={!newMessageText.trim() || !conversationId || isStreaming}
                       size="icon"
-                      className="h-9 w-9 rounded-lg bg-blue-500 transition-colors hover:bg-blue-600 disabled:bg-slate-300 dark:disabled:bg-slate-600 flex-shrink-0"
+                      className="h-9 w-9 rounded-lg bg-primary transition-colors hover:bg-primary/90 disabled:bg-muted dark:disabled:bg-muted flex-shrink-0"
                     >
                       <Send className="h-4 w-4" />
                       <span className="sr-only">Send message</span>

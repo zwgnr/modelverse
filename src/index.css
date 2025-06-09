@@ -30,81 +30,93 @@ div[class*="language-"] code {
 }
 
 :root {
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.688 0.124 23.542); /* Soft peach */
   --primary-text: #111827;
   --secondary-text: #374151;
   --tertiary-text: #4b5563;
-  --secondary-background: #f3f4f6;
+  --secondary-background: #f9f9f9; /* More neutral instead of peach tint */
   --bubbles-background: white;
-  --bubbles-mine-background: #f35d1c;
-  --focus-ring: #3b82f680;
+  --bubbles-mine-background: #f4f4f5; /* Neutral user bubble instead of peach */
+  --focus-ring: oklch(0.688 0.124 23.542 / 0.5); /* Peach focus ring */
   color-scheme: light dark;
 
   --radius: 0.625rem;
-  --background: oklch(94.194% 0.00638 255.743);
+  --background: oklch(96.5% 0.003 23.542); /* Darker background for better contrast */
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(89.684% 0.00325 15.492); /* Much more subtle peach secondary */
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.97 0.001 23.542); /* Barely any peach in muted */
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.92 0.02 23.542); /* Bolder and darker peach accent */
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  --border: oklch(0.922 0.004 23.542); /* Very subtle peach border */
+  --input: oklch(0.922 0.004 23.542);
+  --ring: oklch(0.688 0.124 23.542); /* Peach ring */
+  --chart-1: oklch(0.688 0.124 23.542); /* Peach chart color */
+  --chart-2: oklch(0.75 0.08 45.2); /* Warm coral */
+  --chart-3: oklch(0.8 0.06 85.4); /* Soft yellow-peach */
+  --chart-4: oklch(0.72 0.1 15.8); /* Warm pink-peach */
+  --chart-5: oklch(0.78 0.09 35.7); /* Light orange-peach */
+  --sidebar: oklch(0.99 0.001 23.542); /* Almost neutral sidebar */
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.688 0.124 23.542); /* Peach sidebar primary */
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: oklch(0.92 0.02 23.542); /* Bolder peach sidebar accent */
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: oklch(0.922 0.004 23.542);
+  --sidebar-ring: oklch(0.688 0.124 23.542);
+  
+  /* Conversation states - more neutral */
+  --conversation-active: oklch(0.97 0.004 23.542); /* Very subtle peach for active conversation */
+  --conversation-hover: oklch(0.985 0.002 23.542); /* Barely peach for hover */
+  --conversation-active-foreground: oklch(0.145 0 0);
+  --conversation-hover-foreground: oklch(0.145 0 0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.08 0 0); /* Pure neutral dark background */
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(22.438% 0.00311 16.938); /* Pure neutral cards */
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.12 0 0); /* Pure neutral popover */
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --primary: oklch(0.75 0.1 23.542); /* Keep peach for primary only */
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(31.522% 0.00284 16.614); /* Pure neutral secondary */
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.18 0 0); /* Pure neutral muted */
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.35 0.008 23.542); /* Very subtle peach accent */
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
+  --border: oklch(1 0 0 / 15%); /* Pure neutral borders */
+  --input: oklch(1 0 0 / 20%); /* Pure neutral inputs */
+  --ring: oklch(0.75 0.1 23.542); /* Keep peach for focus ring */
+  --chart-1: oklch(0.75 0.1 23.542); /* Keep peach chart color */
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.1 0 0); /* Pure neutral sidebar */
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-primary: oklch(0.75 0.1 23.542); /* Keep peach for sidebar primary */
+  --sidebar-primary-foreground: oklch(0.145 0 0);
+  --sidebar-accent: oklch(0.35 0.008 23.542); /* Very subtle peach sidebar accent */
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(1 0 0 / 15%); /* Pure neutral sidebar borders */
+  --sidebar-ring: oklch(0.75 0.1 23.542);
+  
+  /* Pure neutral conversation states */
+  --conversation-active: oklch(0.16 0 0); /* Pure neutral active conversation */
+  --conversation-hover: oklch(0.14 0 0); /* Pure neutral hover state */
+  --conversation-active-foreground: oklch(0.985 0 0);
+  --conversation-hover-foreground: oklch(0.985 0 0);
 }
 
 @theme inline {
@@ -143,6 +155,10 @@ div[class*="language-"] code {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-conversation-active: var(--conversation-active);
+  --color-conversation-hover: var(--conversation-hover);
+  --color-conversation-active-foreground: var(--conversation-active-foreground);
+  --color-conversation-hover-foreground: var(--conversation-hover-foreground);
 }
 
 @layer base {
