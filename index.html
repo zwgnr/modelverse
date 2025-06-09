@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acme Chat</title>
+
+    <meta
+      name="theme-color"
+      content="#7c3aed"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#6d28d9"
+      media="(prefers-color-scheme: dark)"
+    />
+  </head>
+  <body>
+    <script>
+      // Apply dark mode immediately to prevent flash
+      (function() {
+        try {
+          const darkMode = localStorage.getItem('acme-chat-dark-mode');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          
+          let shouldBeDark = false;
+          if (darkMode !== null) {
+            shouldBeDark = darkMode === 'true';
+          } else {
+            // Fall back to system preference if no stored value
+            shouldBeDark = prefersDark;
+          }
+          
+          if (shouldBeDark) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // Handle localStorage errors gracefully
+        }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

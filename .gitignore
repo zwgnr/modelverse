@@ -1,0 +1,60 @@
+# Dependency directories
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+coverage/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Misc
+.env
+.env.*.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# System files
+*.swp
+*.swo
+
+# Parcel / Vite / Bun
+.cache/
+.vite/
+.bun/
+
+# Testing
+jest.config.js
+coverage/
+*.lcov
+
+# Storybook
+.storybook-out/
+.storybook-static/
+
+# Next.js
+.next/
+.vercel/
+
+# Turbo / Nx
+.turbo/
+nx-cache/
