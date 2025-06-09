@@ -132,35 +132,29 @@ function RouteComponent() {
                 <PanelLeft className="h-4 w-4" />
               </Button>
 
-              {/* Command Palette Trigger - Only show when sidebar is collapsed */}
+              {/* Collapsed Sidebar Actions */}
               {!sidebarVisible && (
                 <>
+                  {/* Search Icon Button */}
                   <Button
                     onClick={() => setCommandPaletteOpen(true)}
                     variant="outline"
-                    size="sm"
-                    className="relative border-dashed bg-white/50 hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80"
-                    title="Command Palette (⌘K)"
+                    size="icon"
+                    className="h-9 w-9"
+                    title="Search (⌘K)"
                   >
-                    <Search className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Search</span>
-                    <kbd className="bg-muted text-muted-foreground ml-2 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:inline-flex">
-                      <span className="text-xs">
-                        {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}
-                      </span>
-                      K
-                    </kbd>
+                    <Search className="h-4 w-4" />
                   </Button>
 
-                  {/* New Chat Button - Only show when sidebar is collapsed */}
+                  {/* New Chat Button */}
                   <Button
                     onClick={handleNewChat}
                     variant="outline"
-                    size="sm"
-                    className="h-9 w-9 border-purple-500/30 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 p-0 transition-all duration-200 hover:from-blue-500/30 hover:via-purple-500/30 hover:to-pink-500/30 hover:shadow-lg"
+                    size="icon"
+                    className="h-9 w-9"
                     title="New Chat (⌘N)"
                   >
-                    <MessageCirclePlus className="h-4 w-4" />
+                    <MessageCirclePlus className="h-4 w-4 text-primary" />
                   </Button>
                 </>
               )}

@@ -125,8 +125,7 @@ export function Sidebar({
           <Button
             onClick={onNewChat}
             variant="outline"
-            size="sm"
-            className="h-9 w-9 border-primary/20 hover:bg-gradient-to-br bg-gradient-to-br from-primary/10 via-accent/15 to-primary/5 p-0 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-primary/10 active:scale-95"
+            size="icon"
             title="New Chat (⌘N)"
           >
             <MessageCirclePlus className="h-4 w-4 text-primary" />
