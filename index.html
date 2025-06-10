@@ -22,25 +22,27 @@
   </head>
   <body>
     <script>
-      // Apply dark mode immediately to prevent flash
+      // Apply theme immediately to prevent flash
       (function () {
         try {
-          const darkMode = localStorage.getItem("acme-chat-dark-mode");
+          const theme = localStorage.getItem("acme-chat-theme");
           const prefersDark = window.matchMedia(
             "(prefers-color-scheme: dark)",
           ).matches;
 
-          let shouldBeDark = false;
-          if (darkMode !== null) {
-            shouldBeDark = darkMode === "true";
-          } else {
-            // Fall back to system preference if no stored value
-            shouldBeDark = prefersDark;
+          let effectiveTheme = 'light';
+          
+          if (theme === 'dark') {
+            effectiveTheme = 'dark';
+          } else if (theme === 'light') {
+            effectiveTheme = 'light';
+          } else if (theme === 'system' || theme === null) {
+            // Fall back to system preference if system theme or no stored value
+            effectiveTheme = prefersDark ? 'dark' : 'light';
           }
 
-          if (shouldBeDark) {
-            document.documentElement.classList.add("dark");
-          }
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(effectiveTheme);
         } catch (e) {
           // Handle localStorage errors gracefully
         }

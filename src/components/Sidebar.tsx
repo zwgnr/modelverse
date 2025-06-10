@@ -22,7 +22,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { RouterState } from "@tanstack/react-router";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
@@ -276,7 +276,7 @@ export function Sidebar({
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-3 py-3">
                   <span className="text-sm font-medium">Theme</span>
-                  <DarkModeToggle className="h-8 w-8" />
+                  <ThemeToggle />
                 </div>
 
                 <Button

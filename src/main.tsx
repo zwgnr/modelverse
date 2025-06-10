@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { DarkModeProvider } from "./components/dark-mode-provider";
+import { ThemeProvider } from "./components/theme-provider";
 import { routeTree } from './routeTree.gen'
 
 import "./index.css";
@@ -18,8 +18,8 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById("root")!).render(
   <ConvexAuthProvider client={convex}>
-    <DarkModeProvider>
+    <ThemeProvider>
       <RouterProvider router={router} />
-    </DarkModeProvider>
+    </ThemeProvider>
   </ConvexAuthProvider>,
 );

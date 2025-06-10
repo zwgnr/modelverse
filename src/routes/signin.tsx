@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
-import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute('/signin')({
   component: SignInForm,
@@ -49,7 +49,7 @@ export function SignInForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 relative">
       <div className="absolute top-4 right-4">
-        <DarkModeToggle />
+        <ThemeToggle />
       </div>
       
       <div className="w-full max-w-md space-y-8">
