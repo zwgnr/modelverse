@@ -8,3 +8,32 @@
   - `pnpm add -D <package>` for dev dependencies
   - `pnpm remove <package>` for uninstalling
   - `pnpm i` for installing existing dependencies
+
+  ## Classname Management
+
+- ALWAYS use the `cn()` utility function to join and merge classnames
+- NEVER use template literals, string concatenation, or array joins for classnames
+- Import `cn` from your utils (e.g., `import { cn } from "@/lib/utils"`)
+- Use `cn()` for conditional classnames, merging classes, and handling conflicts
+
+### Examples:
+
+```javascript
+DO:
+
+// Use cn() utility
+className={cn("base-class", condition && "active", variant)}
+
+// Complex conditional logic
+className={cn(
+  "btn",
+  variant,
+  {
+    "disabled": disabled,
+    "loading": isLoading,
+    "primary": variant === "primary"
+  }
+)}
+
+// Merging with props
+className={cn("default-styles", className)}
