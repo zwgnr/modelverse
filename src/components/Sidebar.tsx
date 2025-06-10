@@ -17,12 +17,17 @@ import {
 } from "lucide-react";
 import { Id } from "../../convex/_generated/dataModel";
 import { RouterState } from "@tanstack/react-router";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
+import { cn } from "@/lib/utils";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
@@ -31,6 +36,7 @@ interface SidebarProps {
   onOpenCommandPalette?: () => void;
   onSignOut: () => void;
   routerState: RouterState;
+  isVisible: boolean;
 }
 
 export function Sidebar({
@@ -40,8 +46,8 @@ export function Sidebar({
   onOpenCommandPalette,
   onSignOut,
   routerState,
+  isVisible,
 }: SidebarProps) {
-  
   const { data: conversations } = useQuery(
     convexQuery(api.conversations.list, {}),
   );
@@ -52,7 +58,7 @@ export function Sidebar({
   const [editTitle, setEditTitle] = useState("");
   const [hoveredId, setHoveredId] = useState<Id<"conversations"> | null>(null);
 
-  const isIndexRoute = routerState.location.pathname === '/';
+  const isIndexRoute = routerState.location.pathname === "/";
 
   const handleEditStart = (conversation: any) => {
     setEditingId(conversation._id);
@@ -82,25 +88,42 @@ export function Sidebar({
   };
 
   return (
-    <div className="flex h-screen w-64 flex-col p-2">
+    <div
+      className={cn(
+        "flex h-screen w-64 flex-col overflow-hidden p-2 transition-all duration-300 ease-out",
+        isVisible
+          ? "animate-in slide-in-from-left duration-300 ease-out"
+          : "animate-out slide-out-to-left pointer-events-none duration-300 ease-in",
+      )}
+    >
       {/* Header with Branding */}
-      <div className="flex-shrink-0">
+      <div
+        className={cn(
+          "flex-shrink-0 transition-all duration-300",
+          !isVisible && "pointer-events-none opacity-0",
+        )}
+      >
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">💬</span>
-            <span className="font-bold text-primary">askhole</span>
+            <span className="text-primary font-bold">askhole</span>
           </div>
         </div>
       </div>
 
       {/* Search and New Chat Actions */}
-      <div className="flex-shrink-0 space-y-2 p-2">
+      <div
+        className={cn(
+          "flex-shrink-0 space-y-2 p-2 transition-all duration-300",
+          !isVisible && "pointer-events-none opacity-0",
+        )}
+      >
         <div className="flex gap-2">
           {/* Full width search command palette */}
           <Button
             onClick={onOpenCommandPalette}
             variant="outline"
-            className="h-9 flex-1 justify-start border-dashed text-left text-sm hover:bg-secondary hover:text-secondary-foreground"
+            className="hover:bg-secondary hover:text-secondary-foreground h-9 flex-1 justify-start border-dashed text-left text-sm transition-all duration-200"
             title="Command Palette (⌘K)"
           >
             <Search className="mr-3 h-4 w-4" />
@@ -118,27 +141,40 @@ export function Sidebar({
             </div>
           </Button>
 
-          {/* New Chat Button - Peach themed */}
-          <Button asChild variant="outline" size="icon" title="New Chat (⌘N)">
+          {/* New Chat Button */}
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            title="New Chat (⌘N)"
+            className="transition-all duration-200 hover:scale-105"
+          >
             <Link to="/">
-              <MessageCirclePlus className="h-4 w-4 text-primary" />
+              <MessageCirclePlus className="text-primary h-4 w-4" />
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Conversations List */}
-      <ScrollArea className="min-h-0 flex-1 p-2">
+      <ScrollArea
+        className={cn(
+          "min-h-0 flex-1 p-2 transition-all duration-300",
+          !isVisible && "pointer-events-none opacity-0",
+        )}
+      >
         <div className="space-y-1">
           {conversations?.map((conversation) => {
             return (
               <div
                 key={conversation._id}
-                className={`relative rounded-lg transition-all duration-200 ${
+                className={cn(
+                  "relative rounded-lg",
                   currentConversationId === conversation._id
                     ? "bg-accent text-accent-foreground"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                }`}
+                    : "hover:bg-accent hover:text-accent-foreground",
+                  !isVisible && "pointer-events-none",
+                )}
                 onMouseEnter={() => setHoveredId(conversation._id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
@@ -175,23 +211,27 @@ export function Sidebar({
                   <Link
                     to="/chat/$chatid"
                     params={{ chatid: conversation._id }}
-                    className="flex items-center p-2 w-full"
+                    className="flex w-full items-center p-2"
                   >
-                    <div className={`min-w-0 flex-1 transition-all duration-200 ${
-                      hoveredId === conversation._id 
-                        ? "max-w-[140px]" 
-                        : "max-w-[150px]"
-                    }`}>
+                    <div
+                      className={cn(
+                        "min-w-0 flex-1 transition-all duration-200",
+                        hoveredId === conversation._id
+                          ? "max-w-[140px]"
+                          : "max-w-[150px]",
+                      )}
+                    >
                       <div className="truncate text-sm font-medium">
                         {conversation.title}
                       </div>
                     </div>
                     <div
-                      className={`ml-auto flex gap-1 transition-opacity duration-200 ${
+                      className={cn(
+                        "ml-auto flex gap-1 transition-opacity duration-200",
                         hoveredId === conversation._id
                           ? "opacity-100"
-                          : "opacity-0"
-                      }`}
+                          : "opacity-0",
+                      )}
                     >
                       <Button
                         size="sm"
@@ -201,7 +241,7 @@ export function Sidebar({
                           e.stopPropagation();
                           handleEditStart(conversation);
                         }}
-                        className="h-6 w-6 p-0 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-6 w-6 p-0 transition-all duration-200 hover:scale-110"
                         title="Edit conversation name"
                       >
                         <Edit2 className="h-3 w-3" />
@@ -214,7 +254,7 @@ export function Sidebar({
                           e.stopPropagation();
                           handleDelete(conversation._id);
                         }}
-                        className="h-6 w-6 p-0 text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                        className="h-6 w-6 p-0 text-red-400 transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                         title="Delete conversation"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -229,14 +269,19 @@ export function Sidebar({
       </ScrollArea>
 
       {/* Account Popover - Pinned to Bottom */}
-      <div className="flex-shrink-0 border-t p-2">
+      <div
+        className={cn(
+          "flex-shrink-0 border-t p-2 transition-all duration-300",
+          !isVisible && "pointer-events-none opacity-0",
+        )}
+      >
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="w-full justify-start p-2 h-auto hover:bg-secondary hover:text-secondary-foreground"
+              className="hover:bg-secondary hover:text-secondary-foreground h-auto w-full justify-start p-2 transition-all duration-200"
             >
-              <Avatar className="h-8 w-8 mr-3">
+              <Avatar className="mr-3 h-8 w-8">
                 <AvatarFallback className="text-xs">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
@@ -276,7 +321,11 @@ export function Sidebar({
                   <ThemeToggle />
                 </div>
 
-                <Button asChild variant="ghost" className="h-auto w-full justify-start px-3 py-3 text-sm">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-auto w-full justify-start px-3 py-3 text-sm transition-all duration-200"
+                >
                   <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
@@ -290,7 +339,7 @@ export function Sidebar({
               <Button
                 onClick={onSignOut}
                 variant="ghost"
-                className="h-auto w-full justify-start px-3 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/20"
+                className="h-auto w-full justify-start px-3 py-3 text-sm text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/20"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out

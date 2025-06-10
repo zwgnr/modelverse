@@ -80,7 +80,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden relative">
       {/* Command Palette */}
       <CommandPalette
         open={commandPaletteOpen}
@@ -90,18 +90,30 @@ function RouteComponent() {
         currentModel={currentModel}
       />
 
-      {/* Sidebar */}
+      {/* Backdrop for mobile */}
       {sidebarVisible && (
-        <Sidebar
-          routerState={routerState}
-          currentConversationId={chatid as Id<"conversations">}
-          onConversationDelete={handleConversationDelete}
-          onToggleSidebar={toggleSidebar}
-          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-          onSignOut={handleSignOut}
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-300"
+          onClick={() => setSidebarVisible(false)}
         />
       )}
-      <div className="my-2 mr-4 ml-2 flex flex-1 flex-col rounded-xl bg-card">
+
+      {/* Sidebar */}
+      <div className={`relative z-50 transition-all duration-300 ease-out overflow-hidden ${sidebarVisible ? 'w-64' : 'w-0'}`}>
+        <div className={`w-64 ${sidebarVisible ? '' : 'pointer-events-none'}`}>
+          <Sidebar
+            routerState={routerState}
+            currentConversationId={chatid as Id<"conversations">}
+            onConversationDelete={handleConversationDelete}
+            onToggleSidebar={toggleSidebar}
+            onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+            onSignOut={handleSignOut}
+            isVisible={sidebarVisible}
+          />
+        </div>
+      </div>
+      
+      <div className={`my-2 mr-4 flex flex-1 flex-col rounded-xl bg-card transition-all duration-300 ease-out ${sidebarVisible ? 'ml-2' : 'ml-2'}`}>
         <div className="sticky top-0 z-10 w-full rounded-xl bg-transparent px-4 py-3 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -109,34 +121,32 @@ function RouteComponent() {
                 onClick={toggleSidebar}
                 variant="ghost"
                 size="sm"
-                className="mr-2"
-                title="Show sidebar"
+                className="mr-2 transition-all duration-200 hover:scale-105 hover:bg-accent/50"
+                title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
               >
-                <PanelLeft className="h-4 w-4" />
+                <PanelLeft className={`h-4 w-4 transition-transform duration-300 ease-out ${sidebarVisible ? '' : 'scale-x-[-1]'}`} />
               </Button>
 
               {/* Collapsed Sidebar Actions */}
-              {!sidebarVisible && (
-                <>
-                  {/* Search Icon Button */}
-                  <Button
-                    onClick={() => setCommandPaletteOpen(true)}
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9"
-                    title="Search (⌘K)"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
+              <div className={`flex items-center gap-2 transition-all duration-300 ${sidebarVisible ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+                {/* Search Icon Button */}
+                <Button
+                  onClick={() => setCommandPaletteOpen(true)}
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 animate-in fade-in slide-in-from-left-3 duration-300 hover:scale-105"
+                  title="Search (⌘K)"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
 
-                  {/* New Chat Button */}
-                  <Button asChild variant="outline" size="icon" className="h-9 w-9" title="New Chat (⌘N)">
-                    <Link to="/">
-                      <MessageCirclePlus className="h-4 w-4 text-primary" />
-                    </Link>
-                  </Button>
-                </>
-              )}
+                {/* New Chat Button */}
+                <Button asChild variant="outline" size="icon" className="h-9 w-9 animate-in fade-in slide-in-from-left-3 duration-300 delay-75 hover:scale-105" title="New Chat (⌘N)">
+                  <Link to="/">
+                    <MessageCirclePlus className="h-4 w-4 text-primary" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
