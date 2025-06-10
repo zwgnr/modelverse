@@ -13,7 +13,8 @@ import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { PromptArea } from "@/components/PromptArea";
 import { useLRUCache } from "@/hooks/useLRUCache";
-import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
+import { useLayoutSettledDetection } from "@/hooks/useLayoutSettledDetection";
+import React, { useRef, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatStageWrapper,
@@ -117,7 +118,6 @@ const ChatMessagesPane = React.forwardRef<
   }
 >(({ chatid, isActive }, ref) => {
   const conversationId = chatid;
-  const [isReady, setIsReady] = useState(false);
   const internalRef = useRef<HTMLDivElement>(null);
 
   const { data: messages } = useQuery(
@@ -126,63 +126,13 @@ const ChatMessagesPane = React.forwardRef<
     }),
   );
 
-  // Layout-settled detection using ResizeObserver + idle callback
-  useLayoutEffect(() => {
-    if (!isActive || !messages) {
-      setIsReady(false);
-      return;
-    }
-
-    const node = internalRef.current;
-    if (!node) return;
-
-    // always start at the bottom
-    node.scrollTop = node.scrollHeight;
-
-    let rafId: number;
-    let idleId: number;
-    let resizeCount = 0;
-
-    const ro = new ResizeObserver(() => {
-      node.scrollTop = node.scrollHeight; // glue
-      resizeCount++;
-
-      // Cancel previous attempts
-      cancelAnimationFrame(rafId);
-      if (idleId) cancelIdleCallback(idleId);
-
-      // For long threads (many messages), be more patient
-      const isLongThread = messages.length > 20;
-      const framesToWait = isLongThread ? 3 : 2;
-
-      let frameCount = 0;
-      function waitForQuietFrames() {
-        rafId = requestAnimationFrame(() => {
-          frameCount++;
-          if (frameCount < framesToWait) {
-            waitForQuietFrames();
-          } else {
-            // After quiet frames, wait for browser idle
-            idleId = requestIdleCallback(
-              () => {
-                setIsReady(true);
-              },
-              { timeout: 100 },
-            ); // max 100ms timeout
-          }
-        });
-      }
-
-      waitForQuietFrames();
-    });
-
-    ro.observe(node);
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(rafId);
-      if (idleId) cancelIdleCallback(idleId);
-    };
-  }, [isActive, messages, chatid]);
+  // Use custom hook for layout-settled detection
+  const isReady = useLayoutSettledDetection({
+    isActive,
+    messages,
+    nodeRef: internalRef,
+    chatId: chatid,
+  });
 
   return (
     <div
