@@ -19,6 +19,7 @@ import { MessageCirclePlus } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { selectedModelAtom } from "@/lib/models";
 import { useAtom } from "jotai";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/_layout")({
 
 function RouteComponent() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarToggled, setSidebarToggled] = useState(false); // Track if sidebar has been explicitly toggled
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
 
@@ -42,6 +44,7 @@ function RouteComponent() {
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
+    setSidebarToggled(true); // Mark that sidebar has been explicitly toggled
   };
 
   const handleConversationDelete = (
@@ -92,10 +95,16 @@ function RouteComponent() {
 
       {/* Backdrop for mobile */}
       {sidebarVisible && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-300"
-          onClick={() => setSidebarVisible(false)}
-        />
+                  <div 
+            className={cn(
+              "fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden",
+              sidebarToggled && "animate-in fade-in duration-300"
+            )}
+            onClick={() => {
+              setSidebarVisible(false);
+              setSidebarToggled(true);
+            }}
+          />
       )}
 
       {/* Sidebar */}
@@ -109,6 +118,7 @@ function RouteComponent() {
             onOpenCommandPalette={() => setCommandPaletteOpen(true)}
             onSignOut={handleSignOut}
             isVisible={sidebarVisible}
+            hasBeenToggled={sidebarToggled}
           />
         </div>
       </div>

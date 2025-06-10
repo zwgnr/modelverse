@@ -37,6 +37,7 @@ interface SidebarProps {
   onSignOut: () => void;
   routerState: RouterState;
   isVisible: boolean;
+  hasBeenToggled?: boolean;
 }
 
 export function Sidebar({
@@ -47,6 +48,7 @@ export function Sidebar({
   onSignOut,
   routerState,
   isVisible,
+  hasBeenToggled = false,
 }: SidebarProps) {
   const { data: conversations } = useQuery(
     convexQuery(api.conversations.list, {}),
@@ -91,9 +93,13 @@ export function Sidebar({
     <div
       className={cn(
         "flex h-screen w-64 flex-col overflow-hidden p-2 transition-all duration-300 ease-out",
-        isVisible
-          ? "animate-in slide-in-from-left duration-300 ease-out"
-          : "animate-out slide-out-to-left pointer-events-none duration-300 ease-in",
+        hasBeenToggled &&
+          isVisible &&
+          "animate-in slide-in-from-left duration-300 ease-out",
+        hasBeenToggled &&
+          !isVisible &&
+          "animate-out slide-out-to-left pointer-events-none duration-300 ease-in",
+        !hasBeenToggled && !isVisible && "pointer-events-none",
       )}
     >
       {/* Header with Branding */}
