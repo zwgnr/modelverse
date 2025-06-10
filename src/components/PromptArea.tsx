@@ -3,9 +3,17 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Send, Square, Paperclip, Globe, X, FileImage, FileText } from "lucide-react";
+import {
+  Send,
+  Square,
+  Paperclip,
+  Globe,
+  X,
+  FileImage,
+  FileText,
+} from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
-import { models, getModelDisplayName, selectedModelAtom } from "@/lib/models";
+import { models, selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
 import {
@@ -50,10 +58,10 @@ export function PromptArea({
   placeholder = {
     default: "Type your message...",
     streaming: "AI is responding...",
-    withFiles: "Ask about your files..."
+    withFiles: "Ask about your files...",
   },
   createNewConversation = false,
-  onNavigateToChat
+  onNavigateToChat,
 }: PromptAreaProps) {
   const [newMessageText, setNewMessageText] = useState("");
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
@@ -67,31 +75,32 @@ export function PromptArea({
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const supportedFiles = files.filter(file => {
-      const isImage = file.type.startsWith('image/') && 
-                     ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
-      const isPDF = file.type === 'application/pdf';
+    const supportedFiles = files.filter((file) => {
+      const isImage =
+        file.type.startsWith("image/") &&
+        ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+      const isPDF = file.type === "application/pdf";
       return isImage || isPDF;
     });
-    
+
     if (supportedFiles.length !== files.length) {
-      alert('Only PNG, JPEG, WebP images and PDF files are supported.');
+      alert("Only PNG, JPEG, WebP images and PDF files are supported.");
     }
-    
-    setUploadedFiles(prev => [...prev, ...supportedFiles]);
+
+    setUploadedFiles((prev) => [...prev, ...supportedFiles]);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const uploadFileToStorage = async (file: File): Promise<string> => {
     // Get upload URL from Convex
     const uploadUrl = await generateUploadUrl();
-    
+
     // Upload file to Convex storage
     const result = await fetch(uploadUrl, {
       method: "POST",
@@ -108,8 +117,9 @@ export function PromptArea({
   };
 
   const handleSubmit = async () => {
-    if ((!newMessageText.trim() && uploadedFiles.length === 0) || isStreaming) return;
-    
+    if ((!newMessageText.trim() && uploadedFiles.length === 0) || isStreaming)
+      return;
+
     // For index page, we don't need a conversationId initially
     if (!createNewConversation && !conversationId) return;
 
@@ -119,8 +129,8 @@ export function PromptArea({
         uploadedFiles.map(async (file) => ({
           filename: file.name,
           fileType: file.type,
-          storageId: (await uploadFileToStorage(file)) as Id<"_storage">
-        }))
+          storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
+        })),
       );
 
       // Modify model string if web search is enabled
@@ -149,7 +159,7 @@ export function PromptArea({
         // Fallback to direct mutation if no callback provided
         await sendMessage(messageData);
       }
-      
+
       setNewMessageText("");
       setUploadedFiles([]);
 
@@ -158,8 +168,8 @@ export function PromptArea({
         onNavigateToChat(targetConversationId);
       }
     } catch (error) {
-      console.error('Error uploading files:', error);
-      alert('Failed to upload files. Please try again.');
+      console.error("Error uploading files:", error);
+      alert("Failed to upload files. Please try again.");
     }
   };
 
@@ -176,34 +186,44 @@ export function PromptArea({
   };
 
   return (
-    <div className={cn(createNewConversation ? "w-full" : "sticky bottom-0 w-full px-4 py-6", className)}>
-      <div className={cn("container mx-auto max-w-4xl", createNewConversation ? "px-0" : "")}>
+    <div
+      className={cn(
+        createNewConversation ? "w-full" : "sticky bottom-0 w-full px-4 py-6",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "container mx-auto max-w-4xl",
+          createNewConversation ? "px-0" : "",
+        )}
+      >
         <PromptInput
           value={newMessageText}
           onValueChange={setNewMessageText}
           onSubmit={handleSubmit}
           isLoading={isStreaming}
-          className="shadow-xl shadow-black/5 backdrop-blur-lg p-4"
+          className="p-4 shadow-xl shadow-black/5 backdrop-blur-lg"
         >
           {/* Uploaded Files Preview */}
           {uploadedFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-2 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex flex-wrap gap-2 border-b border-gray-100 p-2 dark:border-gray-800">
               {uploadedFiles.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-2 rounded-lg text-sm"
+                  className="bg-secondary text-secondary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
                 >
-                  {file.type.startsWith('image/') ? (
+                  {file.type.startsWith("image/") ? (
                     <FileImage className="h-4 w-4" />
                   ) : (
                     <FileText className="h-4 w-4" />
                   )}
-                  <span className="truncate max-w-32">{file.name}</span>
+                  <span className="max-w-32 truncate">{file.name}</span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    className="hover:bg-destructive hover:text-destructive-foreground h-4 w-4 p-0"
                     onClick={() => removeFile(index)}
                   >
                     <X className="h-3 w-3" />
@@ -217,8 +237,10 @@ export function PromptArea({
           <PromptInputTextarea
             placeholder={getPlaceholder()}
             autoComplete="off"
-            disabled={(!createNewConversation && !conversationId) || isStreaming}
-            className="text-base text-foreground"
+            disabled={
+              (!createNewConversation && !conversationId) || isStreaming
+            }
+            className="text-foreground text-base"
           />
 
           {/* Actions Row */}
@@ -233,7 +255,7 @@ export function PromptArea({
                   className="h-8 w-8 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <Paperclip className="h-4 w-4 text-muted-foreground" />
+                  <Paperclip className="text-muted-foreground h-4 w-4" />
                   <span className="sr-only">Upload file</span>
                 </Button>
               </PromptInputAction>
@@ -245,12 +267,14 @@ export function PromptArea({
                 accept="image/png,image/jpeg,image/webp,application/pdf"
                 multiple
                 onChange={handleFileUpload}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
 
               {/* Web Search Toggle */}
-              <PromptInputAction 
-                tooltip={webSearchEnabled ? "Web search enabled" : "Enable web search"}
+              <PromptInputAction
+                tooltip={
+                  webSearchEnabled ? "Web search enabled" : "Enable web search"
+                }
               >
                 <Button
                   type="button"
@@ -261,13 +285,15 @@ export function PromptArea({
                     "h-8 w-8 rounded-lg transition-colors",
                     webSearchEnabled
                       ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                      : "hover:bg-secondary hover:text-secondary-foreground"
+                      : "hover:bg-secondary hover:text-secondary-foreground",
                   )}
                 >
                   <Globe
                     className={cn(
                       "h-4 w-4",
-                      webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"
+                      webSearchEnabled
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground",
                     )}
                   />
                   <span className="sr-only">Toggle web search</span>
@@ -314,7 +340,9 @@ export function PromptArea({
                   type="button"
                   onClick={handleSubmit}
                   disabled={
-                    (!newMessageText.trim() && uploadedFiles.length === 0) || (!createNewConversation && !conversationId) || isStreaming
+                    (!newMessageText.trim() && uploadedFiles.length === 0) ||
+                    (!createNewConversation && !conversationId) ||
+                    isStreaming
                   }
                   size="icon"
                   className="bg-primary hover:bg-primary/90 disabled:bg-primary/30 disabled:text-primary-foreground/50 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
@@ -329,4 +357,4 @@ export function PromptArea({
       </div>
     </div>
   );
-} 
+}

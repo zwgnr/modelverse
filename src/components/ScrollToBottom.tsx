@@ -7,7 +7,7 @@ export function ScrollToBottomButton() {
   if (isAtBottom) return null;
 
   return (
-    <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2 z-40">
+    <div className="absolute bottom-4 left-1/2 z-40 -translate-x-1/2 transform">
       <Button
         onClick={() => scrollToBottom()}
         variant="secondary"
