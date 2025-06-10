@@ -1,5 +1,6 @@
 import { Bot, Brain, Zap, Sparkles } from "lucide-react";
 import type { ComponentType } from "react";
+import { atom } from "jotai";
 
 export interface Model {
   id: string;
@@ -36,6 +37,9 @@ export const models: Model[] = [
 ];
 
 export const DEFAULT_MODEL = "openai/gpt-4o-mini";
+
+// Jotai atom for selected model
+export const selectedModelAtom = atom(DEFAULT_MODEL);
 
 // Helper function to get display model name
 export const getModelDisplayName = (modelId: string): string | null => {

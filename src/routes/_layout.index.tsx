@@ -5,10 +5,11 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Paperclip, Globe, MessageCirclePlus, X, FileImage, FileText } from "lucide-react";
+import { Send, Paperclip, Globe, X, FileImage, FileText } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
-import { models, DEFAULT_MODEL } from "@/lib/models";
+import { models, selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
+import { useAtom } from "jotai";
 
 export const Route = createFileRoute("/_layout/")({
   component: IndexComponent,
@@ -21,7 +22,7 @@ function IndexComponent() {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const [newMessageText, setNewMessageText] = useState("");
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,20 +113,18 @@ function IndexComponent() {
   };
 
   return (
-    <>
-      <div className="flex-1 overflow-hidden">
-        <div className="flex h-full flex-col items-center justify-center pb-24">
-          <div className="text-center">
-            <h1 className="mt-6 text-3xl font-bold text-gray-800 dark:text-gray-200">
-              What dumb question do you have for me?
-            </h1>
-          </div>
+    <div className="flex flex-1 flex-col items-center justify-center px-4">
+      <div className="w-full max-w-4xl space-y-8 text-center">
+        <div className="space-y-4">
+          {/* <h1 className="text-6xl font-bold tracking-tight">
+            Ask<span className="text-primary">hole</span>
+          </h1> */}
+          <p className="text-muted-foreground text-xl">
+            Ready to answer your dumbest questions.
+          </p>
         </div>
-      </div>
 
-      {/* Input Form */}
-      <div className="sticky bottom-0 w-full px-4 py-6">
-        <div className="container mx-auto max-w-4xl">
+        <div className="w-full">
           <div className="rounded-2xl border p-3 shadow-xl shadow-black/5 backdrop-blur-lg">
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Uploaded Files Preview */}
@@ -253,7 +252,7 @@ function IndexComponent() {
                   type="submit"
                   disabled={!newMessageText.trim() && uploadedFiles.length === 0}
                   size="icon"
-                  className="h-9 w-9 flex-shrink-0 rounded-lg bg-primary transition-colors hover:bg-primary/90 disabled:bg-muted dark:disabled:bg-muted"
+                  className="bg-primary hover:bg-primary/90 disabled:bg-muted dark:disabled:bg-muted h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
                 >
                   <Send className="h-4 w-4" />
                   <span className="sr-only">Send message</span>
@@ -263,6 +262,6 @@ function IndexComponent() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

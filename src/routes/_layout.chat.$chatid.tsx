@@ -10,12 +10,13 @@ import { Send, Square, Paperclip, Globe, X, FileImage, FileText } from "lucide-r
 import { Combobox } from "@/components/ui/combobox";
 import { MarkdownMessage } from "@/components/MarkdownMessage";
 import { FileDisplay } from "@/components/FileDisplay";
-import { models, DEFAULT_MODEL, getModelDisplayName } from "@/lib/models";
+import { models, getModelDisplayName, selectedModelAtom } from "@/lib/models";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
 import { cn } from "@/lib/utils";
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatComponent,
@@ -26,7 +27,7 @@ function ChatComponent() {
   const conversationId = chatid;
 
   const [newMessageText, setNewMessageText] = useState("");
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);

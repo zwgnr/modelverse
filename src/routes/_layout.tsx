@@ -17,7 +17,8 @@ import { PanelLeft } from "lucide-react";
 import { Search } from "lucide-react";
 import { MessageCirclePlus } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { DEFAULT_MODEL } from "@/lib/models";
+import { selectedModelAtom } from "@/lib/models";
+import { useAtom } from "jotai";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/_layout")({
 function RouteComponent() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
+  const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
 
   const conversations = useQuery(api.conversations.list);
   const router = useRouter();
