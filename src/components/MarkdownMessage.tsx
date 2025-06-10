@@ -1,171 +1,130 @@
-import ReactMarkdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useState } from "react";
+// MarkdownMessage.tsx
+import { useEffect, useState } from "react";
+import MarkdownItAsync from "markdown-it-async";
+import { fromAsyncCodeToHtml } from "@shikijs/markdown-it/async";
+import { codeToHtml } from "shiki";
+import { Token } from "markdown-it/index.js";
 
-interface MarkdownMessageProps {
+const md = (() => {
+  const md = MarkdownItAsync({
+    html: true,
+    linkify: true,
+    typographer: true,
+    highlight: () => "",
+  }).use(
+    fromAsyncCodeToHtml(codeToHtml, {
+      themes: { light: "catppuccin-latte", dark: "catppuccin-frappe" },
+    }),
+  );
+
+  /* ---- Tailwind classes for non-code elements -------------------------- */
+  const cls: Record<string, string> = {
+    code_inline: "rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800",
+    h1: "text-foreground mt-6 mb-4 text-2xl font-bold",
+    h2: "text-foreground mt-5 mb-3 text-xl font-bold",
+    h3: "text-foreground mt-4 mb-2 text-lg font-bold",
+    h4: "text-foreground mt-3 mb-2 text-base font-bold",
+    p: "text-foreground mb-3 leading-relaxed",
+    ul: "text-foreground mb-3 ml-6 list-disc space-y-2",
+    ol: "text-foreground mb-3 ml-6 list-decimal space-y-2",
+    li: "pl-2 leading-relaxed",
+    blockquote:
+      "my-4 border-l-4 border-slate-300 pl-4 text-slate-600 italic dark:border-slate-600 dark:text-slate-400",
+    strong: "text-foreground font-bold",
+    em: "text-foreground italic",
+    a: "text-blue-500 underline hover:text-blue-600",
+    hr: "my-6 border-slate-200 dark:border-slate-700",
+    table:
+      "min-w-full border-collapse border border-slate-300 dark:border-slate-600",
+    th: "border border-slate-300 bg-slate-100 px-4 py-2 text-left font-semibold dark:border-slate-600 dark:bg-slate-800",
+    td: "border border-slate-300 px-4 py-2 dark:border-slate-600",
+  };
+
+  /** Helper to add a class to the opening token */
+  const addClass =
+    (rule: string, tag: string = rule) =>
+    (
+      tokens: Token[],
+      idx: number,
+      _opts: unknown,
+      _env: unknown,
+      self: any,
+    ) => {
+      tokens[idx].attrPush(["class", cls[tag]]);
+      return self.renderToken(tokens, idx, _opts);
+    };
+
+  // Standard block/inline rules
+  const rules = {
+    paragraph_open: "p",
+    bullet_list_open: "ul",
+    ordered_list_open: "ol",
+    list_item_open: "li",
+    blockquote_open: "blockquote",
+    strong_open: "strong",
+    em_open: "em",
+    hr: "hr",
+    table_open: "table",
+    th_open: "th",
+    td_open: "td",
+  };
+
+  Object.entries(rules).forEach(([rule, tag]) => {
+    md.renderer.rules[rule] = addClass(rule, tag);
+  });
+
+  // Headings (h1–h4)
+  md.renderer.rules.heading_open = (tokens, idx, opts, _env, self) => {
+    const tag = tokens[idx].tag;
+    tokens[idx].attrPush(["class", cls[tag]]);
+    return self.renderToken(tokens, idx, opts);
+  };
+
+  // Inline code
+  md.renderer.rules.code_inline = (tokens, idx) => {
+    const t = tokens[idx];
+    t.attrPush(["class", cls.code_inline]);
+    return `<code${md.renderer.renderAttrs(t)}>${md.utils.escapeHtml(
+      t.content,
+    )}</code>`;
+  };
+
+  // Links
+  md.renderer.rules.link_open = (tokens, idx, opts, _env, self) => {
+    const t = tokens[idx];
+    t.attrPush(["class", cls.a]);
+    t.attrPush(["target", "_blank"]);
+    t.attrPush(["rel", "noopener noreferrer"]);
+    return self.renderToken(tokens, idx, opts);
+  };
+
+  return md;
+})();
+
+const renderMarkdown = (markdown: string) => md.renderAsync(markdown);
+
+export interface MarkdownMessageProps {
   content: string;
   className?: string;
 }
 
-export function MarkdownMessage({
-  content,
-  className = "",
-}: MarkdownMessageProps) {
-  const CopyButton = ({ code }: { code: string }) => {
-    const [copied, setCopied] = useState(false);
+export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
+  const [html, setHtml] = useState("");
 
-    const handleCopy = async () => {
-      try {
-        await navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy code:', err);
-      }
+  useEffect(() => {
+    let cancelled = false;
+    renderMarkdown(content).then((out) => {
+      if (!cancelled) setHtml(out);
+    });
+    return () => {
+      cancelled = true;
     };
-
-    return (
-      <button
-        onClick={handleCopy}
-        className="absolute top-2 right-2 p-2 rounded-md bg-slate-700 hover:bg-slate-600 text-white transition-colors"
-        title={copied ? "Copied!" : "Copy code"}
-      >
-        {copied ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="20,6 9,17 4,12"></polyline>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        )}
-      </button>
-    );
-  };
+  }, [content]);
 
   return (
-    <div className={className}>
-      <ReactMarkdown
-        components={{
-          code({ node, inline, className, children, ...props }: any) {
-            const match = /language-(\w+)/.exec(className || "");
-            const language = match ? match[1] : "";
-            const codeString = String(children).replace(/\n$/, "");
-
-            return !inline && language ? (
-              <div className="my-4 w-full relative table table-fixed">
-                <CopyButton code={codeString} />
-                <SyntaxHighlighter
-                  style={oneDark}
-                  language={language}
-                  PreTag="pre"
-                  className="rounded-md w-full block"
-                  customStyle={{
-                    margin: 0,
-                    padding: "1rem",
-                    fontSize: "0.875rem",
-                    lineHeight: "1.25rem",
-                    border: "none",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                  {...props}
-                >
-                  {codeString}
-                </SyntaxHighlighter>
-              </div>
-            ) : (
-              <code
-                className="rounded bg-slate-100 px-1 py-0.5 text-sm dark:bg-slate-800"
-                {...props}
-              >
-                {children}
-              </code>
-            );
-          },
-          h1: ({ children }) => (
-            <h1 className="text-foreground mt-6 mb-4 text-2xl font-bold">
-              {children}
-            </h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="text-foreground mt-5 mb-3 text-xl font-bold">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="text-foreground mt-4 mb-2 text-lg font-bold">
-              {children}
-            </h3>
-          ),
-          h4: ({ children }) => (
-            <h4 className="text-foreground mt-3 mb-2 text-base font-bold">
-              {children}
-            </h4>
-          ),
-          p: ({ children }) => (
-            <p className="text-foreground mb-3 leading-relaxed">{children}</p>
-          ),
-          ul: ({ children }) => (
-            <ul className="text-foreground mb-3 ml-6 list-disc space-y-2">
-              {children}
-            </ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="text-foreground mb-3 ml-6 list-decimal space-y-2">
-              {children}
-            </ol>
-          ),
-          li: ({ children }) => (
-            <li className="pl-2 leading-relaxed">{children}</li>
-          ),
-          blockquote: ({ children }) => (
-            <blockquote className="my-4 border-l-4 border-slate-300 pl-4 text-slate-600 italic dark:border-slate-600 dark:text-slate-400">
-              {children}
-            </blockquote>
-          ),
-          strong: ({ children }) => (
-            <strong className="text-foreground font-bold">{children}</strong>
-          ),
-          em: ({ children }) => (
-            <em className="text-foreground italic">{children}</em>
-          ),
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              className="text-blue-500 underline hover:text-blue-600"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {children}
-            </a>
-          ),
-          hr: () => (
-            <hr className="my-6 border-slate-200 dark:border-slate-700" />
-          ),
-          table: ({ children }) => (
-            <div className="my-4 overflow-x-auto">
-              <table className="min-w-full border-collapse border border-slate-300 dark:border-slate-600">
-                {children}
-              </table>
-            </div>
-          ),
-          th: ({ children }) => (
-            <th className="border border-slate-300 bg-slate-100 px-4 py-2 text-left font-semibold dark:border-slate-600 dark:bg-slate-800">
-              {children}
-            </th>
-          ),
-          td: ({ children }) => (
-            <td className="border border-slate-300 px-4 py-2 dark:border-slate-600">
-              {children}
-            </td>
-          ),
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
+    <div
+      className={`${className} [&_.shiki]:my-3 [&_.shiki]:overflow-x-auto [&_.shiki]:rounded-lg [&_.shiki]:bg-slate-50 [&_.shiki]:p-4 [&_.shiki]:dark:bg-slate-900`}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
