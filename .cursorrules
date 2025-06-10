@@ -1,0 +1,10 @@
+# Cursor Rules
+
+## Package Management
+- **ALWAYS use pnpm** for installing, updating, or removing dependencies
+- Never use npm or yarn - this project uses pnpm exclusively
+- When suggesting package installations, always provide pnpm commands:
+  - `pnpm add <package>` for dependencies
+  - `pnpm add -D <package>` for dev dependencies
+  - `pnpm remove <package>` for uninstalling
+  - `pnpm i` for installing existing dependencies
