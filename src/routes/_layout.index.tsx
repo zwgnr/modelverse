@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Paperclip, Globe, MessageCirclePlus, X, FileImage, FileText } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { models, DEFAULT_MODEL } from "@/lib/models";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_layout/")({
   component: IndexComponent,
@@ -185,7 +186,7 @@ function IndexComponent() {
                       title="Upload images or PDFs"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <Paperclip className="h-4 w-4 text-slate-500" />
+                      <Paperclip className="h-4 w-4 text-muted-foreground" />
                       <span className="sr-only">Upload file</span>
                     </Button>
                     <input
@@ -204,11 +205,12 @@ function IndexComponent() {
                     variant={webSearchEnabled ? "default" : "ghost"}
                     size="icon"
                     onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                    className={`h-8 w-8 rounded-lg transition-colors ${
+                    className={cn(
+                      "h-8 w-8 rounded-lg transition-colors",
                       webSearchEnabled
                         ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                         : "hover:bg-secondary hover:text-secondary-foreground"
-                    }`}
+                    )}
                     title={
                       webSearchEnabled
                         ? "Web search enabled"
@@ -216,7 +218,10 @@ function IndexComponent() {
                     }
                   >
                     <Globe
-                      className={`h-4 w-4 ${webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"}`}
+                      className={cn(
+                        "h-4 w-4",
+                        webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"
+                      )}
                     />
                     <span className="sr-only">Toggle web search</span>
                   </Button>

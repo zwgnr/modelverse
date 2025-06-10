@@ -13,6 +13,7 @@ import { FileDisplay } from "@/components/FileDisplay";
 import { models, DEFAULT_MODEL, getModelDisplayName } from "@/lib/models";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatComponent,
@@ -146,19 +147,21 @@ function ChatComponent() {
               return (
                 <div
                   key={message._id}
-                  className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
+                  className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
                 >
                   <div
-                    className={`flex flex-col gap-1 ${
+                    className={cn(
+                      "flex flex-col gap-1",
                       isUser ? "max-w-md items-end" : "max-w-3xl min-w-full items-start"
-                    }`}
+                    )}
                   >
                     <Card
-                      className={`${
+                      className={cn(
                         isUser
                           ? "border-border bg-secondary text-secondary-foreground"
-                          : "w-full border-transparent bg-transparent shadow-none"
-                      } break-words`}
+                          : "w-full border-transparent bg-transparent shadow-none",
+                        "break-words"
+                      )}
                     >
                       <CardContent className="p-3">
                         {isUser ? (
@@ -191,44 +194,7 @@ function ChatComponent() {
                                 Response cancelled by user
                               </div>
                             )}
-                            {/* Web Search Citations */}
-                            {message.annotations &&
-                              message.annotations.length > 0 && (
-                                <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
-                                  <div className="mb-2 flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
-                                    <Globe className="h-3 w-3" />
-                                    Sources
-                                  </div>
-                                  <div className="space-y-2">
-                                    {message.annotations
-                                      .filter(
-                                        (annotation: any) =>
-                                          annotation.type === "url_citation",
-                                      )
-                                      .map((citation: any, index: number) => (
-                                        <a
-                                          key={index}
-                                          href={citation.url_citation.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="block rounded-lg border border-gray-200 p-2 transition-colors hover:border-blue-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-blue-600 dark:hover:bg-gray-800"
-                                        >
-                                          <div className="truncate text-xs font-medium text-blue-600 dark:text-blue-400">
-                                            {citation.url_citation.title}
-                                          </div>
-                                          <div className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
-                                            {citation.url_citation.url}
-                                          </div>
-                                          {citation.url_citation.content && (
-                                            <div className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
-                                              {citation.url_citation.content}
-                                            </div>
-                                          )}
-                                        </a>
-                                      ))}
-                                  </div>
-                                </div>
-                              )}
+
 
                             {/* Model Footer - Only for completed AI messages */}
                             {!isUser &&
@@ -323,7 +289,7 @@ function ChatComponent() {
                       title="Upload images or PDFs"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <Paperclip className="h-4 w-4 text-slate-500" />
+                      <Paperclip className="h-4 w-4 text-muted-foreground" />
                       <span className="sr-only">Upload file</span>
                     </Button>
                     <input
@@ -342,11 +308,12 @@ function ChatComponent() {
                     variant={webSearchEnabled ? "default" : "ghost"}
                     size="icon"
                     onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                    className={`h-8 w-8 rounded-lg transition-colors ${
+                    className={cn(
+                      "h-8 w-8 rounded-lg transition-colors",
                       webSearchEnabled
                         ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                         : "hover:bg-secondary hover:text-secondary-foreground"
-                    }`}
+                    )}
                     title={
                       webSearchEnabled
                         ? "Web search enabled"
@@ -354,7 +321,10 @@ function ChatComponent() {
                     }
                   >
                     <Globe
-                      className={`h-4 w-4 ${webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"}`}
+                      className={cn(
+                        "h-4 w-4",
+                        webSearchEnabled ? "text-primary-foreground" : "text-muted-foreground"
+                      )}
                     />
                     <span className="sr-only">Toggle web search</span>
                   </Button>

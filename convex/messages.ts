@@ -154,13 +154,7 @@ export const update = internalMutation({
   },
 });
 
-// Updates a message with annotations (web search citations)
-export const updateAnnotations = internalMutation({
-  args: { messageId: v.id("messages"), annotations: v.array(v.any()) },
-  handler: async (ctx, { messageId, annotations }) => {
-    await ctx.db.patch(messageId, { annotations });
-  },
-});
+
 
 // Updates streaming status of a message
 export const updateStreamingStatus = internalMutation({

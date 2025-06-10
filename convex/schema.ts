@@ -20,7 +20,6 @@ export default defineSchema({
     author: v.string(),
     isStreaming: v.optional(v.boolean()),
     isCancelled: v.optional(v.boolean()),
-    annotations: v.optional(v.array(v.any())),
     model: v.optional(v.string()),
     files: v.optional(v.array(v.object({
       filename: v.string(),
