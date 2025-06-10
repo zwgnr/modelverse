@@ -42,9 +42,14 @@ export const send = mutation({
     body: v.string(), 
     author: v.string(),
     conversationId: v.id("conversations"),
-    model: v.optional(v.string())
+    model: v.optional(v.string()),
+    files: v.optional(v.array(v.object({
+      filename: v.string(),
+      fileType: v.string(),
+      storageId: v.id("_storage"),
+    }))),
   },
-  handler: async (ctx, { body, author, conversationId, model = "openai/gpt-4o-mini" }) => {
+  handler: async (ctx, { body, author, conversationId, model = "openai/gpt-4o-mini", files }) => {
     // Get the current user's ID using Convex Auth
     const userId = await getAuthUserId(ctx);
     if (!userId) {
@@ -70,7 +75,8 @@ export const send = mutation({
       body, 
       author, 
       userId, 
-      conversationId 
+      conversationId,
+      files
     });
 
     // Update conversation's last activity
@@ -86,15 +92,37 @@ export const send = mutation({
       });
     }
 
-    // Fetch the latest n messages to send as context.
-    const messages = await ctx.db
+    // Fetch messages for context with smart prioritization
+    // Always include messages with files, then fill up to 50 with recent messages
+    const allMessages = await ctx.db
       .query("messages")
       .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-      .order("desc")
-      .take(10);
+      .collect();
     
-    // Reverse the list so that it's in chronological order.
-    messages.reverse();
+    // Get all messages with files (images, PDFs, etc.)
+    const messagesWithFiles = allMessages.filter(msg => msg.files && msg.files.length > 0);
+    
+    // Get recent messages (last 50) 
+    const recentMessages = allMessages
+      .sort((a, b) => b._creationTime - a._creationTime)
+      .slice(0, 50);
+    
+    // Combine and deduplicate, prioritizing messages with files
+    const contextMessages = new Map();
+    
+    // First add all messages with files
+    messagesWithFiles.forEach(msg => {
+      contextMessages.set(msg._id, msg);
+    });
+    
+    // Then add recent messages
+    recentMessages.forEach(msg => {
+      contextMessages.set(msg._id, msg);
+    });
+    
+    // Convert back to array and sort chronologically
+    const messages = Array.from(contextMessages.values())
+      .sort((a, b) => a._creationTime - b._creationTime);
     
     // Determine AI assistant name based on model
     const aiAssistant = MODEL_ASSISTANT_MAP[model] || "ChatGPT";

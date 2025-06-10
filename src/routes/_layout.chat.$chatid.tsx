@@ -1,14 +1,15 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Square, Paperclip, Globe } from "lucide-react";
+import { Send, Square, Paperclip, Globe, X, FileImage, FileText } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { MarkdownMessage } from "@/components/MarkdownMessage";
+import { FileDisplay } from "@/components/FileDisplay";
 import { models, DEFAULT_MODEL, getModelDisplayName } from "@/lib/models";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
@@ -24,6 +25,8 @@ function ChatComponent() {
   const [newMessageText, setNewMessageText] = useState("");
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const messages = useQuery(
     api.messages.list,
@@ -39,23 +42,83 @@ function ChatComponent() {
   );
   const sendMessage = useMutation(api.messages.send);
   const cancelStream = useMutation(api.messages.cancelStream);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const supportedFiles = files.filter(file => {
+      const isImage = file.type.startsWith('image/') && 
+                     ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+      const isPDF = file.type === 'application/pdf';
+      return isImage || isPDF;
+    });
+    
+    if (supportedFiles.length !== files.length) {
+      alert('Only PNG, JPEG, WebP images and PDF files are supported.');
+    }
+    
+    setUploadedFiles(prev => [...prev, ...supportedFiles]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFileToStorage = async (file: File): Promise<string> => {
+    // Get upload URL from Convex
+    const uploadUrl = await generateUploadUrl();
+    
+    // Upload file to Convex storage
+    const result = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+
+    if (!result.ok) {
+      throw new Error(`Upload failed: ${result.statusText}`);
+    }
+
+    const { storageId } = await result.json();
+    return storageId;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessageText.trim() || !conversationId || isStreaming) return;
+    if ((!newMessageText.trim() && uploadedFiles.length === 0) || !conversationId || isStreaming) return;
 
-    // Modify model string if web search is enabled
-    const modelToUse = webSearchEnabled
-      ? `${selectedModel}:online`
-      : selectedModel;
+    try {
+      // Upload files to Convex storage
+      const fileData = await Promise.all(
+        uploadedFiles.map(async (file) => ({
+          filename: file.name,
+          fileType: file.type,
+          storageId: (await uploadFileToStorage(file)) as Id<"_storage">
+        }))
+      );
 
-    await sendMessage({
-      body: newMessageText,
-      author: "User",
-      conversationId: conversationId as Id<"conversations">,
-      model: modelToUse,
-    });
-    setNewMessageText("");
+      // Modify model string if web search is enabled
+      const modelToUse = webSearchEnabled
+        ? `${selectedModel}:online`
+        : selectedModel;
+
+      await sendMessage({
+        body: newMessageText,
+        author: "User",
+        conversationId: conversationId as Id<"conversations">,
+        model: modelToUse,
+        files: fileData.length > 0 ? fileData : undefined,
+      });
+      
+      setNewMessageText("");
+      setUploadedFiles([]);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      alert('Failed to upload files. Please try again.');
+    }
   };
 
   const handleStopStream = async () => {
@@ -99,9 +162,24 @@ function ChatComponent() {
                     >
                       <CardContent className="p-3">
                         {isUser ? (
-                          <p className="overflow-hidden text-sm leading-relaxed break-words whitespace-pre-wrap">
-                            {message.body}
-                          </p>
+                          <div className="space-y-2">
+                            {/* Display attached files */}
+                            {message.files && message.files.length > 0 && (
+                              <div className="space-y-2">
+                                {message.files.map((file: any, index: number) => (
+                                  <div key={index} className="border rounded-lg p-2">
+                                    <FileDisplay file={file} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {/* Display text content */}
+                            {message.body.trim() && (
+                              <p className="overflow-hidden text-sm leading-relaxed break-words whitespace-pre-wrap">
+                                {message.body}
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <div>
                             <MarkdownMessage
@@ -184,6 +262,34 @@ function ChatComponent() {
         <div className="container mx-auto max-w-4xl">
           <div className="rounded-2xl border p-3 shadow-xl shadow-black/5 backdrop-blur-lg">
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Uploaded Files Preview */}
+              {uploadedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 border-b border-gray-100 dark:border-gray-800">
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-2 rounded-lg text-sm"
+                    >
+                      {file.type.startsWith('image/') ? (
+                        <FileImage className="h-4 w-4" />
+                      ) : (
+                        <FileText className="h-4 w-4" />
+                      )}
+                      <span className="truncate max-w-32">{file.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Row 1: Text Input Only */}
               <div className="flex items-center">
                 <div className="relative flex-1">
@@ -193,6 +299,8 @@ function ChatComponent() {
                     placeholder={
                       isStreaming
                         ? "AI is responding..."
+                        : uploadedFiles.length > 0
+                        ? "Ask about your files..."
                         : "Type your message..."
                     }
                     className="h-11 border-0 bg-transparent! text-base shadow-none focus:ring-0 focus-visible:border-0 focus-visible:ring-0"
@@ -206,17 +314,27 @@ function ChatComponent() {
               <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center gap-3">
                   {/* File Upload Button */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
-                    title="Upload file (coming soon)"
-                    disabled
-                  >
-                    <Paperclip className="h-4 w-4 text-slate-500" />
-                    <span className="sr-only">Upload file</span>
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+                      title="Upload images or PDFs"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip className="h-4 w-4 text-slate-500" />
+                      <span className="sr-only">Upload file</span>
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,application/pdf"
+                      multiple
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </div>
 
                   {/* Web Search Toggle */}
                   <Button
@@ -278,7 +396,7 @@ function ChatComponent() {
                   <Button
                     type="submit"
                     disabled={
-                      !newMessageText.trim() || !conversationId || isStreaming
+                      (!newMessageText.trim() && uploadedFiles.length === 0) || !conversationId || isStreaming
                     }
                     size="icon"
                     className="bg-primary hover:bg-primary/90 disabled:bg-muted dark:disabled:bg-muted h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
