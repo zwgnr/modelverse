@@ -11,7 +11,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { MarkdownMessage } from "@/components/MarkdownMessage";
 import { FileDisplay } from "@/components/FileDisplay";
 import { models, DEFAULT_MODEL, getModelDisplayName } from "@/lib/models";
-import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
 import { cn } from "@/lib/utils";
 
@@ -138,7 +138,6 @@ function ChatComponent() {
           className="h-full px-4 py-6" 
           resize="instant" 
           initial="instant"
-          key={chatid} // Force re-initialization when chat changes
         >
           <StickToBottom.Content className="container mx-auto max-w-4xl space-y-4">
             {messages?.map((message: any) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -11,14 +11,13 @@ import {
 import { Plus, Search, MessageSquare } from "lucide-react";
 import { Id } from "../../convex/_generated/dataModel";
 import { models } from "@/lib/models";
+import { Link } from "@tanstack/react-router";
 
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onNewChat: () => void;
   onNewChatWithModel?: (modelId: string) => void;
   onModelSelect: (modelName: string) => void;
-  onConversationSelect: (conversationId: Id<"conversations">) => void;
   conversations?: Array<{
     _id: Id<"conversations">;
     title?: string;
@@ -30,10 +29,8 @@ interface CommandPaletteProps {
 export function CommandPalette({
   open,
   onOpenChange,
-  onNewChat,
   onNewChatWithModel,
   onModelSelect,
-  onConversationSelect,
   conversations = [],
   currentModel,
 }: CommandPaletteProps) {
@@ -51,8 +48,8 @@ export function CommandPalette({
     return () => document.removeEventListener("keydown", down);
   }, [open, onOpenChange]);
 
-  const handleSelect = (callback: () => void) => {
-    callback();
+  const handleSelect = (callback?: () => void) => {
+    if (callback) callback();
     onOpenChange(false);
     setSearchQuery("");
   };
@@ -75,12 +72,14 @@ export function CommandPalette({
 
           {/* Quick Actions */}
           <CommandGroup heading="Quick Actions">
-            <CommandItem onSelect={() => handleSelect(onNewChat)}>
-              <Plus className="mr-2 h-4 w-4" />
-              <span>New Chat</span>
-              <div className="text-muted-foreground ml-auto text-xs">
-                Ctrl+N
-              </div>
+            <CommandItem onSelect={() => handleSelect()}>
+              <Link to="/" className="flex w-full items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                <span>New Chat</span>
+                <div className="text-muted-foreground ml-auto text-xs">
+                  Ctrl+N
+                </div>
+              </Link>
             </CommandItem>
           </CommandGroup>
 
@@ -100,22 +99,20 @@ export function CommandPalette({
                         onNewChatWithModel(model.id);
                       } else {
                         onModelSelect(model.id);
-                        // Small delay to ensure state update happens first
-                        setTimeout(() => {
-                          onNewChat();
-                        }, 10);
                       }
                     })
                   }
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {Icon && <Icon />}
-                  <div className="flex flex-col">
-                    <span>New chat with {model.name}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {model.description}
-                    </span>
-                  </div>
+                  <Link to="/" className="flex w-full items-center">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {Icon && <Icon />}
+                    <div className="flex flex-col">
+                      <span>New chat with {model.name}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {model.description}
+                      </span>
+                    </div>
+                  </Link>
                 </CommandItem>
               );
             })}
@@ -161,16 +158,20 @@ export function CommandPalette({
               {conversations.slice(0, 8).map((conversation, index) => (
                 <CommandItem
                   key={conversation._id}
-                  onSelect={() =>
-                    handleSelect(() => onConversationSelect(conversation._id))
-                  }
+                  onSelect={() => handleSelect()}
                 >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate">
-                      {formatConversationTitle(conversation, index)}
-                    </span>
-                  </div>
+                  <Link 
+                    to="/chat/$chatid" 
+                    params={{ chatid: conversation._id }}
+                    className="flex w-full items-center"
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate">
+                        {formatConversationTitle(conversation, index)}
+                      </span>
+                    </div>
+                  </Link>
                 </CommandItem>
               ))}
             </CommandGroup>

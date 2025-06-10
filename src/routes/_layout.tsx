@@ -6,13 +6,14 @@ import {
   Outlet,
   useRouter,
   useRouterState,
+  Link,
 } from "@tanstack/react-router";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, PanelLeftOpen, PanelRightOpen } from "lucide-react";
+import { PanelLeft } from "lucide-react";
 import { Search } from "lucide-react";
 import { MessageCirclePlus } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -42,13 +43,6 @@ function RouteComponent() {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const handleConversationSelect = (conversationId: Id<"conversations">) => {
-    router.navigate({
-      to: "/chat/$chatid",
-      params: { chatid: conversationId },
-    });
-  };
-
   const handleConversationDelete = (
     deletedConversationId: Id<"conversations">,
   ) => {
@@ -60,17 +54,10 @@ function RouteComponent() {
       router.navigate({ to: "/" });
     }
   };
-  const handleNewChat = async () => {
-    router.navigate({ to: "/" });
-  };
 
   const { signOut } = useAuthActions();
   const handleSignOut = () => {
     signOut();
-  };
-
-  const handleGoToSettings = () => {
-    router.navigate({ to: "/settings" });
   };
 
   const handleModelSelect = (modelName: string) => {
@@ -97,9 +84,7 @@ function RouteComponent() {
       <CommandPalette
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
-        onNewChat={handleNewChat}
         onModelSelect={handleModelSelect}
-        onConversationSelect={handleConversationSelect}
         conversations={conversations}
         currentModel={currentModel}
       />
@@ -109,13 +94,10 @@ function RouteComponent() {
         <Sidebar
           routerState={routerState}
           currentConversationId={chatid as Id<"conversations">}
-          onConversationSelect={handleConversationSelect}
           onConversationDelete={handleConversationDelete}
           onToggleSidebar={toggleSidebar}
-          onNewChat={handleNewChat}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           onSignOut={handleSignOut}
-          onGoToSettings={handleGoToSettings}
         />
       )}
       <div className="my-2 mr-4 ml-2 flex flex-1 flex-col rounded-xl bg-card">
@@ -147,14 +129,10 @@ function RouteComponent() {
                   </Button>
 
                   {/* New Chat Button */}
-                  <Button
-                    onClick={handleNewChat}
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9"
-                    title="New Chat (⌘N)"
-                  >
-                    <MessageCirclePlus className="h-4 w-4 text-primary" />
+                  <Button asChild variant="outline" size="icon" className="h-9 w-9" title="New Chat (⌘N)">
+                    <Link to="/">
+                      <MessageCirclePlus className="h-4 w-4 text-primary" />
+                    </Link>
                   </Button>
                 </>
               )}

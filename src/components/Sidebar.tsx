@@ -5,15 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  MessageCircle,
   Edit2,
   Trash2,
   Check,
   X,
   Search,
-  PanelLeftClose,
   MessageCirclePlus,
-  Lollipop,
   User,
   Settings,
   LogOut,
@@ -23,28 +20,23 @@ import { RouterState } from "@tanstack/react-router";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Link } from "@tanstack/react-router";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
-  onConversationSelect: (conversationId: Id<"conversations">) => void;
   onConversationDelete?: (deletedConversationId: Id<"conversations">) => void;
   onToggleSidebar?: () => void;
-  onNewChat?: () => void;
   onOpenCommandPalette?: () => void;
   onSignOut: () => void;
-  onGoToSettings: () => void;
   routerState: RouterState;
 }
 
 export function Sidebar({
   currentConversationId,
-  onConversationSelect,
   onConversationDelete,
   onToggleSidebar,
-  onNewChat,
   onOpenCommandPalette,
   onSignOut,
-  onGoToSettings,
   routerState,
 }: SidebarProps) {
   const conversations = useQuery(api.conversations.list);
@@ -122,13 +114,10 @@ export function Sidebar({
           </Button>
 
           {/* New Chat Button - Peach themed */}
-          <Button
-            onClick={onNewChat}
-            variant="outline"
-            size="icon"
-            title="New Chat (⌘N)"
-          >
-            <MessageCirclePlus className="h-4 w-4 text-primary" />
+          <Button asChild variant="outline" size="icon" title="New Chat (⌘N)">
+            <Link to="/">
+              <MessageCirclePlus className="h-4 w-4 text-primary" />
+            </Link>
           </Button>
         </div>
       </div>
@@ -178,9 +167,10 @@ export function Sidebar({
                     </Button>
                   </div>
                 ) : (
-                  <div
-                    className="flex cursor-pointer items-center p-2"
-                    onClick={() => onConversationSelect(conversation._id)}
+                  <Link
+                    to="/chat/$chatid"
+                    params={{ chatid: conversation._id }}
+                    className="flex items-center p-2 w-full"
                   >
                     <div className={`min-w-0 flex-1 transition-all duration-200 ${
                       hoveredId === conversation._id 
@@ -202,6 +192,7 @@ export function Sidebar({
                         size="sm"
                         variant="ghost"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleEditStart(conversation);
                         }}
@@ -214,6 +205,7 @@ export function Sidebar({
                         size="sm"
                         variant="ghost"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleDelete(conversation._id);
                         }}
@@ -223,7 +215,7 @@ export function Sidebar({
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                  </div>
+                  </Link>
                 )}
               </div>
             );
@@ -279,13 +271,11 @@ export function Sidebar({
                   <ThemeToggle />
                 </div>
 
-                <Button
-                  onClick={onGoToSettings}
-                  variant="ghost"
-                  className="h-auto w-full justify-start px-3 py-3 text-sm"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                <Button asChild variant="ghost" className="h-auto w-full justify-start px-3 py-3 text-sm">
+                  <Link to="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
                 </Button>
               </div>
 
