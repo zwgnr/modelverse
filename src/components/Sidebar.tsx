@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api.js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { convexQuery } from "@convex-dev/react-query";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
@@ -39,7 +41,10 @@ export function Sidebar({
   onSignOut,
   routerState,
 }: SidebarProps) {
-  const conversations = useQuery(api.conversations.list);
+  
+  const { data: conversations } = useQuery(
+    convexQuery(api.conversations.list, {}),
+  );
   const updateTitle = useMutation(api.conversations.updateTitle);
   const deleteConversation = useMutation(api.conversations.deleteConversation);
 

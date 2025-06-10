@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { models, DEFAULT_MODEL, getModelDisplayName } from "@/lib/models";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
 import { cn } from "@/lib/utils";
+import { convexQuery } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatComponent,
@@ -29,17 +31,18 @@ function ChatComponent() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const messages = useQuery(
-    api.messages.list,
-    conversationId
-      ? { conversationId: conversationId as Id<"conversations"> }
-      : "skip",
+  const { data: messages } = useQuery(
+    convexQuery(api.messages.list, {
+      conversationId: conversationId as Id<"conversations">,
+    }),
   );
-  const streamingMessage = useQuery(
-    api.messages.getStreamingMessage,
-    conversationId
-      ? { conversationId: conversationId as Id<"conversations"> }
-      : "skip",
+  const { data: streamingMessage } = useQuery(
+    convexQuery(
+      api.messages.getStreamingMessage,
+      conversationId
+        ? { conversationId: conversationId as Id<"conversations"> }
+        : "skip",
+    ),
   );
   const sendMessage = useMutation(api.messages.send);
   const cancelStream = useMutation(api.messages.cancelStream);
