@@ -28,6 +28,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
 import { cn } from "@/lib/utils";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
@@ -57,8 +58,8 @@ export function Sidebar({
   const [editingId, setEditingId] = useState<Id<"conversations"> | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [hoveredId, setHoveredId] = useState<Id<"conversations"> | null>(null);
-
-  const isIndexRoute = routerState.location.pathname === "/";
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState<Id<"conversations"> | null>(null);
 
   const handleEditStart = (conversation: any) => {
     setEditingId(conversation._id);
@@ -78,12 +79,18 @@ export function Sidebar({
     setEditTitle("");
   };
 
-  const handleDelete = async (conversationId: Id<"conversations">) => {
-    if (window.confirm("Are you sure you want to delete this conversation?")) {
-      // Notify parent component about the deletion first
-      onConversationDelete?.(conversationId);
+  const handleDeleteClick = (conversationId: Id<"conversations">) => {
+    setConversationToDelete(conversationId);
+    setDeleteDialogOpen(true);
+  };
 
-      await deleteConversation({ conversationId });
+  const handleDeleteConfirm = async () => {
+    if (conversationToDelete) {
+      // Notify parent component about the deletion first
+      onConversationDelete?.(conversationToDelete);
+
+      await deleteConversation({ conversationId: conversationToDelete });
+      setConversationToDelete(null);
     }
   };
 
@@ -268,7 +275,7 @@ export function Sidebar({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleDelete(conversation._id);
+                            handleDeleteClick(conversation._id);
                           }}
                           className="h-6 w-6 p-0 text-red-400 transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                           title="Delete conversation"
@@ -365,6 +372,13 @@ export function Sidebar({
           </PopoverContent>
         </Popover>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }
