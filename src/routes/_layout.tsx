@@ -114,7 +114,6 @@ function RouteComponent() {
             routerState={routerState}
             currentConversationId={chatid as Id<"conversations">}
             onConversationDelete={handleConversationDelete}
-            onToggleSidebar={toggleSidebar}
             onOpenCommandPalette={() => setCommandPaletteOpen(true)}
             onSignOut={handleSignOut}
             isVisible={sidebarVisible}

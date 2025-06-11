@@ -14,6 +14,7 @@ import {
   User,
   Settings,
   LogOut,
+  MoreVertical,
 } from "lucide-react";
 import { Id } from "../../convex/_generated/dataModel";
 import { RouterState } from "@tanstack/react-router";
@@ -57,10 +58,18 @@ export function Sidebar({
 
   const [editingId, setEditingId] = useState<Id<"conversations"> | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [hoveredId, setHoveredId] = useState<Id<"conversations"> | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [conversationToDelete, setConversationToDelete] = useState<Id<"conversations"> | null>(null);
+  const [conversationToDelete, setConversationToDelete] =
+    useState<Id<"conversations"> | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
+  const [actionsPopoverConversationId, setActionsPopoverConversationId] =
+    useState<Id<"conversations"> | null>(null);
+
+  const closeActionsPopover = () => {
+    setActionsPopoverOpen(false);
+    setActionsPopoverConversationId(null);
+  };
 
   const handleEditStart = (conversation: any) => {
     setEditingId(conversation._id);
@@ -116,9 +125,9 @@ export function Sidebar({
         )}
       >
         <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             <span className="text-xl">💬</span>
-            <div className="text-foreground font-bold">
+            <div className="text-foreground text-xl font-bold">
               <span className="text-primary">ask</span>hole
             </div>
           </div>
@@ -173,7 +182,7 @@ export function Sidebar({
       {/* Conversations List */}
       <ScrollArea
         className={cn(
-          "min-h-0 flex-1 p-2 transition-all duration-300",
+          "min-h-0 flex-1 p-2 transition-all duration-300 [&>div>div]:!block",
           !isVisible && "pointer-events-none opacity-0",
         )}
       >
@@ -193,14 +202,12 @@ export function Sidebar({
                 <div
                   key={conversation._id}
                   className={cn(
-                    "relative rounded-lg",
+                    "relative min-w-0 overflow-hidden rounded-lg",
                     currentConversationId === conversation._id
                       ? "bg-accent text-accent-foreground"
                       : "hover:bg-accent hover:text-accent-foreground",
                     !isVisible && "pointer-events-none",
                   )}
-                  onMouseEnter={() => setHoveredId(conversation._id)}
-                  onMouseLeave={() => setHoveredId(null)}
                 >
                   {editingId === conversation._id ? (
                     <div className="flex items-center gap-1 p-2">
@@ -232,59 +239,88 @@ export function Sidebar({
                       </Button>
                     </div>
                   ) : (
-                    <Link
-                      to="/chat/$chatid"
-                      params={{ chatid: conversation._id }}
-                      className="flex w-full items-center p-2"
-                    >
-                      <div
-                        className={cn(
-                          "min-w-0 flex-1 transition-all duration-200",
-                          hoveredId === conversation._id
-                            ? "max-w-[140px]"
-                            : "max-w-[150px]",
-                        )}
+                    <div className="group relative flex items-center justify-between p-1">
+                      <Link
+                        to="/chat/$chatid"
+                        params={{ chatid: conversation._id }}
+                        className="block w-full min-w-0 p-2 pr-8"
                       >
                         <div className="truncate text-sm font-medium">
                           {conversation.title}
                         </div>
-                      </div>
-                      <div
-                        className={cn(
-                          "ml-auto flex gap-1 transition-opacity duration-200",
-                          hoveredId === conversation._id
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
+                      </Link>
+
+                      <Popover
+                        key={`popover-${conversation._id}`}
+                        open={
+                          actionsPopoverOpen &&
+                          actionsPopoverConversationId === conversation._id
+                        }
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setActionsPopoverOpen(open);
+                          } else {
+                            closeActionsPopover();
+                          }
+                        }}
                       >
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleEditStart(conversation);
-                          }}
-                          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-6 w-6 p-0 transition-all duration-200 hover:scale-110"
-                          title="Edit conversation name"
+                        <PopoverTrigger asChild>
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setActionsPopoverConversationId(conversation._id);
+                              setActionsPopoverOpen(true);
+                            }}
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              "text-muted-foreground hover:bg-accent hover:text-accent-foreground absolute top-1/2 right-1 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center p-0 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:scale-110 data-[state=open]:opacity-100",
+                            )}
+                          >
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-40 p-1"
+                          align="center"
+                          side="right"
+                          sideOffset={4}
+                          onCloseAutoFocus={(e) => e.preventDefault()}
                         >
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDeleteClick(conversation._id);
-                          }}
-                          className="h-6 w-6 p-0 text-red-400 transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                          title="Delete conversation"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </Link>
+                          <div className="space-y-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEditStart(conversation);
+                                closeActionsPopover();
+                              }}
+                              className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-8 w-full justify-start text-sm transition-all duration-200"
+                            >
+                              <Edit2 className="mr-2 h-3 w-3" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteClick(conversation._id);
+                                closeActionsPopover();
+                              }}
+                              className="h-8 w-full justify-start text-sm text-red-600 transition-all duration-200 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/20"
+                            >
+                              <Trash2 className="mr-2 h-3 w-3" />
+                              Delete
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   )}
                 </div>
               );
@@ -319,7 +355,12 @@ export function Sidebar({
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64" align="start" side="top" sideOffset={8}>
+          <PopoverContent
+            className="w-64"
+            align="start"
+            side="top"
+            sideOffset={8}
+          >
             <div className="space-y-2">
               {/* Header with avatar and user info inline */}
               <div className="flex items-center gap-3">

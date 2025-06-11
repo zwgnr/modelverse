@@ -348,15 +348,15 @@ export function PromptArea({
                 type="button"
                 onClick={handleStopStream}
                 size="icon"
-                className="h-9 w-9 flex-shrink-0 rounded-lg bg-red-500 transition-colors hover:bg-red-600"
+                className="h-9 w-9 flex-shrink-0 rounded-lg bg-foreground transition-colors hover:bg-foreground/80"
                 title="Stop generation"
               >
                 <Square className="h-4 w-4" />
                 <span className="sr-only">Stop generation</span>
               </Button>
-            ) : (
-              <PromptInputAction tooltip="Send message">
+            ) : ( 
                 <Button
+                  aria-label="Send message"
                   type="button"
                   onClick={handleSubmit}
                   disabled={
@@ -370,7 +370,6 @@ export function PromptArea({
                   <Send className="h-4 w-4" />
                   <span className="sr-only">Send message</span>
                 </Button>
-              </PromptInputAction>
             )}
           </div>
         </PromptInput>
