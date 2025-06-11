@@ -1,3 +1,4 @@
+import {  useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
@@ -30,12 +31,26 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ConvexAuthProvider client={convex}>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </ConvexAuthProvider>,
-);
+const container = document.getElementById("root")!;
+const root = createRoot(container);
+
+function App() {
+  useEffect(() => {
+    const loader = document.getElementById("loader");
+    if (loader) {
+      loader.remove();
+    }
+  }, []);
+
+  return (
+      <ConvexAuthProvider client={convex}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <RouterProvider router={router} />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </ConvexAuthProvider>
+  );
+}
+
+root.render(<App />);

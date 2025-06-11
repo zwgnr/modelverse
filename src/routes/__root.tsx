@@ -1,3 +1,4 @@
+import { Loader } from '@/components/ui/loader'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { useConvexAuth } from 'convex/react'
@@ -12,7 +13,7 @@ function RootComponent() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <Loader variant="bars" size="lg" />
       </div>
     )
   }

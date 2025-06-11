@@ -19,6 +19,64 @@
       content="#00ff41"
       media="(prefers-color-scheme: dark)"
     />
+    <style>
+      /*
+        This inline style block prevents a flash of unstyled content (FOUC) by
+        immediately rendering a theme-aware background and a CSS-only loader.
+        This ensures a seamless visual transition before the main React application
+        loads and takes over.
+      */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: oklch(98% 0 0);
+      }
+      .dark body {
+        background-color: oklch(0.08 0 0);
+      }
+      #loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .bars-loader {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem; /* lg:gap-2 */
+        height: 1.5rem; /* lg:h-6 */
+      }
+      .bars-loader .bar {
+        background-color: oklch(0.75 0.3 142);
+        width: 0.5rem; /* lg:w-2 */
+        height: 100%; /* h-full */
+        animation: wave-bars 1.2s ease-in-out infinite;
+      }
+      .dark .bars-loader .bar {
+        background-color: oklch(0.8 0.35 142);
+      }
+      .bars-loader .bar:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .bars-loader .bar:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .bars-loader .bar:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes wave-bars {
+        0%,
+        100% {
+          transform: scaleY(0.5);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+    </style>
   </head>
   <body>
     <script>
@@ -48,7 +106,15 @@
         }
       })();
     </script>
-    <div id="root"></div>
+    <div id="root">
+      <div id="loader">
+        <div class="bars-loader">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
