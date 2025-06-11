@@ -60,6 +60,7 @@ export function Sidebar({
   const [hoveredId, setHoveredId] = useState<Id<"conversations"> | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Id<"conversations"> | null>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const handleEditStart = (conversation: any) => {
     setEditingId(conversation._id);
@@ -299,7 +300,7 @@ export function Sidebar({
           !isVisible && "pointer-events-none opacity-0",
         )}
       >
-        <Popover>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
@@ -318,7 +319,7 @@ export function Sidebar({
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64" align="start" side="right">
+          <PopoverContent className="w-64" align="start" side="top" sideOffset={8}>
             <div className="space-y-2">
               {/* Header with avatar and user info inline */}
               <div className="flex items-center gap-3">
@@ -349,6 +350,7 @@ export function Sidebar({
                   asChild
                   variant="ghost"
                   className="h-auto w-full justify-start px-3 py-3 text-sm transition-all duration-200"
+                  onClick={() => setPopoverOpen(false)}
                 >
                   <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
