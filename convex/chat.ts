@@ -66,7 +66,6 @@ export const streamChat = httpAction(async (ctx, request) => {
       const model = message.model || "openai/gpt-4o-mini";
       const apiKey = process.env.OPEN_ROUTER_API_KEY!;
       const isWebSearchEnabled = model.endsWith(":online");
-      const modelId = isWebSearchEnabled ? `${model}:online` : model;
 
       // Create OpenRouter provider
       const openrouter = createOpenRouter({
@@ -78,12 +77,11 @@ export const streamChat = httpAction(async (ctx, request) => {
 
       try {
         const result = streamText({
-          model: openrouter.chat(modelId),
+          model: openrouter.chat(model),
           messages: [
             {
               role: "system",
-              content: `You are a helpful assistant that can answer questions and help with tasks.
-              Please provide your response in markdown format.`,
+              content: `You are a helpful assistant that can answer questions and help with tasks. Provide your response in markdown format. The year is ${new Date().getFullYear()} and today is ${new Date().toLocaleDateString()} Answer clearly and concisely. Keep answers under 300 words unless the user asks for more detail.`,
             },
             ...history,
           ],
