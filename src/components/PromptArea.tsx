@@ -271,7 +271,7 @@ export function PromptArea({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="h-8 w-8 rounded-lg transition-colors hover:bg-accent!"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Paperclip className="text-muted-foreground h-4 w-4" />
@@ -304,7 +304,7 @@ export function PromptArea({
                     "h-8 w-8 rounded-lg transition-colors",
                     webSearchEnabled
                       ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                      : "hover:bg-secondary hover:text-secondary-foreground",
+                      : "hover:bg-accent! hover:text-secondary-foreground",
                   )}
                 >
                   <Globe

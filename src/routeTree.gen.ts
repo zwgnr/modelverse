@@ -8,47 +8,77 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
+import { Route as LayoutSettingsRouteImport } from './routes/_layout.settings'
+import { Route as LayoutChatChatidRouteImport } from './routes/_layout.chat.$chatid'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as SigninImport } from './routes/signin'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutIndexImport } from './routes/_layout.index'
-import { Route as LayoutSettingsImport } from './routes/_layout.settings'
-import { Route as LayoutChatChatidImport } from './routes/_layout.chat.$chatid'
-
-// Create/Update Routes
-
-const SigninRoute = SigninImport.update({
+const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const LayoutRoute = LayoutImport.update({
+const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const LayoutIndexRoute = LayoutIndexImport.update({
+const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const LayoutSettingsRoute = LayoutSettingsImport.update({
+const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const LayoutChatChatidRoute = LayoutChatChatidImport.update({
+const LayoutChatChatidRoute = LayoutChatChatidRouteImport.update({
   id: '/chat/$chatid',
   path: '/chat/$chatid',
   getParentRoute: () => LayoutRoute,
 } as any)
 
-// Populate the FileRoutesByPath interface
+export interface FileRoutesByFullPath {
+  '': typeof LayoutRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/settings': typeof LayoutSettingsRoute
+  '/': typeof LayoutIndexRoute
+  '/chat/$chatid': typeof LayoutChatChatidRoute
+}
+export interface FileRoutesByTo {
+  '/signin': typeof SigninRoute
+  '/settings': typeof LayoutSettingsRoute
+  '/': typeof LayoutIndexRoute
+  '/chat/$chatid': typeof LayoutChatChatidRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/_layout': typeof LayoutRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/chat/$chatid': typeof LayoutChatChatidRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '' | '/signin' | '/settings' | '/' | '/chat/$chatid'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/signin' | '/settings' | '/' | '/chat/$chatid'
+  id:
+    | '__root__'
+    | '/_layout'
+    | '/signin'
+    | '/_layout/settings'
+    | '/_layout/'
+    | '/_layout/chat/$chatid'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  LayoutRoute: typeof LayoutRouteWithChildren
+  SigninRoute: typeof SigninRoute
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -56,41 +86,39 @@ declare module '@tanstack/react-router' {
       id: '/_layout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof LayoutImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof LayoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/signin': {
       id: '/signin'
       path: '/signin'
       fullPath: '/signin'
-      preLoaderRoute: typeof SigninImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/settings': {
       id: '/_layout/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
+      preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
     }
     '/_layout/': {
       id: '/_layout/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof LayoutIndexImport
-      parentRoute: typeof LayoutImport
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
     '/_layout/chat/$chatid': {
       id: '/_layout/chat/$chatid'
       path: '/chat/$chatid'
       fullPath: '/chat/$chatid'
-      preLoaderRoute: typeof LayoutChatChatidImport
-      parentRoute: typeof LayoutImport
+      preLoaderRoute: typeof LayoutChatChatidRouteImport
+      parentRoute: typeof LayoutRoute
     }
   }
 }
-
-// Create and export the route tree
 
 interface LayoutRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
@@ -107,92 +135,10 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
-export interface FileRoutesByFullPath {
-  '': typeof LayoutRouteWithChildren
-  '/signin': typeof SigninRoute
-  '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
-  '/chat/$chatid': typeof LayoutChatChatidRoute
-}
-
-export interface FileRoutesByTo {
-  '/signin': typeof SigninRoute
-  '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
-  '/chat/$chatid': typeof LayoutChatChatidRoute
-}
-
-export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/_layout': typeof LayoutRouteWithChildren
-  '/signin': typeof SigninRoute
-  '/_layout/settings': typeof LayoutSettingsRoute
-  '/_layout/': typeof LayoutIndexRoute
-  '/_layout/chat/$chatid': typeof LayoutChatChatidRoute
-}
-
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/signin' | '/settings' | '/' | '/chat/$chatid'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/signin' | '/settings' | '/' | '/chat/$chatid'
-  id:
-    | '__root__'
-    | '/_layout'
-    | '/signin'
-    | '/_layout/settings'
-    | '/_layout/'
-    | '/_layout/chat/$chatid'
-  fileRoutesById: FileRoutesById
-}
-
-export interface RootRouteChildren {
-  LayoutRoute: typeof LayoutRouteWithChildren
-  SigninRoute: typeof SigninRoute
-}
-
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   SigninRoute: SigninRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/_layout",
-        "/signin"
-      ]
-    },
-    "/_layout": {
-      "filePath": "_layout.tsx",
-      "children": [
-        "/_layout/settings",
-        "/_layout/",
-        "/_layout/chat/$chatid"
-      ]
-    },
-    "/signin": {
-      "filePath": "signin.tsx"
-    },
-    "/_layout/settings": {
-      "filePath": "_layout.settings.tsx",
-      "parent": "/_layout"
-    },
-    "/_layout/": {
-      "filePath": "_layout.index.tsx",
-      "parent": "/_layout"
-    },
-    "/_layout/chat/$chatid": {
-      "filePath": "_layout.chat.$chatid.tsx",
-      "parent": "/_layout"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
