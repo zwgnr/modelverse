@@ -26,18 +26,20 @@ pre.prism-code,
 code.prism-code,
 div[class*="language-"] pre,
 div[class*="language-"] code {
-  font-family: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace !important;
+  font-family:
+    "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace !important;
 }
 
 :root {
-  --primary: oklch(0.75 0.30 142); /* Bright neon green */
+  --primary: oklch(0.75 0.3 142); /* Bright neon green */
   --primary-text: #111827;
   --secondary-text: #374151;
   --tertiary-text: #4b5563;
   --secondary-background: #f9f9f9; /* More neutral instead of green tint */
   --bubbles-background: white;
   --bubbles-mine-background: #f4f4f5; /* Neutral user bubble instead of green */
-  --focus-ring: oklch(0.75 0.30 142 / 0.5); /* Bright neon green focus ring */
+  --focus-ring: oklch(0.75 0.3 142 / 0.5); /* Bright neon green focus ring */
   color-scheme: light dark;
 
   --radius: 0.625rem;
@@ -57,20 +59,22 @@ div[class*="language-"] code {
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(92% 0 0); /* Clean neutral border */
   --input: oklch(92% 0 0);
-  --ring: oklch(0.75 0.30 142); /* Bright neon green ring */
-  --chart-1: oklch(0.75 0.30 142); /* Bright neon green chart color */
+  --ring: oklch(0.75 0.3 142); /* Bright neon green ring */
+  --chart-1: oklch(0.75 0.3 142); /* Bright neon green chart color */
   --chart-2: oklch(0.75 0.08 162); /* Cool cyan */
   --chart-3: oklch(0.8 0.06 122); /* Soft lime green */
   --chart-4: oklch(0.72 0.1 182); /* Cool teal */
   --chart-5: oklch(0.78 0.09 102); /* Light green */
   --sidebar: oklch(99% 0 0); /* Clean neutral sidebar */
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.75 0.30 142); /* Bright neon green sidebar primary */
+  --sidebar-primary: oklch(
+    0.75 0.3 142
+  ); /* Bright neon green sidebar primary */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(88% 0 0); /* More visible sidebar accent */
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(92% 0 0);
-  --sidebar-ring: oklch(0.75 0.30 142);
+  --sidebar-ring: oklch(0.75 0.3 142);
 }
 
 .dark {
@@ -80,9 +84,9 @@ div[class*="language-"] code {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.18 0 0); /* Lighter popover for better contrast */
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.80 0.35 142); /* Ultra bright neon green for primary */
+  --primary: oklch(0.8 0.35 142); /* Ultra bright neon green for primary */
   --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.20 0 0); /* Lighter secondary for better contrast */
+  --secondary: oklch(0.2 0 0); /* Lighter secondary for better contrast */
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.16 0 0); /* Lighter muted for better contrast */
   --muted-foreground: oklch(0.708 0 0);
@@ -90,21 +94,23 @@ div[class*="language-"] code {
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.25 0 0); /* Lighter borders for better definition */
-  --input: oklch(0.20 0 0); /* Lighter inputs for better contrast */
-  --ring: oklch(0.80 0.35 142); /* Ultra bright neon green for focus ring */
-  --chart-1: oklch(0.80 0.35 142); /* Ultra bright neon green chart color */
+  --input: oklch(0.2 0 0); /* Lighter inputs for better contrast */
+  --ring: oklch(0.8 0.35 142); /* Ultra bright neon green for focus ring */
+  --chart-1: oklch(0.8 0.35 142); /* Ultra bright neon green chart color */
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.10 0 0); /* Slightly lighter sidebar */
+  --sidebar: oklch(0.1 0 0); /* Slightly lighter sidebar */
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.80 0.35 142); /* Ultra bright neon green for sidebar primary */
+  --sidebar-primary: oklch(
+    0.8 0.35 142
+  ); /* Ultra bright neon green for sidebar primary */
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.28 0 0); /* More visible dark sidebar accent */
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.25 0 0); /* Lighter sidebar borders */
-  --sidebar-ring: oklch(0.80 0.35 142);
+  --sidebar-ring: oklch(0.8 0.35 142);
 }
 
 @theme inline {
@@ -177,5 +183,132 @@ div[class*="language-"] code {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes typing {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+}
+
+@keyframes loading-dots {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.6);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes text-blink {
+  0%,
+  100% {
+    color: var(--primary);
+  }
+  50% {
+    color: var(--muted-foreground);
+  }
+}
+
+@keyframes bounce-dots {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes thin-pulse {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer-text {
+  0% {
+    background-position: 150% center;
+  }
+  100% {
+    background-position: -150% center;
+  }
+}
+
+@keyframes wave-bars {
+  0%,
+  100% {
+    transform: scaleY(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(0.6);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
+@keyframes spinner-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }

@@ -321,9 +321,10 @@ export function PromptArea({
 
               {/* Model Picker */}
               <Combobox
-                options={models.map((model) => ({
+                groupedOptions={models.map((model) => ({
                   value: model.id,
                   label: model.name,
+                  group: model.company,
                 }))}
                 value={selectedModel}
                 onValueChange={setSelectedModel}

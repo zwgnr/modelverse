@@ -22,8 +22,15 @@ interface ComboboxOption {
   label: string
 }
 
+interface ComboboxGroupedOption {
+  value: string
+  label: string
+  group: string
+}
+
 interface ComboboxProps {
-  options: ComboboxOption[]
+  options?: ComboboxOption[]
+  groupedOptions?: ComboboxGroupedOption[]
   value?: string
   onValueChange?: (value: string) => void
   placeholder?: string
@@ -33,6 +40,7 @@ interface ComboboxProps {
 
 export function Combobox({
   options,
+  groupedOptions,
   value,
   onValueChange,
   placeholder = "Select option...",
@@ -40,6 +48,31 @@ export function Combobox({
   className,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+
+  // Group options by their group property if using groupedOptions
+  const groupedData = React.useMemo(() => {
+    if (groupedOptions) {
+      return groupedOptions.reduce((acc, option) => {
+        if (!acc[option.group]) {
+          acc[option.group] = [];
+        }
+        acc[option.group].push(option);
+        return acc;
+      }, {} as Record<string, ComboboxGroupedOption[]>);
+    }
+    return null;
+  }, [groupedOptions]);
+
+  // Find the selected option label
+  const selectedLabel = React.useMemo(() => {
+    if (options) {
+      return options.find((option) => option.value === value)?.label;
+    }
+    if (groupedOptions) {
+      return groupedOptions.find((option) => option.value === value)?.label;
+    }
+    return null;
+  }, [options, groupedOptions, value]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,9 +83,7 @@ export function Combobox({
           aria-expanded={open}
           className={cn("w-[200px] justify-between", className)}
         >
-          {value
-            ? options.find((option) => option.value === value)?.label
-            : placeholder}
+          {selectedLabel || placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -61,26 +92,54 @@ export function Combobox({
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>No option found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onValueChange?.(currentValue)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            
+            {/* Render grouped options */}
+            {groupedData && Object.entries(groupedData).map(([group, groupOptions]) => (
+              <CommandGroup key={group} heading={group}>
+                {groupOptions.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(currentValue) => {
+                      onValueChange?.(currentValue)
+                      setOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
+            
+            {/* Render simple options (backwards compatibility) */}
+            {options && !groupedOptions && (
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(currentValue) => {
+                      onValueChange?.(currentValue)
+                      setOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
