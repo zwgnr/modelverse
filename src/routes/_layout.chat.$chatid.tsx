@@ -3,18 +3,25 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { Card, CardContent } from "@/components/ui/card";
-import { MarkdownMessage } from "@/components/MarkdownMessage";
 import { FileDisplay } from "@/components/FileDisplay";
-import { getModelDisplayName } from "@/lib/models";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
-import { cn } from "@/lib/utils";
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { PromptArea } from "@/components/PromptArea";
 import { useLRUCache } from "@/hooks/useLRUCache";
 import { useLayoutSettledDetection } from "@/hooks/useLayoutSettledDetection";
-import React, { useRef, useEffect, useState } from "react";
+import { ServerMessage } from "@/components/ServerMessage";
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  drivenIdsAtom,
+  isStreamingAtom,
+  currentStreamingMessageIdAtom,
+  startStreamingAtom,
+  stopStreamingAtom,
+  autoDetectStreamingAtom,
+} from "@/atoms/streaming";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatStageWrapper,
@@ -27,6 +34,13 @@ function ChatStageWrapper() {
   const { chatid } = Route.useParams();
   const cache = useLRUCache<boolean>(MAX_MOUNTED);
   const panesRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Jotai atoms
+  const isStreaming = useAtomValue(isStreamingAtom);
+  const startStreaming = useSetAtom(startStreamingAtom);
+  const stopStreaming = useSetAtom(stopStreamingAtom);
+  const autoDetectStreaming = useSetAtom(autoDetectStreamingAtom);
 
   // Add current chat to cache (promotes it to MRU)
   cache.set(chatid, true);
@@ -45,16 +59,22 @@ function ChatStageWrapper() {
 
   // Get active chat data for prompt area
   const conversationId = chatid;
-  const { data: streamingMessage } = useQuery(
-    convexQuery(
-      api.messages.getStreamingMessage,
-      conversationId
-        ? { conversationId: conversationId as Id<"conversations"> }
-        : "skip",
-    ),
-  );
   const sendMessage = useMutation(api.messages.send);
-  const cancelStream = useMutation(api.messages.cancelStream);
+
+  // Get messages for auto-detection of recent streaming messages
+  const { data: messages } = useQuery(
+    convexQuery(api.messages.list, {
+      conversationId: conversationId as Id<"conversations">,
+    }),
+  );
+
+  // Auto-detect recent messages that should be streaming when chat page loads
+  useEffect(() => {
+    if (!messages || hasInitialized) return;
+
+    autoDetectStreaming(messages);
+    setHasInitialized(true);
+  }, [messages, hasInitialized, autoDetectStreaming]);
 
   const handleSendMessage = async (messageData: {
     body: string;
@@ -67,16 +87,27 @@ function ChatStageWrapper() {
       storageId: Id<"_storage">;
     }>;
   }) => {
-    await sendMessage(messageData);
-  };
+    try {
+      // Transform the messageData to match new schema
+      const messageId = await sendMessage({
+        prompt: messageData.body,
+        conversationId: messageData.conversationId,
+        model: messageData.model,
+        files: messageData.files,
+      });
 
-  const handleStopStream = async () => {
-    if (streamingMessage) {
-      await cancelStream({ messageId: streamingMessage._id });
+      // Start streaming using Jotai action
+      startStreaming(messageId);
+    } catch (error) {
+      console.error("Failed to send message:", error);
     }
   };
 
-  const isStreaming = Boolean(streamingMessage);
+  const cancelStream = useMutation(api.messages.cancelStream);
+
+  const handleStopStream = useCallback(() => {
+    stopStreaming(cancelStream);
+  }, [stopStreaming, cancelStream]);
 
   return (
     <div className="flex h-full flex-col">
@@ -87,6 +118,7 @@ function ChatStageWrapper() {
             key={mountedChatId}
             chatid={mountedChatId}
             isActive={mountedChatId === chatid}
+            messages={mountedChatId === chatid ? messages : undefined}
             ref={(node: HTMLDivElement) => {
               if (node) {
                 panesRef.current.set(mountedChatId, node);
@@ -104,6 +136,9 @@ function ChatStageWrapper() {
         isStreaming={isStreaming}
         onSendMessage={handleSendMessage}
         onStopStream={handleStopStream}
+        onMessageSent={(messageId) => {
+          startStreaming(messageId);
+        }}
       />
     </div>
   );
@@ -115,16 +150,27 @@ const ChatMessagesPane = React.forwardRef<
   {
     chatid: string;
     isActive: boolean;
+    messages?: any[] | undefined;
   }
->(({ chatid, isActive }, ref) => {
+>(({ chatid, isActive, messages: propMessages }, ref) => {
   const conversationId = chatid;
   const internalRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: messages } = useQuery(
-    convexQuery(api.messages.list, {
+  // Jotai atoms
+  const drivenIds = useAtomValue(drivenIdsAtom);
+  const currentStreamingMessageId = useAtomValue(currentStreamingMessageIdAtom);
+  const stopStreaming = useSetAtom(stopStreamingAtom);
+
+  // Only query if messages not provided via props (for inactive panes)
+  const { data: queryMessages } = useQuery({
+    ...convexQuery(api.messages.list, {
       conversationId: conversationId as Id<"conversations">,
     }),
-  );
+    enabled: !propMessages, // Only query if messages not provided
+  });
+
+  const messages = propMessages || queryMessages;
 
   // Use custom hook for layout-settled detection
   const isReady = useLayoutSettledDetection({
@@ -133,6 +179,15 @@ const ChatMessagesPane = React.forwardRef<
     nodeRef: internalRef,
     chatId: chatid,
   });
+
+  const scrollToBottom = useCallback(
+    (behavior: ScrollBehavior = "smooth") => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior });
+      }
+    },
+    [messagesEndRef],
+  );
 
   return (
     <div
@@ -158,86 +213,67 @@ const ChatMessagesPane = React.forwardRef<
         initial="instant"
       >
         <StickToBottom.Content className="container mx-auto max-w-4xl space-y-4">
-          {messages?.map((message: any) => {
-            const isUser = message.author === "User";
-
-            return (
-              <div
-                key={message._id}
-                className={cn(
-                  "flex gap-3",
-                  isUser ? "justify-end" : "justify-start",
-                )}
-              >
-                <div
-                  className={cn(
-                    "flex flex-col gap-1",
-                    isUser
-                      ? "max-w-md items-end"
-                      : "max-w-3xl min-w-full items-start",
-                  )}
-                >
-                  <Card
-                    className={cn(
-                      isUser
-                        ? "border-border bg-secondary text-secondary-foreground"
-                        : "w-full border-transparent bg-transparent shadow-none",
-                      "break-words",
-                    )}
-                  >
+          {messages?.length === 0 && (
+            <div className="text-center text-gray-500">
+              No messages yet. Start the conversation!
+            </div>
+          )}
+          {messages?.map((message: any) => (
+            <React.Fragment key={message._id}>
+              {/* User Message */}
+              <div className="flex justify-end gap-3">
+                <div className="flex max-w-md flex-col items-end gap-1">
+                  <Card className="border-border bg-secondary text-secondary-foreground break-words">
                     <CardContent className="p-3">
-                      {isUser ? (
-                        <div className="space-y-2">
-                          {/* Display attached files */}
-                          {message.files && message.files.length > 0 && (
-                            <div className="space-y-2">
-                              {message.files.map((file: any, index: number) => (
-                                <div
-                                  key={index}
-                                  className="rounded-lg border p-2"
-                                >
-                                  <FileDisplay file={file} />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {/* Display text content */}
-                          {message.body.trim() && (
-                            <p className="overflow-hidden text-sm leading-relaxed break-words whitespace-pre-wrap">
-                              {message.body}
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <div>
-                          <MarkdownMessage
-                            content={message.body}
-                            className="text-sm"
-                          />
-                          {message.isCancelled && (
-                            <div className="mt-2 border-t pt-2 text-xs text-gray-500 italic">
-                              Response cancelled by user
-                            </div>
-                          )}
-
-                          {/* Model Footer - Only for completed AI messages */}
-                          {!isUser && message.model && !message.isStreaming && (
-                            <div className="mt-3 border-t border-gray-100 pt-2 dark:border-gray-800">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  {getModelDisplayName(message.model)}
-                                </span>
+                      <div className="space-y-2">
+                        {/* Display attached files */}
+                        {message.files && message.files.length > 0 && (
+                          <div className="space-y-2">
+                            {message.files.map((file: any, index: number) => (
+                              <div
+                                key={index}
+                                className="rounded-lg border p-2"
+                              >
+                                <FileDisplay file={file} messageId={message._id} />
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
+                        {/* Display text content */}
+                        {message.prompt.trim() && (
+                          <p className="overflow-hidden text-sm leading-relaxed break-words whitespace-pre-wrap">
+                            {message.prompt}
+                          </p>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
               </div>
-            );
-          })}
+
+              {/* AI Response */}
+              <div className="flex justify-start gap-3">
+                <div className="flex max-w-3xl min-w-full flex-col items-start gap-1">
+                  <Card className="w-full border-transparent bg-transparent break-words shadow-none">
+                    <CardContent className="p-3">
+                      <ServerMessage
+                        message={message}
+                        isDriven={drivenIds.has(message._id)}
+                        stopStreaming={() => {
+                          // Only clear streaming state if this is the current streaming message
+                          if (currentStreamingMessageId === message._id) {
+                            stopStreaming();
+                          }
+                        }}
+                        scrollToBottom={scrollToBottom}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </React.Fragment>
+          ))}
+          <div ref={messagesEndRef} />
         </StickToBottom.Content>
 
         {/* Scroll to bottom button - shows when not at bottom */}

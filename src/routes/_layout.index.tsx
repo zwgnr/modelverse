@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { PromptArea } from "@/components/PromptArea";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_layout/")({
   component: IndexComponent,
@@ -7,6 +8,7 @@ export const Route = createFileRoute("/_layout/")({
 
 function IndexComponent() {
   const router = useRouter();
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleNavigateToChat = (conversationId: string) => {
     router.navigate({
@@ -29,7 +31,14 @@ function IndexComponent() {
 
         <PromptArea
           createNewConversation={true}
+          isStreaming={isStreaming}
           onNavigateToChat={handleNavigateToChat}
+          onStartStream={() => {
+            setIsStreaming(true);
+          }}
+          onStopStream={() => {
+            setIsStreaming(false);
+          }}
           className="relative"
         />
       </div>

@@ -32,7 +32,6 @@ import { cn } from "@/lib/utils";
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
   onConversationDelete?: (deletedConversationId: Id<"conversations">) => void;
-  onToggleSidebar?: () => void;
   onOpenCommandPalette?: () => void;
   onSignOut: () => void;
   routerState: RouterState;
@@ -43,7 +42,6 @@ interface SidebarProps {
 export function Sidebar({
   currentConversationId,
   onConversationDelete,
-  onToggleSidebar,
   onOpenCommandPalette,
   onSignOut,
   routerState,
@@ -112,7 +110,9 @@ export function Sidebar({
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">💬</span>
-            <span className="text-primary font-bold">askhole</span>
+            <div className="text-foreground font-bold">
+              <span className="text-primary">ask</span>hole
+            </div>
           </div>
         </div>
       </div>
@@ -170,107 +170,118 @@ export function Sidebar({
         )}
       >
         <div className="space-y-1">
-          {conversations?.map((conversation) => {
-            return (
-              <div
-                key={conversation._id}
-                className={cn(
-                  "relative rounded-lg",
-                  currentConversationId === conversation._id
-                    ? "bg-accent text-accent-foreground"
-                    : "hover:bg-accent hover:text-accent-foreground",
-                  !isVisible && "pointer-events-none",
-                )}
-                onMouseEnter={() => setHoveredId(conversation._id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                {editingId === conversation._id ? (
-                  <div className="flex items-center gap-1 p-2">
-                    <Input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="h-8 text-sm"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEditSave();
-                        if (e.key === "Escape") handleEditCancel();
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleEditSave}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleEditCancel}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <Link
-                    to="/chat/$chatid"
-                    params={{ chatid: conversation._id }}
-                    className="flex w-full items-center p-2"
-                  >
-                    <div
-                      className={cn(
-                        "min-w-0 flex-1 transition-all duration-200",
-                        hoveredId === conversation._id
-                          ? "max-w-[140px]"
-                          : "max-w-[150px]",
-                      )}
-                    >
-                      <div className="truncate text-sm font-medium">
-                        {conversation.title}
-                      </div>
-                    </div>
-                    <div
-                      className={cn(
-                        "ml-auto flex gap-1 transition-opacity duration-200",
-                        hoveredId === conversation._id
-                          ? "opacity-100"
-                          : "opacity-0",
-                      )}
-                    >
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEditStart(conversation);
-                        }}
-                        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-6 w-6 p-0 transition-all duration-200 hover:scale-110"
-                        title="Edit conversation name"
-                      >
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDelete(conversation._id);
-                        }}
-                        className="h-6 w-6 p-0 text-red-400 transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                        title="Delete conversation"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </Link>
-                )}
+          {conversations?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+              <div className="text-muted-foreground mb-4">
+                <MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
               </div>
-            );
-          })}
+              <h3 className="text-foreground mb-2 text-sm font-medium">
+                No conversations yet
+              </h3>
+            </div>
+          ) : (
+            conversations?.map((conversation) => {
+              return (
+                <div
+                  key={conversation._id}
+                  className={cn(
+                    "relative rounded-lg",
+                    currentConversationId === conversation._id
+                      ? "bg-accent text-accent-foreground"
+                      : "hover:bg-accent hover:text-accent-foreground",
+                    !isVisible && "pointer-events-none",
+                  )}
+                  onMouseEnter={() => setHoveredId(conversation._id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  {editingId === conversation._id ? (
+                    <div className="flex items-center gap-1 p-2">
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="h-8 text-sm"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleEditSave();
+                          if (e.key === "Escape") handleEditCancel();
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleEditSave}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleEditCancel}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link
+                      to="/chat/$chatid"
+                      params={{ chatid: conversation._id }}
+                      className="flex w-full items-center p-2"
+                    >
+                      <div
+                        className={cn(
+                          "min-w-0 flex-1 transition-all duration-200",
+                          hoveredId === conversation._id
+                            ? "max-w-[140px]"
+                            : "max-w-[150px]",
+                        )}
+                      >
+                        <div className="truncate text-sm font-medium">
+                          {conversation.title}
+                        </div>
+                      </div>
+                      <div
+                        className={cn(
+                          "ml-auto flex gap-1 transition-opacity duration-200",
+                          hoveredId === conversation._id
+                            ? "opacity-100"
+                            : "opacity-0",
+                        )}
+                      >
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleEditStart(conversation);
+                          }}
+                          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-6 w-6 p-0 transition-all duration-200 hover:scale-110"
+                          title="Edit conversation name"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDelete(conversation._id);
+                          }}
+                          className="h-6 w-6 p-0 text-red-400 transition-all duration-200 hover:scale-110 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                          title="Delete conversation"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </Link>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </ScrollArea>
 

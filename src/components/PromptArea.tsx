@@ -37,7 +37,9 @@ interface PromptAreaProps {
       storageId: Id<"_storage">;
     }>;
   }) => Promise<void>;
-  onStopStream?: () => Promise<void>;
+  onStopStream?: () => void;
+  onStartStream?: () => void;
+  onMessageSent?: (messageId: string) => void;
   className?: string;
   placeholder?: {
     default?: string;
@@ -54,6 +56,8 @@ export function PromptArea({
   isStreaming = false,
   onSendMessage,
   onStopStream,
+  onStartStream,
+  onMessageSent,
   className,
   placeholder = {
     default: "Type your message...",
@@ -156,8 +160,23 @@ export function PromptArea({
       if (onSendMessage) {
         await onSendMessage(messageData);
       } else {
+        // Signal that streaming should start
+        if (onStartStream) {
+          onStartStream();
+        }
+
         // Fallback to direct mutation if no callback provided
-        await sendMessage(messageData);
+        const messageId = await sendMessage({
+          prompt: messageData.body,
+          conversationId: messageData.conversationId,
+          model: messageData.model,
+          files: messageData.files,
+        });
+
+        // Signal that message was sent and provide the messageId
+        if (onMessageSent) {
+          onMessageSent(messageId);
+        }
       }
 
       setNewMessageText("");
@@ -173,9 +192,9 @@ export function PromptArea({
     }
   };
 
-  const handleStopStream = async () => {
+  const handleStopStream = () => {
     if (onStopStream) {
-      await onStopStream();
+      onStopStream();
     }
   };
 

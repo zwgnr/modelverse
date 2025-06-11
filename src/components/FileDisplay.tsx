@@ -9,10 +9,26 @@ interface FileDisplayProps {
     fileType: string;
     storageId: Id<"_storage">;
   };
+  messageId: Id<"messages">;
 }
 
-export function FileDisplay({ file }: FileDisplayProps) {
-  const fileUrl = useQuery(api.files.getFileUrl, { storageId: file.storageId });
+export function FileDisplay({ file, messageId }: FileDisplayProps) {
+  const fileUrl = useQuery(api.files.getFileUrl, {
+    storageId: file.storageId,
+    messageId: messageId,
+  });
+
+  if (!fileUrl) {
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <FileImage className="h-3 w-3" />
+          {file.filename}
+        </div>
+        <div className="h-32 w-full animate-pulse bg-muted rounded border" />
+      </div>
+    );
+  }
 
   if (file.fileType.startsWith('image/')) {
     return (
