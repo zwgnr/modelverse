@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type RefObject } from "react";
+import { useLayoutEffect, useState, type RefObject, useEffect } from "react";
 
 interface UseLayoutSettledDetectionOptions {
   isActive: boolean;
@@ -18,10 +18,19 @@ export function useLayoutSettledDetection({
   chatId,
 }: UseLayoutSettledDetectionOptions) {
   const [isReady, setIsReady] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+
+  // Reset initial load state when the chat ID changes
+  useEffect(() => {
+    setHasInitiallyLoaded(false);
+    setIsReady(false);
+  }, [chatId]);
 
   useLayoutEffect(() => {
-    if (!isActive || !messages) {
-      setIsReady(false);
+    if (!isActive || !messages || hasInitiallyLoaded) {
+      if (isActive && hasInitiallyLoaded) {
+        setIsReady(true);
+      }
       return;
     }
 
@@ -33,11 +42,9 @@ export function useLayoutSettledDetection({
 
     let rafId: number;
     let idleId: number;
-    let resizeCount = 0;
 
     const ro = new ResizeObserver(() => {
-      node.scrollTop = node.scrollHeight; // glue
-      resizeCount++;
+      node.scrollTop = node.scrollHeight; // glue to bottom
 
       // Cancel previous attempts
       cancelAnimationFrame(rafId);
@@ -58,6 +65,7 @@ export function useLayoutSettledDetection({
             idleId = requestIdleCallback(
               () => {
                 setIsReady(true);
+                setHasInitiallyLoaded(true);
               },
               { timeout: 100 },
             ); // max 100ms timeout
@@ -69,12 +77,13 @@ export function useLayoutSettledDetection({
     });
 
     ro.observe(node);
+
     return () => {
       ro.disconnect();
       cancelAnimationFrame(rafId);
       if (idleId) cancelIdleCallback(idleId);
     };
-  }, [isActive, messages, chatId]);
+  }, [isActive, messages, hasInitiallyLoaded, nodeRef]);
 
   return isReady;
 }

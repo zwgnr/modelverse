@@ -49,12 +49,6 @@ function ChatStageWrapper() {
   useEffect(() => {
     const currentPane = panesRef.current.get(chatid);
     if (!currentPane) return;
-
-    // Wait one frame for DOM to be fully rendered
-    requestAnimationFrame(() => {
-      // Scroll to bottom before making visible
-      currentPane.scrollTop = currentPane.scrollHeight;
-    });
   }, [chatid]);
 
   // Get active chat data for prompt area
@@ -234,7 +228,10 @@ const ChatMessagesPane = React.forwardRef<
                                 key={index}
                                 className="rounded-lg border p-2"
                               >
-                                <FileDisplay file={file} messageId={message._id} />
+                                <FileDisplay
+                                  file={file}
+                                  messageId={message._id}
+                                />
                               </div>
                             ))}
                           </div>
