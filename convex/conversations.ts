@@ -17,7 +17,7 @@ export const list = query({
     // Get conversations ordered by most recently updated
     const conversations = await ctx.db
       .query("conversations")
-      .withIndex("by_user_updated", (q) => q.eq("userId", userId))
+      .withIndex("by_user_pinned_updated", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
 
@@ -191,5 +191,27 @@ export const generateTitle = internalAction({
       console.error("Failed to generate conversation title:", e);
       // If title generation fails, we'll just keep the default "New Chat" title
     }
+  },
+});
+
+export const togglePin = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation || conversation.userId !== userId) {
+      throw new Error("Conversation not found or unauthorized");
+    }
+
+    await ctx.db.patch(conversationId, {
+      isPinned: !conversation.isPinned,
+      updatedAt: Date.now(),
+    });
   },
 });

@@ -15,6 +15,8 @@ import {
   Settings,
   LogOut,
   MoreVertical,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { Doc, Id } from "../../convex/_generated/dataModel.js";
 import { RouterState, useLoaderData } from "@tanstack/react-router";
@@ -53,6 +55,7 @@ export function Sidebar({
 }: SidebarProps) {
   const updateTitle = useMutation(api.conversations.updateTitle);
   const deleteConversation = useMutation(api.conversations.deleteConversation);
+  const togglePin = useMutation(api.conversations.togglePin);
 
   const { data: currentUser } = useSuspenseQuery(
     convexQuery(api.auth.getCurrentUser, {}),
@@ -247,8 +250,11 @@ export function Sidebar({
                         params={{ chatid: conversation._id }}
                         className="block w-full min-w-0 p-2 pr-8"
                       >
-                        <div className="truncate text-sm font-medium">
-                          {conversation.title}
+                        <div className="flex items-center gap-2 truncate text-sm font-medium">
+                          {conversation.isPinned && (
+                            <Pin className="h-3 w-3 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{conversation.title}</span>
                         </div>
                       </Link>
 
@@ -291,6 +297,24 @@ export function Sidebar({
                           onCloseAutoFocus={(e) => e.preventDefault()}
                         >
                           <div className="space-y-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                togglePin({ conversationId: conversation._id });
+                                closeActionsPopover();
+                              }}
+                              className="text-muted-foreground hover:bg-accent hover:text-accent-foreground h-8 w-full justify-start text-sm transition-all duration-200"
+                            >
+                              {conversation.isPinned ? (
+                                <PinOff className="mr-2 h-3 w-3" />
+                              ) : (
+                                <Pin className="mr-2 h-3 w-3" />
+                              )}
+                              {conversation.isPinned ? "Unpin" : "Pin"}
+                            </Button>
                             <Button
                               size="sm"
                               variant="ghost"

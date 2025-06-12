@@ -12,9 +12,11 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     hasPendingInitialMessage: v.optional(v.boolean()),
+    isPinned: v.optional(v.boolean()),
   })
     .index("by_user", ["userId"])
-    .index("by_user_updated", ["userId", "updatedAt"]),
+    .index("by_user_updated", ["userId", "updatedAt"])
+    .index("by_user_pinned_updated", ["userId", "isPinned", "updatedAt"]),
 
   messages: defineTable({
     userId: v.string(),
@@ -31,6 +33,5 @@ export default defineSchema({
         }),
       ),
     ),
-  })
-    .index("by_conversation", ["conversationId"]),
+  }).index("by_conversation", ["conversationId"]),
 });
