@@ -19,6 +19,10 @@
 ### Examples:
 
 ```javascript
+DONT:
+// do not add cn if there is just a single string
+className={cn("class1 class-2")}
+
 DO:
 
 // Use cn() utility

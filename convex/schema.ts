@@ -1,10 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
-import { StreamIdValidator } from "@convex-dev/persistent-text-streaming";
 
 export default defineSchema({
-  ...authTables,
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+  }).index("by_email", ["email"]),
   conversations: defineTable({
     userId: v.string(),
     title: v.string(),
@@ -20,8 +21,6 @@ export default defineSchema({
     prompt: v.string(),
     response: v.optional(v.string()),
     model: v.optional(v.string()),
-    responseStreamId: StreamIdValidator,
-    cancelled: v.optional(v.boolean()),
     files: v.optional(
       v.array(
         v.object({
@@ -32,6 +31,5 @@ export default defineSchema({
       ),
     ),
   })
-    .index("by_conversation", ["conversationId"])
-    .index("by_stream", ["responseStreamId"]),
+    .index("by_conversation", ["conversationId"]),
 });

@@ -1,43 +1,34 @@
 import {
-  Link,
   Outlet,
-  ScrollRestoration,
   createRootRouteWithContext,
   useRouteContext,
   HeadContent,
   Scripts,
+  redirect,
+  useLoaderData,
 } from "@tanstack/react-router";
-import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { createServerFn } from "@tanstack/react-start";
 import { QueryClient } from "@tanstack/react-query";
 import * as React from "react";
-import { getAuth } from "@clerk/tanstack-react-start/server";
-// import { DefaultCatchBoundary } from '@/components/DefaultCatchBoundary.js'
-// import { NotFound } from '@/components/NotFound.js'
+import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
+import { NotFound } from "@/components/NotFound";
 import appCss from "../index.css?url";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 
 import { ConvexReactClient } from "convex/react";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ThemeProvider } from "@/components/theme-provider";
-import { getWebRequest } from "@tanstack/react-start/server";
+import { authClient } from "@/lib/auth-client";
+import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import { getThemeServerFn } from "@/server/theme";
+import { ThemeProvider, useTheme } from "@/components/theme-provider";
+import { getAuth } from "@/server/get-auth";
 
-const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
-  const auth = await getAuth(getWebRequest());
-  const token = await auth.getToken({ template: "convex" });
-
-  return {
-    userId: auth.userId,
-    token,
-  };
-});
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   convexClient: ConvexReactClient;
   convexQueryClient: ConvexQueryClient;
 }>()({
   head: () => ({
+    title: "askhole",
     meta: [
       {
         charSet: "utf-8",
@@ -50,61 +41,91 @@ export const Route = createRootRouteWithContext<{
     links: [
       { rel: "stylesheet", href: appCss },
       {
-        rel: "apple-touch-icon",
-        sizes: "180x180",
-        href: "/apple-touch-icon.png",
-      },
-      {
         rel: "icon",
-        type: "image/png",
-        sizes: "32x32",
-        href: "/favicon-32x32.png",
+        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>",
       },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        href: "/favicon-16x16.png",
-      },
-      { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
-      { rel: "icon", href: "/favicon.ico" },
     ],
   }),
+  loader: async () => {
+    return {
+      theme: await getThemeServerFn(),
+    };
+  },
   beforeLoad: async (ctx) => {
-    const auth = await fetchClerkAuth();
+    const auth = await getAuth();
     const { userId, token } = auth;
 
+    // If the user is signed in and tries to access the sign-in page,
+    // redirect them to the home page.
+    if (userId && ctx.location.pathname === "/signin") {
+      throw redirect({
+        to: "/",
+      });
+    }
+
+    // If the user is not signed in and is not on the sign-in page,
+    // redirect them to the sign-in page.
+    if (!userId && ctx.location.pathname !== "/signin") {
+      throw redirect({
+        to: "/signin",
+        search: {
+          // Keep track of the page the user was trying to access so we can
+          // redirect them back after they sign in.
+          redirect: ctx.location.href,
+        },
+      });
+    }
+
     // During SSR only (the only time serverHttpClient exists),
-    // set the Clerk auth token to make HTTP queries with.
+    // set the auth token for Convex to make HTTP queries with.
     if (token) {
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);
     }
 
-    return {
-      userId,
-      token,
-    };
+    return { userId, token };
   },
-  notFoundComponent: () => <div>Not Found</div>,
+  errorComponent: (props) => {
+    return (
+      <RootDocument>
+        <DefaultCatchBoundary {...props} />
+      </RootDocument>
+    );
+  },
+  notFoundComponent: NotFound,
   component: RootComponent,
 });
 
 function RootComponent() {
   const context = useRouteContext({ from: Route.id });
+  const { token } = useRouteContext({ from: Route.id });
+  const { theme } = useLoaderData({ from: Route.id });
+
+  // Set auth token on client-side Convex client immediately to prevent auth gap
+  // React.useEffect(() => {
+  //   if (token) {
+  //     // Set the auth token on the Convex client to ensure queries have auth
+  //     context.convexClient.setAuth(async () => token);
+  //   }
+  // }, [token, context.convexClient]);
+
   return (
-    <ClerkProvider>
-      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+    <ConvexBetterAuthProvider
+      client={context.convexClient}
+      authClient={authClient}
+    >
+      <ThemeProvider theme={theme}>
         <RootDocument>
           <Outlet />
         </RootDocument>
-      </ConvexProviderWithClerk>
-    </ClerkProvider>
+      </ThemeProvider>
+    </ConvexBetterAuthProvider>
   );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme();
   return (
-    <html className="font-geist">
+    <html className={theme} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

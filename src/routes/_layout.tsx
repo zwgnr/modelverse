@@ -18,15 +18,17 @@ import { MessageCirclePlus } from "lucide-react";
 import { selectedModelAtom } from "@/lib/models";
 import { useAtom } from "jotai";
 import { cn } from "@/lib/utils";
-import { useClerk } from "@clerk/tanstack-react-start";
 import { convexQuery } from "@convex-dev/react-query";
-import React from "react";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(
       convexQuery(api.conversations.list, {}),
+    );
+    await context.queryClient.ensureQueryData(
+      convexQuery(api.auth.getCurrentUser, {}),
     );
   },
 });
@@ -68,10 +70,14 @@ function RouteComponent() {
     }
   };
 
-  const { signOut } = useClerk();
   const handleSignOut = () => {
-    signOut();
-    router.navigate({ to: "/signin" });
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.navigate({ to: "/signin" });
+        },
+      },
+    });
   };
 
   const handleModelSelect = (modelName: string) => {
@@ -79,7 +85,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="bg-background relative flex h-screen overflow-hidden">
+    <div className="bg-background relative flex h-screen w-screen overflow-hidden">
       {/* Command Palette */}
       <CommandPalette
         open={commandPaletteOpen}
@@ -105,9 +111,17 @@ function RouteComponent() {
 
       {/* Sidebar */}
       <div
-        className={`relative z-50 overflow-hidden transition-all duration-300 ease-out ${sidebarVisible ? "w-64" : "w-0"}`}
+        className={cn(
+          "relative z-50 flex-shrink-0 overflow-hidden transition-all duration-300 ease-out",
+          sidebarVisible ? "w-64" : "w-0",
+        )}
       >
-        <div className={`w-64 ${sidebarVisible ? "" : "pointer-events-none"}`}>
+        <div
+          className={cn(
+            "h-full w-64",
+            !sidebarVisible && "pointer-events-none",
+          )}
+        >
           <Sidebar
             routerState={routerState}
             currentConversationId={chatid as Id<"conversations">}
@@ -121,56 +135,70 @@ function RouteComponent() {
         </div>
       </div>
 
-      <div
-        className={`bg-card my-2 mr-4 flex flex-1 flex-col rounded-xl transition-all duration-300 ease-out ${sidebarVisible ? "ml-2" : "ml-2"}`}
-      >
-        <div className="sticky top-0 z-10 w-full rounded-xl bg-transparent px-4 py-3 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={toggleSidebar}
-                variant="ghost"
-                size="sm"
-                className="hover:bg-accent/50 mr-2 transition-all duration-200 hover:scale-105"
-                title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
-              >
-                <PanelLeft
-                  className={`h-4 w-4 transition-transform duration-300 ease-out ${sidebarVisible ? "" : "scale-x-[-1]"}`}
-                />
-              </Button>
-
-              {/* Collapsed Sidebar Actions */}
-              <div
-                className={`flex items-center gap-2 transition-all duration-300 ${sidebarVisible ? "pointer-events-none scale-95 opacity-0" : "scale-100 opacity-100"}`}
-              >
-                {/* Search Icon Button */}
+      {/* Main content area */}
+      <div className="flex min-w-0 flex-1 flex-col p-2">
+        <div className="bg-card flex h-full flex-col overflow-hidden rounded-xl">
+          {/* Header */}
+          <div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-4 py-3 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <Button
-                  onClick={() => setCommandPaletteOpen(true)}
-                  variant="outline"
-                  size="icon"
-                  className="animate-in fade-in slide-in-from-left-3 h-9 w-9 duration-300 hover:scale-105"
-                  title="Search (⌘K)"
+                  onClick={toggleSidebar}
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-accent/50 mr-2 transition-all duration-200 hover:scale-105"
+                  title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
                 >
-                  <Search className="h-4 w-4" />
+                  <PanelLeft
+                    className={cn(
+                      "h-4 w-4 transition-transform duration-300 ease-out",
+                      !sidebarVisible && "scale-x-[-1]",
+                    )}
+                  />
                 </Button>
 
-                {/* New Chat Button */}
-                <Button
-                  asChild
-                  variant="outline"
-                  size="icon"
-                  className="animate-in fade-in slide-in-from-left-3 h-9 w-9 delay-75 duration-300 hover:scale-105"
-                  title="New Chat (⌘N)"
+                {/* Collapsed Sidebar Actions */}
+                <div
+                  className={cn(
+                    "flex items-center gap-2 transition-all duration-300",
+                    sidebarVisible
+                      ? "pointer-events-none scale-95 opacity-0"
+                      : "scale-100 opacity-100",
+                  )}
                 >
-                  <Link to="/">
-                    <MessageCirclePlus className="text-primary h-4 w-4" />
-                  </Link>
-                </Button>
+                  {/* Search Icon Button */}
+                  <Button
+                    onClick={() => setCommandPaletteOpen(true)}
+                    variant="outline"
+                    size="icon"
+                    className="animate-in fade-in slide-in-from-left-3 h-9 w-9 duration-300 hover:scale-105"
+                    title="Search (⌘K)"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+
+                  {/* New Chat Button */}
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="icon"
+                    className="animate-in fade-in slide-in-from-left-3 h-9 w-9 delay-75 duration-300 hover:scale-105"
+                    title="New Chat (⌘N)"
+                  >
+                    <Link to="/">
+                      <MessageCirclePlus className="text-primary h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Outlet container with proper constraints */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <Outlet />
+          </div>
         </div>
-        <Outlet />
       </div>
     </div>
   );

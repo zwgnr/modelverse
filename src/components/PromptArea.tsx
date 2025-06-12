@@ -48,7 +48,7 @@ interface PromptAreaProps {
   };
   // For index page - creates new conversation and navigates
   createNewConversation?: boolean;
-  onNavigateToChat?: (conversationId: string) => void;
+  onNavigateToChat?: (conversationId: string, prompt?: string) => void;
 }
 
 export function PromptArea({
@@ -73,9 +73,9 @@ export function PromptArea({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const sendMessage = useMutation(api.messages.send);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const createConversation = useMutation(api.conversations.create);
+  const sendMessage = useMutation(api.messages.send);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -121,14 +121,57 @@ export function PromptArea({
   };
 
   const handleSubmit = async () => {
-    if ((!newMessageText.trim() && uploadedFiles.length === 0) || isStreaming)
+    if (!newMessageText.trim() && uploadedFiles.length === 0) return;
+
+    if (createNewConversation) {
+      if (onNavigateToChat && onStartStream) {
+        onStartStream();
+        
+        try {
+          // Create the conversation first
+          const newConversationId = await createConversation({});
+          
+          // Prepare file data if any
+          const fileData = await Promise.all(
+            uploadedFiles.map(async (file) => ({
+              filename: file.name,
+              fileType: file.type,
+              storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
+            })),
+          );
+
+          const modelToUse = webSearchEnabled
+            ? `${selectedModel}:online`
+            : selectedModel;
+
+          // Send the message immediately to the new conversation
+          await sendMessage({
+            prompt: newMessageText,
+            conversationId: newConversationId,
+            model: modelToUse,
+            files: fileData.length > 0 ? fileData : undefined,
+          });
+
+          // Clear the form
+          setNewMessageText("");
+          setUploadedFiles([]);
+
+          // Navigate to the clean chat page (no prompt parameter)
+          onNavigateToChat(newConversationId);
+        } catch (error) {
+          console.error('Failed to create conversation and send message:', error);
+        } finally {
+          if (onStopStream) {
+            onStopStream();
+          }
+        }
+      }
       return;
+    }
 
-    // For index page, we don't need a conversationId initially
-    if (!createNewConversation && !conversationId) return;
-
-    try {
-      // Upload files to Convex storage
+    // This part is for sending messages in an *existing* conversation,
+    // which is now handled by the main chat component.
+    if (onSendMessage && conversationId) {
       const fileData = await Promise.all(
         uploadedFiles.map(async (file) => ({
           filename: file.name,
@@ -137,92 +180,19 @@ export function PromptArea({
         })),
       );
 
-      // Modify model string if web search is enabled
       const modelToUse = webSearchEnabled
         ? `${selectedModel}:online`
         : selectedModel;
 
-      let targetConversationId = conversationId;
-
-      // Create new conversation and send message BEFORE navigating
-      if (createNewConversation) {
-        targetConversationId = await createConversation({});
-        
-        // Send the message immediately before navigation
-        if (targetConversationId) {
-          const messageData = {
-            body: newMessageText,
-            author: "User" as const,
-            conversationId: targetConversationId as Id<"conversations">,
-            model: modelToUse,
-            files: fileData.length > 0 ? fileData : undefined,
-          };
-
-          if (onSendMessage) {
-            await onSendMessage(messageData);
-          } else {
-            // Send the message immediately
-            const messageId = await sendMessage({
-              prompt: messageData.body,
-              conversationId: messageData.conversationId,
-              model: messageData.model,
-              files: messageData.files,
-            });
-
-            // Signal that message was sent and provide the messageId
-            if (onMessageSent) {
-              onMessageSent(messageId);
-            }
-          }
-
-          // NOW navigate with content already in the conversation
-          if (onNavigateToChat) {
-            onNavigateToChat(targetConversationId);
-          }
-        }
-        
-        // Clear form and return early - we've already handled everything
-        setNewMessageText("");
-        setUploadedFiles([]);
-        return;
-      }
-
-      const messageData = {
+      await onSendMessage({
         body: newMessageText,
-        author: "User" as const,
-        conversationId: targetConversationId as Id<"conversations">,
+        author: "User",
+        conversationId: conversationId as Id<"conversations">,
         model: modelToUse,
         files: fileData.length > 0 ? fileData : undefined,
-      };
-
-      if (onSendMessage) {
-        await onSendMessage(messageData);
-      } else {
-        // Signal that streaming should start
-        if (onStartStream) {
-          onStartStream();
-        }
-
-        // Send the message
-        const messageId = await sendMessage({
-          prompt: messageData.body,
-          conversationId: messageData.conversationId,
-          model: messageData.model,
-          files: messageData.files,
-        });
-
-        // Signal that message was sent and provide the messageId
-        if (onMessageSent) {
-          onMessageSent(messageId);
-        }
-      }
-
-      // Clear form after successful submit (existing conversation flow)
+      });
       setNewMessageText("");
       setUploadedFiles([]);
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      alert("Failed to upload files. Please try again.");
     }
   };
 

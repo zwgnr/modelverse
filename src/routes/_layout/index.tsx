@@ -22,9 +22,6 @@ function IndexComponent() {
     <div className="flex flex-1 flex-col items-center justify-center px-4">
       <div className="w-full max-w-4xl space-y-8 text-center">
         <div className="space-y-4">
-          {/* <h1 className="text-6xl font-bold tracking-tight">
-            Ask<span className="text-primary">hole</span>
-          </h1> */}
           <p className="text-muted-foreground text-xl">
             Ready to answer your dumbest questions.
           </p>

@@ -1,9 +1,8 @@
-import { createFileRoute, Navigate, useRouter } from '@tanstack/react-router'
-import { useConvexAuth } from "convex/react"
+import { createFileRoute } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, ArrowLeft, Bell, Shield, Palette, Globe, Settings, CreditCard, Lock } from "lucide-react"
+import { User, Bell, Shield, Palette, Globe, Settings, CreditCard, Lock } from "lucide-react"
 
 function SettingsPage() {
   return (

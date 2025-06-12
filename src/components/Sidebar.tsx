@@ -16,8 +16,8 @@ import {
   LogOut,
   MoreVertical,
 } from "lucide-react";
-import { Id } from "../../convex/_generated/dataModel.js";
-import { RouterState } from "@tanstack/react-router";
+import { Doc, Id } from "../../convex/_generated/dataModel.js";
+import { RouterState, useLoaderData } from "@tanstack/react-router";
 import {
   Popover,
   PopoverContent,
@@ -28,10 +28,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { convexQuery } from "@convex-dev/react-query";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
-  conversations: any[] | undefined;
+  conversations: Doc<"conversations">[] | undefined;
   onConversationDelete?: (deletedConversationId: Id<"conversations">) => void;
   onOpenCommandPalette?: () => void;
   onSignOut: () => void;
@@ -46,12 +48,15 @@ export function Sidebar({
   onConversationDelete,
   onOpenCommandPalette,
   onSignOut,
-  routerState,
   isVisible,
   hasBeenToggled = false,
 }: SidebarProps) {
   const updateTitle = useMutation(api.conversations.updateTitle);
   const deleteConversation = useMutation(api.conversations.deleteConversation);
+
+  const { data: currentUser } = useSuspenseQuery(
+    convexQuery(api.auth.getCurrentUser, {}),
+  );
 
   const [editingId, setEditingId] = useState<Id<"conversations"> | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -68,7 +73,7 @@ export function Sidebar({
     setActionsPopoverConversationId(null);
   };
 
-  const handleEditStart = (conversation: any) => {
+  const handleEditStart = (conversation: Doc<"conversations">) => {
     setEditingId(conversation._id);
     setEditTitle(conversation.title);
   };
@@ -184,7 +189,7 @@ export function Sidebar({
         )}
       >
         <div className="space-y-1">
-          {conversations?.length === 0 ? (
+          {!conversations || conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
               <div className="text-muted-foreground mb-4">
                 <MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
@@ -194,7 +199,7 @@ export function Sidebar({
               </h3>
             </div>
           ) : (
-            conversations?.map((conversation) => {
+            conversations.map((conversation) => {
               return (
                 <div
                   key={conversation._id}
@@ -337,7 +342,7 @@ export function Sidebar({
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="hover:bg-secondary hover:text-secondary-foreground h-auto w-full justify-start p-2 transition-all duration-200"
+              className="hover:bg-accent hover:text-accent-foreground h-auto w-full justify-start p-2 transition-all duration-200"
             >
               <Avatar className="mr-3 h-8 w-8">
                 <AvatarFallback className="text-xs">
@@ -345,9 +350,11 @@ export function Sidebar({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-medium">@zwgnr</p>
+                {/* <p className="truncate text-sm font-medium">
+                  {currentUser?.name ?? "anon"}
+                </p> */}
                 <p className="text-muted-foreground truncate text-xs">
-                  user@example.com
+                  {currentUser?.email ?? "anon"}
                 </p>
               </div>
             </Button>
@@ -367,9 +374,11 @@ export function Sidebar({
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">@zwgnr</p>
+                  {/* <p className="truncate font-medium">
+                    {currentUser?.name ?? "anon"}
+                  </p> */}
                   <p className="text-muted-foreground truncate text-xs">
-                    user@example.com
+                    {currentUser?.email ?? "anon"}
                   </p>
                 </div>
               </div>

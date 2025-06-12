@@ -1,85 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { setThemeServerFn } from "@/server/theme";
+import { useRouter } from "@tanstack/react-router";
+import { createContext, PropsWithChildren, use } from "react";
+import type { Theme } from "@/server/theme";
 
-type Theme = 'dark' | 'light' | 'system'
+type ThemeContextVal = { theme: Theme; setTheme: (val: Theme) => void };
+type Props = PropsWithChildren<{ theme: Theme }>;
 
-type ThemeProviderContextType = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
+const ThemeContext = createContext<ThemeContextVal | null>(null);
 
-const ThemeProviderContext = createContext<ThemeProviderContextType | undefined>(undefined)
+export function ThemeProvider({ children, theme }: Props) {
+  const router = useRouter();
 
-export function useTheme() {
-  const context = useContext(ThemeProviderContext)
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-  return context
-}
-
-interface ThemeProviderProps {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
-}
-
-export function ThemeProvider({
-  children,
-  defaultTheme = 'system',
-  storageKey = 'acme-chat-theme',
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem(storageKey) as Theme) || defaultTheme
-    }
-    return defaultTheme
-  })
-
-  useEffect(() => {
-    const root = window.document.documentElement
-
-    root.classList.remove('light', 'dark')
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-
-      root.classList.add(systemTheme)
-      return
-    }
-
-    root.classList.add(theme)
-  }, [theme])
-
-  useEffect(() => {
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      
-      const handleChange = () => {
-        const root = window.document.documentElement
-        root.classList.remove('light', 'dark')
-        
-        const systemTheme = mediaQuery.matches ? 'dark' : 'light'
-        root.classList.add(systemTheme)
-      }
-
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
-    }
-  }, [theme])
-
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
+  function setTheme(val: Theme) {
+    setThemeServerFn({ data: val });
+    router.invalidate();
   }
 
   return (
-    <ThemeProviderContext.Provider value={value}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
-    </ThemeProviderContext.Provider>
-  )
-} 
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const val = use(ThemeContext);
+  if (!val) throw new Error("useTheme called outside of ThemeProvider!");
+  return val;
+}

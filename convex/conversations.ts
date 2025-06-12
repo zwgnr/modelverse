@@ -2,19 +2,16 @@ import { mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { internalAction, internalMutation } from "./_generated/server";
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText } from "ai";
 import { internal } from "./_generated/api";
 
 export const list = query({
   handler: async (ctx): Promise<Doc<"conversations">[]> => {
     const identity = await ctx.auth.getUserIdentity();
-    
     if (!identity) {
-      // maybe we should return an empty array instead of throwing an error, this is inconsistent
-      throw new Error("Not authenticated");
+      return [];
     }
-
     const userId = identity.subject;
 
     // Get conversations ordered by most recently updated
@@ -27,6 +24,7 @@ export const list = query({
     return conversations;
   },
 });
+
 
 export const create = mutation({
   args: { title: v.optional(v.string()) },
@@ -57,7 +55,7 @@ export const updateTitle = mutation({
   args: { conversationId: v.id("conversations"), title: v.string() },
   handler: async (ctx, { conversationId, title }) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {    
+    if (!identity) {
       throw new Error("Not authenticated");
     }
 
@@ -117,7 +115,9 @@ export const deleteConversation = mutation({
     // Delete all messages in this conversation
     const messages = await ctx.db
       .query("messages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+      .withIndex("by_conversation", (q) =>
+        q.eq("conversationId", conversationId),
+      )
       .collect();
 
     for (const message of messages) {
@@ -140,9 +140,9 @@ export const updateTitleInternal = internalMutation({
 });
 
 export const generateTitle = internalAction({
-  args: { 
-    conversationId: v.id("conversations"), 
-    firstMessage: v.string() 
+  args: {
+    conversationId: v.id("conversations"),
+    firstMessage: v.string(),
   },
   handler: async (ctx, { conversationId, firstMessage }) => {
     const apiKey = process.env.OPEN_ROUTER_API_KEY!;
@@ -154,12 +154,13 @@ export const generateTitle = internalAction({
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that generates short, descriptive titles for conversations. Generate a concise title (2-5 words) that captures the main topic or purpose of the conversation based on the first user message. Do not use quotes or extra formatting."
+            content:
+              "You are a helpful assistant that generates short, descriptive titles for conversations. Generate a concise title (2-5 words) that captures the main topic or purpose of the conversation based on the first user message. Do not use quotes or extra formatting.",
           },
           {
-            role: "user", 
-            content: `Generate a short title for a conversation that starts with: "${firstMessage}"`
-          }
+            role: "user",
+            content: `Generate a short title for a conversation that starts with: "${firstMessage}"`,
+          },
         ],
         maxTokens: 50,
       });
@@ -167,11 +168,11 @@ export const generateTitle = internalAction({
       // Update the conversation title using internal mutation
       await ctx.runMutation(internal.conversations.updateTitleInternal, {
         conversationId,
-        title: result.text.trim()
+        title: result.text.trim(),
       });
     } catch (e) {
       console.error("Failed to generate conversation title:", e);
       // If title generation fails, we'll just keep the default "New Chat" title
     }
   },
-}); 
+});

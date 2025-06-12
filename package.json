@@ -1,6 +1,6 @@
 {
   "name": "askhole-ai",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
@@ -9,9 +9,9 @@
     "dev:frontend": "vite dev --open --clearScreen false"
   },
   "dependencies": {
-    "@auth/core": "0.37.0",
+    "@ai-sdk/react": "^1.2.12",
     "@clerk/tanstack-react-start": "0.17.0-snapshot.v20250611045520",
-    "@convex-dev/auth": "^0.0.87",
+    "@convex-dev/better-auth": "^0.6.1",
     "@convex-dev/persistent-text-streaming": "^0.2.3",
     "@convex-dev/react-query": "0.0.0-alpha.8",
     "@openrouter/ai-sdk-provider": "^0.7.1",
@@ -29,10 +29,11 @@
     "@tailwindcss/vite": "^4.1.8",
     "@tanstack/react-query": "^5.80.6",
     "@tanstack/react-router": "^1.21.2",
-    "@tanstack/react-router-with-query": "^1.21.4",
+    "@tanstack/react-router-with-query": "^1.21.2",
     "@tanstack/react-start": "^1.21.4",
     "@tanstack/router-devtools": "^1.21.4",
     "ai": "^4.3.16",
+    "better-auth": "1.2.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -45,7 +46,8 @@
     "react-dom": "^19.1.0",
     "tailwind-merge": "^3.3.1",
     "use-stick-to-bottom": "^1.1.1",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "zod": "^3.25.62"
   },
   "devDependencies": {
     "@types/json-schema": "^7.0.15",
