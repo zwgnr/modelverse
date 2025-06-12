@@ -138,6 +138,24 @@ export const updateTitleInternal = internalMutation({
   },
 });
 
+export const clearPendingInitialMessage = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, { conversationId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const userId = identity.subject;
+
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation || conversation.userId !== userId) {
+      throw new Error("Conversation not found or unauthorized");
+    }
+
+    await ctx.db.patch(conversationId, {
+      hasPendingInitialMessage: false,
+    });
+  },
+});
+
 export const generateTitle = internalAction({
   args: {
     conversationId: v.id("conversations"),

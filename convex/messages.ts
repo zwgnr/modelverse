@@ -50,11 +50,15 @@ export const send = mutation({
     if (!conversation) throw new Error("Conversation not found");
     if (conversation.userId !== userId) throw new Error("Unauthorized");
 
-    const isFirstMessage = (await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-        .collect()
-    ).length === 0;
+    const isFirstMessage =
+      (
+        await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) =>
+            q.eq("conversationId", conversationId),
+          )
+          .collect()
+      ).length === 0;
 
     const messageId = await ctx.db.insert("messages", {
       userId,
@@ -65,7 +69,11 @@ export const send = mutation({
       // `response` is omitted initially
     });
 
-    await ctx.db.patch(conversationId, { updatedAt: Date.now() });
+    await ctx.db.patch(conversationId, {
+      updatedAt: Date.now(),
+      // Set pending flag if this is the first message (from index page flow)
+      ...(isFirstMessage ? { hasPendingInitialMessage: true } : {}),
+    });
 
     if (isFirstMessage) {
       ctx.scheduler.runAfter(0, internal.conversations.generateTitle, {
@@ -88,7 +96,7 @@ export const saveResponse = mutation({
     const message = await ctx.db.get(messageId);
     if (!message) throw new Error("Message not found");
     if (message.userId !== userId) throw new Error("Unauthorized");
-    
+
     await ctx.db.patch(messageId, { response });
   },
 });

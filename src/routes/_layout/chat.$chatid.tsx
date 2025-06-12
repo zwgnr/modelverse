@@ -34,9 +34,13 @@ function ChatConversation() {
   const { chatid } = useParams({ from: "/_layout/chat/$chatid" });
   const queryClient = useQueryClient();
   const lastMessageIdRef = useRef<Id<"messages"> | null>(null);
+  const hasTriggeredInitialMessage = useRef(false);
 
   const sendMessage = useMutation(api.messages.send);
   const saveResponse = useMutation(api.messages.saveResponse);
+  const clearPendingInitialMessage = useMutation(
+    api.conversations.clearPendingInitialMessage,
+  );
 
   const { data: conversations } = useSuspenseQuery(
     convexQuery(api.conversations.list, {}),
@@ -99,49 +103,51 @@ function ChatConversation() {
     },
   });
 
-  // Effect to trigger AI response for messages without responses
+  // Effect to handle pending initial message from new chat page
   useEffect(() => {
-    if (!dbMessages || isLoading) return;
+    if (
+      !currentConversation?.hasPendingInitialMessage ||
+      hasTriggeredInitialMessage.current
+    ) {
+      return;
+    }
 
-    console.log("Checking for messages without response...", dbMessages);
+    // Find the first message (should be the one just created)
+    const firstMessage = dbMessages?.[0];
+    if (!firstMessage || firstMessage.response) {
+      return;
+    }
 
-    // Find the last message without a response
-    const messageWithoutResponse = dbMessages.find((msg) => !msg.response);
+    hasTriggeredInitialMessage.current = true;
 
-    console.log("Message without response:", messageWithoutResponse);
-
-    if (messageWithoutResponse) {
-      // Check if this message is already in the streaming messages
-      const isAlreadyInStream = messages.some(
-        (msg) => msg.id === messageWithoutResponse._id,
-      );
-
-      console.log("Is already in stream:", isAlreadyInStream);
-      console.log("Current lastMessageIdRef:", lastMessageIdRef.current);
-      console.log("Current messages:", messages);
-
-      if (!isAlreadyInStream && !lastMessageIdRef.current) {
-        console.log(
-          "Triggering AI response for message:",
-          messageWithoutResponse.prompt,
-        );
-
-        // Trigger the same flow as handleSendMessage but the message is already in DB
+    // Clear the pending flag immediately
+    clearPendingInitialMessage({
+      conversationId: chatid as Id<"conversations">,
+    })
+      .then(() => {
+        // Trigger the AI response
         append(
           {
             role: "user",
-            content: messageWithoutResponse.prompt,
+            content: firstMessage.prompt,
           },
           {
-            body: { model: messageWithoutResponse.model },
+            body: { model: firstMessage.model },
           },
         );
-
-        // Set the message ID so the response gets saved properly
-        lastMessageIdRef.current = messageWithoutResponse._id;
-      }
-    }
-  }, [dbMessages, messages, isLoading, append]);
+        lastMessageIdRef.current = firstMessage._id;
+      })
+      .catch((error) => {
+        console.error("Failed to clear pending flag:", error);
+        setErrorMessage("Failed to start AI response");
+      });
+  }, [
+    currentConversation?.hasPendingInitialMessage,
+    dbMessages,
+    append,
+    clearPendingInitialMessage,
+    chatid,
+  ]);
 
   const handleSendMessage = useCallback(
     async (data: {

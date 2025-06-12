@@ -102,10 +102,7 @@ export function PromptArea({
   };
 
   const uploadFileToStorage = async (file: File): Promise<string> => {
-    // Get upload URL from Convex
     const uploadUrl = await generateUploadUrl();
-
-    // Upload file to Convex storage
     const result = await fetch(uploadUrl, {
       method: "POST",
       headers: { "Content-Type": file.type },
@@ -124,9 +121,7 @@ export function PromptArea({
     if (!newMessageText.trim() && uploadedFiles.length === 0) return;
 
     if (createNewConversation) {
-      if (onNavigateToChat && onStartStream) {
-        onStartStream();
-        
+      if (onNavigateToChat) {
         try {
           // Create the conversation first
           const newConversationId = await createConversation({});
@@ -156,21 +151,18 @@ export function PromptArea({
           setNewMessageText("");
           setUploadedFiles([]);
 
-          // Navigate to the clean chat page (no prompt parameter)
+          // Navigate to the chat page - the chat component will handle streaming
           onNavigateToChat(newConversationId);
         } catch (error) {
           console.error('Failed to create conversation and send message:', error);
-        } finally {
-          if (onStopStream) {
-            onStopStream();
-          }
+          alert('Failed to start conversation. Please try again.');
         }
       }
       return;
     }
 
     // This part is for sending messages in an *existing* conversation,
-    // which is now handled by the main chat component.
+    // which is handled by the main chat component.
     if (onSendMessage && conversationId) {
       const fileData = await Promise.all(
         uploadedFiles.map(async (file) => ({
