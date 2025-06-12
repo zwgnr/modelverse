@@ -57,7 +57,7 @@ export const models: Model[] = [
 
 export const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
-// Jotai atom for selected model
+// Regular jotai atom for selected model (client-side routing preserves state)
 export const selectedModelAtom = atom(DEFAULT_MODEL);
 
 // Helper function to group models by company

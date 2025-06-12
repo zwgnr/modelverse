@@ -14,6 +14,7 @@ function IndexComponent() {
     router.navigate({
       to: "/chat/$chatid",
       params: { chatid: conversationId },
+      replace: true, // Replace current history entry to avoid back/forward issues
     });
   };
 

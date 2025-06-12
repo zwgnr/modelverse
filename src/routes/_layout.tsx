@@ -10,7 +10,7 @@ import {
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PanelLeft } from "lucide-react";
 import { Search } from "lucide-react";
@@ -20,6 +20,7 @@ import { useAtom } from "jotai";
 import { cn } from "@/lib/utils";
 import { useClerk } from "@clerk/tanstack-react-start";
 import { convexQuery } from "@convex-dev/react-query";
+import React from "react";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,

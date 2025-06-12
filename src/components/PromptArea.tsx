@@ -144,9 +144,47 @@ export function PromptArea({
 
       let targetConversationId = conversationId;
 
-      // Create new conversation if needed (index page)
+      // Create new conversation and send message BEFORE navigating
       if (createNewConversation) {
         targetConversationId = await createConversation({});
+        
+        // Send the message immediately before navigation
+        if (targetConversationId) {
+          const messageData = {
+            body: newMessageText,
+            author: "User" as const,
+            conversationId: targetConversationId as Id<"conversations">,
+            model: modelToUse,
+            files: fileData.length > 0 ? fileData : undefined,
+          };
+
+          if (onSendMessage) {
+            await onSendMessage(messageData);
+          } else {
+            // Send the message immediately
+            const messageId = await sendMessage({
+              prompt: messageData.body,
+              conversationId: messageData.conversationId,
+              model: messageData.model,
+              files: messageData.files,
+            });
+
+            // Signal that message was sent and provide the messageId
+            if (onMessageSent) {
+              onMessageSent(messageId);
+            }
+          }
+
+          // NOW navigate with content already in the conversation
+          if (onNavigateToChat) {
+            onNavigateToChat(targetConversationId);
+          }
+        }
+        
+        // Clear form and return early - we've already handled everything
+        setNewMessageText("");
+        setUploadedFiles([]);
+        return;
       }
 
       const messageData = {
@@ -165,7 +203,7 @@ export function PromptArea({
           onStartStream();
         }
 
-        // Fallback to direct mutation if no callback provided
+        // Send the message
         const messageId = await sendMessage({
           prompt: messageData.body,
           conversationId: messageData.conversationId,
@@ -179,13 +217,9 @@ export function PromptArea({
         }
       }
 
+      // Clear form after successful submit (existing conversation flow)
       setNewMessageText("");
       setUploadedFiles([]);
-
-      // Navigate to chat if this is from index page
-      if (createNewConversation && onNavigateToChat && targetConversationId) {
-        onNavigateToChat(targetConversationId);
-      }
     } catch (error) {
       console.error("Error uploading files:", error);
       alert("Failed to upload files. Please try again.");

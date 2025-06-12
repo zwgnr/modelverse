@@ -63,7 +63,7 @@ function ChatStageWrapper() {
   const sendMessage = useMutation(api.messages.send);
 
   // Get messages for auto-detection of recent streaming messages
-  const { data: messages } = useSuspenseQuery(
+  const { data: messages } = useQuery(
     convexQuery(api.messages.list, {
       conversationId: conversationId as Id<"conversations">,
     }),
@@ -109,6 +109,9 @@ function ChatStageWrapper() {
   const handleStopStream = useCallback(() => {
     stopStreaming(cancelStream);
   }, [stopStreaming, cancelStream]);
+
+  // NOW we can do conditional rendering after all hooks
+  // Removed loading state - just render the chat directly
 
   return (
     <div className="flex h-full flex-col">
