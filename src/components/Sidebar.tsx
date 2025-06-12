@@ -16,7 +16,7 @@ import {
   LogOut,
   MoreVertical,
 } from "lucide-react";
-import { Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../convex/_generated/dataModel.js";
 import { RouterState } from "@tanstack/react-router";
 import {
   Popover,
@@ -26,13 +26,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
 import { cn } from "@/lib/utils";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 
 interface SidebarProps {
   currentConversationId?: Id<"conversations">;
+  conversations: any[] | undefined;
   onConversationDelete?: (deletedConversationId: Id<"conversations">) => void;
   onOpenCommandPalette?: () => void;
   onSignOut: () => void;
@@ -43,6 +42,7 @@ interface SidebarProps {
 
 export function Sidebar({
   currentConversationId,
+  conversations,
   onConversationDelete,
   onOpenCommandPalette,
   onSignOut,
@@ -50,9 +50,6 @@ export function Sidebar({
   isVisible,
   hasBeenToggled = false,
 }: SidebarProps) {
-  const { data: conversations } = useQuery(
-    convexQuery(api.conversations.list, {}),
-  );
   const updateTitle = useMutation(api.conversations.updateTitle);
   const deleteConversation = useMutation(api.conversations.deleteConversation);
 

@@ -1,17 +1,26 @@
-import { auth } from "./auth";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { StreamId } from "@convex-dev/persistent-text-streaming";
 import { streamingComponent } from "./streaming";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { streamText } from "ai";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const streamChat = httpAction(async (ctx, request) => {
-  const userId = await getAuthUserId(ctx);
-  if (!userId) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  try {
+    // Get user from Clerk authentication
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return new Response("Unauthorized", { 
+        status: 401,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Vary": "Origin",
+        },
+      });
+    }
+    const userId = identity.subject;
 
   const body = (await request.json()) as {
     streamId: string;
@@ -117,7 +126,21 @@ export const streamChat = httpAction(async (ctx, request) => {
   );
 
   response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   response.headers.set("Vary", "Origin");
 
   return response;
+  } catch (error) {
+    console.error("Error in streamChat:", error);
+    return new Response("Internal Server Error", { 
+      status: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Vary": "Origin",
+      },
+    });
+  }
 });

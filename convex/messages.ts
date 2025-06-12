@@ -9,7 +9,9 @@ import { StreamId } from "@convex-dev/persistent-text-streaming";
 export const list = query({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, { conversationId }): Promise<Doc<"messages">[]> => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       throw new Error("Not authenticated");
     }
@@ -35,7 +37,9 @@ export const list = query({
 export const saveResponse = mutation({
   args: { messageId: v.id("messages"), response: v.string() },
   handler: async (ctx, { messageId, response }) => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       throw new Error("Not authenticated");
     }
@@ -55,7 +59,9 @@ export const cancelStream = mutation({
     messageId: v.id("messages"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       throw new Error("Not authenticated");
     }
@@ -92,7 +98,9 @@ export const send = mutation({
     ctx,
     { prompt, conversationId, model = "openai/gpt-4o-mini", files },
   ) => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       throw new Error("Not authenticated");
     }

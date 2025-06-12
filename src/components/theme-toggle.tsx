@@ -7,14 +7,14 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const { theme, setTheme } = useTheme();
-
+ // const { theme, setTheme } = useTheme();
+const theme = 'light'
   return (
     <div
       className={`border-input bg-background flex items-center rounded-md border ${className}`}
     >
       <button
-        onClick={() => setTheme('light')}
+       // onClick={() => setTheme('light')}
         className={`focus-visible:ring-ring relative inline-flex h-6 w-6 items-center justify-center rounded-l-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
           theme === 'light'
             ? "bg-primary text-primary-foreground shadow-md"
@@ -27,27 +27,27 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         <Sun className="h-3 w-3" />
       </button>
       <button
-        onClick={() => setTheme('dark')}
+      //  onClick={() => setTheme('dark')}
         className={`border-input focus-visible:ring-ring relative inline-flex h-6 w-6 items-center justify-center border-l border-r text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-          theme === 'dark'
+          theme === 'light'
             ? "bg-primary text-primary-foreground shadow-md"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground opacity-60"
         }`}
         aria-label="Switch to dark mode"
-        aria-pressed={theme === 'dark'}
+        aria-pressed={theme === 'light'}
         title="Dark mode"
       >
         <Moon className="h-3 w-3" />
       </button>
       <button
-        onClick={() => setTheme('system')}
+      //  onClick={() => setTheme('system')}
         className={`focus-visible:ring-ring relative inline-flex h-6 w-6 items-center justify-center rounded-r-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-          theme === 'system'
+          theme === 'light'
             ? "bg-primary text-primary-foreground shadow-md"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground opacity-60"
         }`}
         aria-label="Switch to system mode"
-        aria-pressed={theme === 'system'}
+        aria-pressed={theme === 'light'}
         title="System mode"
       >
         <Monitor className="h-3 w-3" />

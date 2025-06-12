@@ -7,7 +7,7 @@ import { FileDisplay } from "@/components/FileDisplay";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
 import { convexQuery } from "@convex-dev/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { PromptArea } from "@/components/PromptArea";
 import { useLRUCache } from "@/hooks/useLRUCache";
 import { useLayoutSettledDetection } from "@/hooks/useLayoutSettledDetection";
@@ -25,6 +25,13 @@ import {
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatStageWrapper,
+  loader: async ({ context, params }) => {
+    context.queryClient.ensureQueryData(
+      convexQuery(api.messages.list, {
+        conversationId: params.chatid as Id<"conversations">,
+      }),
+    );
+  },
 });
 
 const MAX_MOUNTED = 4; // last 4 visited threads
@@ -56,7 +63,7 @@ function ChatStageWrapper() {
   const sendMessage = useMutation(api.messages.send);
 
   // Get messages for auto-detection of recent streaming messages
-  const { data: messages } = useQuery(
+  const { data: messages } = useSuspenseQuery(
     convexQuery(api.messages.list, {
       conversationId: conversationId as Id<"conversations">,
     }),
@@ -183,6 +190,10 @@ const ChatMessagesPane = React.forwardRef<
     [messagesEndRef],
   );
 
+  // For empty conversations (like newly created ones), show immediately without waiting for layout
+  const shouldShowImmediately = isActive && (!messages || messages.length === 0);
+  const shouldShow = shouldShowImmediately || (isActive && isReady);
+
   return (
     <div
       ref={(node) => {
@@ -196,9 +207,9 @@ const ChatMessagesPane = React.forwardRef<
       }}
       className="absolute inset-0 overflow-hidden"
       style={{
-        opacity: isActive && isReady ? 1 : 0,
+        opacity: shouldShow ? 1 : 0,
         pointerEvents: isActive ? "auto" : "none",
-        transition: "opacity 150ms ease-in-out",
+        transition: shouldShowImmediately ? "none" : "opacity 150ms ease-in-out",
       }}
     >
       <StickToBottom

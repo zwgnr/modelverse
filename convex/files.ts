@@ -1,11 +1,14 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { Id } from "./_generated/dataModel";
 
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       throw new Error("Not authenticated");
     }
@@ -19,7 +22,9 @@ export const getFileUrl = query({
     messageId: v.id("messages"),
   },
   handler: async (ctx, { storageId, messageId }) => {
-    const userId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    const userId = identity?.subject;
+
     if (!userId) {
       return null;
     }

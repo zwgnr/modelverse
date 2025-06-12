@@ -6,7 +6,7 @@ import { StreamIdValidator } from "@convex-dev/persistent-text-streaming";
 export default defineSchema({
   ...authTables,
   conversations: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     title: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -15,7 +15,7 @@ export default defineSchema({
     .index("by_user_updated", ["userId", "updatedAt"]),
 
   messages: defineTable({
-    userId: v.id("users"),
+    userId: v.string(),
     conversationId: v.id("conversations"),
     prompt: v.string(),
     response: v.optional(v.string()),

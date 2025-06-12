@@ -1,5 +1,4 @@
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,22 +6,24 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useSignIn, useSignUp } from "@clerk/tanstack-react-start";
 
 export const Route = createFileRoute('/signin')({
   component: SignInForm,
 });
 
 export function SignInForm() {
-  const { signIn } = useAuthActions();
-  const { isAuthenticated } = useConvexAuth();
+ // const { signIn } = useAuthActions();
+ // const { isAuthenticated } = useConvexAuth();
   const navigate = useNavigate();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-
+  const { signUp } = useSignUp();
+  const { signIn } = useSignIn();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
@@ -32,9 +33,28 @@ export function SignInForm() {
       const formData = new FormData(e.target as HTMLFormElement);
       formData.set("flow", flow);
       
-      await signIn("password", formData);
+      if (flow === "signIn") {
+        const result = await signIn?.create({
+          identifier: formData.get("email") as string,
+          password: formData.get("password") as string,
+        });
+        console.log("result", result);
+        if (result?.status === "complete") {
+          // Sign in successful, redirect to home page
+          navigate({ to: "/" });
+        }
+      } else {
+        const result = await signUp?.create({
+          emailAddress: formData.get("email") as string,
+          password: formData.get("password") as string,
+        });
+        
+        if (result?.status === "complete") {
+          // Sign up successful, redirect to home page
+          navigate({ to: "/" });
+        }
+      }
       
-      navigate({ to: "/" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
@@ -42,16 +62,17 @@ export function SignInForm() {
     }
   };
 
-  if (isAuthenticated) {
-    return <Navigate to="/" />;
-  }
+  // if (isAuthenticated) {
+  //   return <Navigate to="." />;
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 relative">
+      {/* <div id="clerk-captcha" /> */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      
+     
       <div className="w-full max-w-md space-y-8">
 
         {/* Main Card */}

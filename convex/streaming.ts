@@ -5,7 +5,7 @@ import {
 } from "@convex-dev/persistent-text-streaming";
 import { components } from "./_generated/api";
 import { query } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { Id } from "./_generated/dataModel";
 
 export const streamingComponent = new PersistentTextStreaming(
   components.persistentTextStreaming,
@@ -16,10 +16,11 @@ export const getStreamBody = query({
     streamId: StreamIdValidator,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("Not authenticated");
     }
+    const userId = identity.subject;
 
     // 1. Find the message associated with this stream.
     const message = await ctx.db
