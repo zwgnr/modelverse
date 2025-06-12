@@ -14,7 +14,4 @@ export default defineConfig({
     tanstackStart(),
     tailwindcss(),
   ],
-  ssr: {
-    noExternal: ['@clerk/tanstack-react-start'],
-  },
 })

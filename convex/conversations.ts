@@ -25,7 +25,6 @@ export const list = query({
   },
 });
 
-
 export const create = mutation({
   args: { title: v.optional(v.string()) },
   handler: async (ctx, { title }) => {

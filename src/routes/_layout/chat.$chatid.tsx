@@ -8,7 +8,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
 import { convexQuery } from "@convex-dev/react-query";
-import React, { useRef, useEffect, useCallback, useLayoutEffect } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { MarkdownMessage } from "@/components/MarkdownMessage";
 import { PromptArea } from "@/components/PromptArea";
 import { TypingLoader } from "@/components/ui/loader";
@@ -38,6 +44,7 @@ function ChatConversation() {
   const currentConversation = conversations?.find(
     (conv) => conv._id === chatid,
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Update page title dynamically
   useLayoutEffect(() => {
@@ -86,6 +93,9 @@ function ChatConversation() {
           }).queryKey,
         });
       }
+    },
+    onError: (err) => {
+      setErrorMessage(err instanceof Error ? err.message : "An error occurred");
     },
   });
 
@@ -143,18 +153,26 @@ function ChatConversation() {
         storageId: Id<"_storage">;
       }>;
     }) => {
-      const { body, model, files } = data;
-      if (!body.trim() && (!files || files.length === 0)) return;
+      try {
+        const { body, model, files } = data;
+        if (!body.trim() && (!files || files.length === 0)) return;
 
-      append({ role: "user", content: body }, { body: { model } });
+        append({ role: "user", content: body }, { body: { model } });
 
-      const messageId = await sendMessage({
-        prompt: body,
-        conversationId: chatid as Id<"conversations">,
-        model,
-        files,
-      });
-      lastMessageIdRef.current = messageId;
+        const messageId = await sendMessage({
+          prompt: body,
+          conversationId: chatid as Id<"conversations">,
+          model,
+          files,
+        });
+        lastMessageIdRef.current = messageId;
+
+        setErrorMessage(null);
+      } catch (err) {
+        setErrorMessage(
+          err instanceof Error ? err.message : "Failed to send message",
+        );
+      }
     },
     [append, sendMessage, chatid],
   );
@@ -174,6 +192,13 @@ function ChatConversation() {
           initial="instant"
         >
           <StickToBottom.Content className="container mx-auto max-w-4xl space-y-4">
+            {/* Error banner */}
+            {errorMessage && (
+              <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                {errorMessage}
+              </div>
+            )}
+
             {messages.map((message) => (
               <React.Fragment key={message.id}>
                 {message.role === "user" ? (
