@@ -17,9 +17,6 @@ importers:
       '@convex-dev/better-auth':
         specifier: ^0.6.1
         version: 0.6.1(better-auth@1.2.7)(convex@1.24.8(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
-      '@convex-dev/persistent-text-streaming':
-        specifier: ^0.2.3
-        version: 0.2.3(convex@1.24.8(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@convex-dev/react-query':
         specifier: 0.0.0-alpha.8
         version: 0.0.0-alpha.8(@tanstack/react-query@5.80.6(react@19.1.0))(convex@1.24.8(react@19.1.0))
@@ -405,13 +402,6 @@ packages:
       convex: ~1.16.5 || >=1.17.0 <1.35.0
       react: ^18.3.1 || ^19.0.0
       react-dom: ^18.3.1 || ^19.0.0
-
-  '@convex-dev/persistent-text-streaming@0.2.3':
-    resolution: {integrity: sha512-v6by8JB2lXyd+ZBH0I5TOsd98zk+tvmfPt6ofRuxC2GtNkqUpy6F7CdijRaXiGW+ozlUiQyRsBzhvhTUwVUAHg==}
-    peerDependencies:
-      convex: '>=1.23.0 <1.35.0'
-      react: ~18.3.1 || ^19.0.0
-      react-dom: ~18.3.1 || ^19.0.0
 
   '@convex-dev/react-query@0.0.0-alpha.8':
     resolution: {integrity: sha512-Rv/q7/CplU75f7ckBd2vh+HoeeQ0tOrjwMl14Hk7D/03e55oUIU0TV5JYYzC79ZQyyAtoj7CmCo5ZxcmtKNv1Q==}
@@ -4898,12 +4888,6 @@ snapshots:
       - '@standard-schema/spec'
       - hono
       - typescript
-
-  '@convex-dev/persistent-text-streaming@0.2.3(convex@1.24.8(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      convex: 1.24.8(react@19.1.0)
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
 
   '@convex-dev/react-query@0.0.0-alpha.8(@tanstack/react-query@5.80.6(react@19.1.0))(convex@1.24.8(react@19.1.0))':
     dependencies:

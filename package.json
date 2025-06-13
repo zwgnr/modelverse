@@ -12,7 +12,6 @@
     "@ai-sdk/react": "^1.2.12",
     "@clerk/tanstack-react-start": "0.17.0-snapshot.v20250611045520",
     "@convex-dev/better-auth": "^0.6.1",
-    "@convex-dev/persistent-text-streaming": "^0.2.3",
     "@convex-dev/react-query": "0.0.0-alpha.8",
     "@openrouter/ai-sdk-provider": "^0.7.1",
     "@radix-ui/react-avatar": "^1.1.10",

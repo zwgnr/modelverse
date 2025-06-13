@@ -19,7 +19,7 @@ import { ConvexReactClient } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { getThemeServerFn } from "@/server/theme";
-import { ThemeProvider, useTheme } from "@/components/theme-provider";
+import { ThemeProvider, useTheme } from "@/features/theme/theme-provider";
 import { getAuth } from "@/server/get-auth";
 
 export const Route = createRootRouteWithContext<{

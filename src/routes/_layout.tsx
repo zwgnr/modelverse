@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar } from "@/features/sidebar/Sidebar";
 import { CommandPalette } from "@/components/CommandPalette";
 import {
   createFileRoute,

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/features/theme/theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 
