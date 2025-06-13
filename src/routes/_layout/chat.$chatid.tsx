@@ -21,6 +21,8 @@ import { MarkdownMessage } from "@/components/MarkdownMessage";
 import { PromptArea } from "@/components/PromptArea";
 import { TypingLoader } from "@/components/ui/loader";
 import { FileDisplay } from "@/components/FileDisplay";
+import { getModelDisplayName } from "@/lib/models";
+import { GitFork } from "lucide-react";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatConversation,
@@ -261,10 +263,10 @@ function ChatConversation() {
             )}
 
             {messages.map((message, messageIndex) => {
-              // Find the corresponding database message to get file information
+              // Find the corresponding database message to get file information and model info
               const dbMessage = message.role === "user" 
                 ? dbMessages?.find(m => m.prompt === message.content)
-                : null;
+                : dbMessages?.find(m => m.response === message.content);
               
               return (
                 <React.Fragment key={message.id}>
@@ -314,6 +316,18 @@ function ChatConversation() {
                             <MarkdownMessage content={message.content} />
                           </CardContent>
                         </Card>
+                        {/* Model footnote and fork icon - only show for completed AI responses */}
+                        {dbMessage?.model && (
+                          <div className="flex items-center gap-2 px-3 text-xs text-muted-foreground">
+                            <span>{getModelDisplayName(dbMessage.model) || dbMessage.model}</span>
+                            <button 
+                              className="opacity-50 hover:opacity-100 transition-opacity"
+                              title="Fork conversation"
+                            >
+                              <GitFork size={12} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
