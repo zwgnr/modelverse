@@ -9,7 +9,11 @@
   - `pnpm remove <package>` for uninstalling
   - `pnpm i` for installing existing dependencies
 
-  ## Classname Management
+## typescript
+
+- never type something as any
+
+## Classname Management
 
 - ALWAYS use the `cn()` utility function to join and merge classnames
 - NEVER use template literals, string concatenation, or array joins for classnames

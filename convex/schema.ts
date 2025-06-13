@@ -1,15 +1,26 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-// Keep in sync with src/lib/models.ts
-export const modelId = v.union(
-  v.literal("openai/gpt-4o-mini"),
-  v.literal("openai/chatgpt-4o-latest"),
-  v.literal("openai/gpt-4.1"),
-  v.literal("anthropic/claude-sonnet-4"),
-  v.literal("google/gemini-2.5-flash-preview-05-20"),
-  v.literal("x-ai/grok-3-beta"),
+// Define all valid model IDs as a const array for reuse
+export const MODEL_IDS = [
+  "openai/gpt-4o-mini",
+  "openai/chatgpt-4o-latest",
+  "openai/gpt-4.1",
+  "anthropic/claude-sonnet-4",
+  "google/gemini-2.5-flash-preview-05-20",
+  "x-ai/grok-3-beta",
+] as const;
+
+// Generate web search variants programmatically
+export const WEB_SEARCH_MODEL_IDS = MODEL_IDS.map(
+  (id) => `${id}:online` as const,
 );
+
+// Combine all model IDs
+export const ALL_MODEL_IDS = [...MODEL_IDS, ...WEB_SEARCH_MODEL_IDS] as const;
+
+// Create the union type from the constant
+export const modelId = v.union(...ALL_MODEL_IDS.map((id) => v.literal(id)));
 
 export default defineSchema({
   users: defineTable({

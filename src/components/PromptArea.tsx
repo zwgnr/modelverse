@@ -22,6 +22,8 @@ import {
   PromptInputActions,
   PromptInputAction,
 } from "@/components/ui/prompt-input";
+import { Infer } from "convex/values";
+import { modelId } from "convex/schema";
 
 interface PromptAreaProps {
   conversationId?: string;
@@ -30,7 +32,7 @@ interface PromptAreaProps {
     body: string;
     author: "User";
     conversationId: Id<"conversations">;
-    model: string;
+    model: Infer<typeof modelId>;
     files?: Array<{
       filename: string;
       fileType: string;
@@ -38,8 +40,6 @@ interface PromptAreaProps {
     }>;
   }) => Promise<void>;
   onStopStream?: () => void;
-  onStartStream?: () => void;
-  onMessageSent?: (messageId: string) => void;
   className?: string;
   placeholder?: {
     default?: string;
@@ -56,8 +56,6 @@ export function PromptArea({
   isStreaming = false,
   onSendMessage,
   onStopStream,
-  onStartStream,
-  onMessageSent,
   className,
   placeholder = {
     default: "Type your message...",
@@ -125,7 +123,7 @@ export function PromptArea({
         try {
           // Create the conversation first
           const newConversationId = await createConversation({});
-          
+
           // Prepare file data if any
           const fileData = await Promise.all(
             uploadedFiles.map(async (file) => ({
@@ -135,9 +133,11 @@ export function PromptArea({
             })),
           );
 
-          const modelToUse = webSearchEnabled
-            ? `${selectedModel}:online`
-            : selectedModel;
+          const modelToUse = (
+            webSearchEnabled && !selectedModel.includes(":online")
+              ? `${selectedModel}:online`
+              : selectedModel
+          ) as Infer<typeof modelId>;
 
           // Send the message immediately to the new conversation
           await sendMessage({
@@ -154,8 +154,11 @@ export function PromptArea({
           // Navigate to the chat page - the chat component will handle streaming
           onNavigateToChat(newConversationId);
         } catch (error) {
-          console.error('Failed to create conversation and send message:', error);
-          alert('Failed to start conversation. Please try again.');
+          console.error(
+            "Failed to create conversation and send message:",
+            error,
+          );
+          throw new Error("Failed to start conversation. Please try again.");
         }
       }
       return;
@@ -172,9 +175,11 @@ export function PromptArea({
         })),
       );
 
-      const modelToUse = webSearchEnabled
-        ? `${selectedModel}:online`
-        : selectedModel;
+      const modelToUse = (
+        webSearchEnabled && !selectedModel.includes(":online")
+          ? `${selectedModel}:online`
+          : selectedModel
+      ) as Infer<typeof modelId>;
 
       await onSendMessage({
         body: newMessageText,
@@ -267,7 +272,7 @@ export function PromptArea({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-lg transition-colors hover:bg-accent!"
+                  className="hover:bg-accent! h-8 w-8 rounded-lg transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Paperclip className="text-muted-foreground h-4 w-4" />
@@ -323,7 +328,9 @@ export function PromptArea({
                   group: model.company,
                 }))}
                 value={selectedModel}
-                onValueChange={setSelectedModel}
+                onValueChange={(value: string) =>
+                  setSelectedModel(value as Infer<typeof modelId>)
+                }
                 placeholder="Select model..."
                 searchPlaceholder="Search models..."
                 className="w-48"
@@ -344,28 +351,28 @@ export function PromptArea({
                 type="button"
                 onClick={handleStopStream}
                 size="icon"
-                className="h-9 w-9 flex-shrink-0 rounded-lg bg-foreground transition-colors hover:bg-foreground/80"
+                className="bg-foreground hover:bg-foreground/80 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
                 title="Stop generation"
               >
                 <Square className="h-4 w-4" />
                 <span className="sr-only">Stop generation</span>
               </Button>
-            ) : ( 
-                <Button
-                  aria-label="Send message"
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={
-                    (!newMessageText.trim() && uploadedFiles.length === 0) ||
-                    (!createNewConversation && !conversationId) ||
-                    isStreaming
-                  }
-                  size="icon"
-                  className="bg-primary hover:bg-primary/90 disabled:bg-primary/30 disabled:text-primary-foreground/50 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
-                >
-                  <Send className="h-4 w-4" />
-                  <span className="sr-only">Send message</span>
-                </Button>
+            ) : (
+              <Button
+                aria-label="Send message"
+                type="button"
+                onClick={handleSubmit}
+                disabled={
+                  (!newMessageText.trim() && uploadedFiles.length === 0) ||
+                  (!createNewConversation && !conversationId) ||
+                  isStreaming
+                }
+                size="icon"
+                className="bg-primary hover:bg-primary/90 disabled:bg-primary/30 disabled:text-primary-foreground/50 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
+              >
+                <Send className="h-4 w-4" />
+                <span className="sr-only">Send message</span>
+              </Button>
             )}
           </div>
         </PromptInput>

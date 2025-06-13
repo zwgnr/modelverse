@@ -4,6 +4,8 @@ import { useChat } from "@ai-sdk/react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
+import { Infer } from "convex/values";
+import { modelId } from "../../../convex/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { StickToBottom } from "use-stick-to-bottom";
 import { ScrollToBottomButton } from "@/components/ScrollToBottom";
@@ -152,7 +154,7 @@ function ChatConversation() {
   const handleSendMessage = useCallback(
     async (data: {
       body: string;
-      model?: string;
+      model?: Infer<typeof modelId>;
       files?: Array<{
         filename: string;
         fileType: string;
