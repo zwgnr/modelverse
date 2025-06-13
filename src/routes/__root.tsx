@@ -85,10 +85,13 @@ export const Route = createRootRouteWithContext<{
     return { userId, token };
   },
   errorComponent: (props) => {
+    const { theme } = useLoaderData({ from: Route.id });
     return (
-      <RootDocument>
-        <DefaultCatchBoundary {...props} />
-      </RootDocument>
+      <ThemeProvider theme={theme}>
+        <RootDocument>
+          <DefaultCatchBoundary {...props} />
+        </RootDocument>
+      </ThemeProvider>
     );
   },
   notFoundComponent: NotFound,

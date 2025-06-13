@@ -33,11 +33,12 @@ interface PromptAreaProps {
     author: "User";
     conversationId: Id<"conversations">;
     model: Infer<typeof modelId>;
-    files?: Array<{
+    files?: FileList | { name: string; contentType: string; url: string }[];
+    fileData?: {
       filename: string;
       fileType: string;
       storageId: Id<"_storage">;
-    }>;
+    }[];
   }) => Promise<void>;
   onStopStream?: () => void;
   className?: string;
@@ -68,7 +69,9 @@ export function PromptArea({
   const [newMessageText, setNewMessageText] = useState("");
   const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { file: File; dataUrl?: string }[]
+  >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
@@ -80,16 +83,35 @@ export function PromptArea({
     const supportedFiles = files.filter((file) => {
       const isImage =
         file.type.startsWith("image/") &&
-        ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+        ["image/png", "image/jpeg", "image/webp", "image/gif"].includes(
+          file.type,
+        );
       const isPDF = file.type === "application/pdf";
       return isImage || isPDF;
     });
 
     if (supportedFiles.length !== files.length) {
-      alert("Only PNG, JPEG, WebP images and PDF files are supported.");
+      alert(
+        "Only PNG, JPEG, WebP, GIF images and PDF files are supported.",
+      );
     }
 
-    setUploadedFiles((prev) => [...prev, ...supportedFiles]);
+    // Read files and generate data URLs for images
+    supportedFiles.forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setUploadedFiles((prev) => [
+            ...prev,
+            { file, dataUrl: e.target?.result as string },
+          ]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setUploadedFiles((prev) => [...prev, { file }]);
+      }
+    });
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -118,26 +140,26 @@ export function PromptArea({
   const handleSubmit = async () => {
     if (!newMessageText.trim() && uploadedFiles.length === 0) return;
 
-    if (createNewConversation) {
-      if (onNavigateToChat) {
-        try {
+    try {
+      // Upload all files to Convex storage first
+      const fileData = await Promise.all(
+        uploadedFiles.map(async ({ file }) => ({
+          filename: file.name,
+          fileType: file.type,
+          storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
+        })),
+      );
+
+      const modelToUse = (
+        webSearchEnabled && !selectedModel.includes(":online")
+          ? `${selectedModel}:online`
+          : selectedModel
+      ) as Infer<typeof modelId>;
+
+      if (createNewConversation) {
+        if (onNavigateToChat) {
           // Create the conversation first
           const newConversationId = await createConversation({});
-
-          // Prepare file data if any
-          const fileData = await Promise.all(
-            uploadedFiles.map(async (file) => ({
-              filename: file.name,
-              fileType: file.type,
-              storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
-            })),
-          );
-
-          const modelToUse = (
-            webSearchEnabled && !selectedModel.includes(":online")
-              ? `${selectedModel}:online`
-              : selectedModel
-          ) as Infer<typeof modelId>;
 
           // Send the message immediately to the new conversation
           await sendMessage({
@@ -153,43 +175,40 @@ export function PromptArea({
 
           // Navigate to the chat page - the chat component will handle streaming
           onNavigateToChat(newConversationId);
-        } catch (error) {
-          console.error(
-            "Failed to create conversation and send message:",
-            error,
-          );
-          throw new Error("Failed to start conversation. Please try again.");
         }
+        return;
       }
-      return;
-    }
 
-    // This part is for sending messages in an *existing* conversation,
-    // which is handled by the main chat component.
-    if (onSendMessage && conversationId) {
-      const fileData = await Promise.all(
-        uploadedFiles.map(async (file) => ({
-          filename: file.name,
-          fileType: file.type,
-          storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
-        })),
-      );
+      // This part is for sending messages in an *existing* conversation
+      if (onSendMessage && conversationId) {
+        // Create attachments for the AI SDK with proper URLs from Convex
+        const attachments = await Promise.all(
+          fileData.map(async (file, index) => {
+            // For now, we'll create a temporary URL that the backend can use
+            // The actual URL will be fetched when needed
+            return {
+              name: file.filename,
+              contentType: file.fileType,
+              url: `convex-storage://${file.storageId}`, // Special URL format
+            };
+          })
+        );
 
-      const modelToUse = (
-        webSearchEnabled && !selectedModel.includes(":online")
-          ? `${selectedModel}:online`
-          : selectedModel
-      ) as Infer<typeof modelId>;
+        await onSendMessage({
+          body: newMessageText,
+          author: "User",
+          conversationId: conversationId as Id<"conversations">,
+          model: modelToUse,
+          files: attachments,
+          fileData: fileData.length > 0 ? fileData : undefined,
+        });
 
-      await onSendMessage({
-        body: newMessageText,
-        author: "User",
-        conversationId: conversationId as Id<"conversations">,
-        model: modelToUse,
-        files: fileData.length > 0 ? fileData : undefined,
-      });
-      setNewMessageText("");
-      setUploadedFiles([]);
+        setNewMessageText("");
+        setUploadedFiles([]);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      throw error;
     }
   };
 
@@ -228,7 +247,7 @@ export function PromptArea({
           {/* Uploaded Files Preview */}
           {uploadedFiles.length > 0 && (
             <div className="flex flex-wrap gap-2 border-b border-gray-100 p-2 dark:border-gray-800">
-              {uploadedFiles.map((file, index) => (
+              {uploadedFiles.map(({ file }, index) => (
                 <div
                   key={index}
                   className="bg-secondary text-secondary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
