@@ -1,10 +1,21 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Keep in sync with src/lib/models.ts
+export const modelId = v.union(
+  v.literal("openai/gpt-4o-mini"),
+  v.literal("openai/chatgpt-4o-latest"),
+  v.literal("openai/gpt-4.1"),
+  v.literal("anthropic/claude-sonnet-4"),
+  v.literal("google/gemini-2.5-flash-preview-05-20"),
+  v.literal("x-ai/grok-3-beta"),
+);
+
 export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
+    modelUsage: v.array(v.object({ model: modelId, count: v.number() })),
   }).index("by_email", ["email"]),
   conversations: defineTable({
     userId: v.string(),
@@ -23,7 +34,7 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     prompt: v.string(),
     response: v.optional(v.string()),
-    model: v.optional(v.string()),
+    model: v.optional(modelId),
     files: v.optional(
       v.array(
         v.object({

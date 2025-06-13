@@ -2,6 +2,7 @@ import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { modelId } from "./schema";
 
 export const list = query({
   args: { conversationId: v.id("conversations") },
@@ -30,7 +31,7 @@ export const send = mutation({
   args: {
     prompt: v.string(),
     conversationId: v.id("conversations"),
-    model: v.optional(v.string()),
+    model: v.optional(modelId),
     files: v.optional(
       v.array(
         v.object({
@@ -44,7 +45,27 @@ export const send = mutation({
   handler: async (ctx, { prompt, conversationId, model, files }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    const userId = identity.subject;
+    const userId = identity.subject as Id<"users">;
+
+    // --- Track usage ---
+    if (model) {
+      const user = await ctx.db.get(userId);
+      if (!user) throw new Error("User not found");
+
+      const modelUsage = user.modelUsage ?? [];
+      const modelIndex = modelUsage.findIndex((u) => u.model === model);
+
+      if (modelIndex === -1) {
+        modelUsage.push({ model, count: 1 });
+      } else {
+        modelUsage[modelIndex].count++;
+      }
+
+      await ctx.db.patch(userId, {
+        modelUsage,
+      });
+    }
+    // --- End track usage ---
 
     const conversation = await ctx.db.get(conversationId);
     if (!conversation) throw new Error("Conversation not found");
