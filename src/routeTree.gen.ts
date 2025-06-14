@@ -57,7 +57,6 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '': typeof LayoutRouteWithChildren
   '/signin': typeof SigninRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
@@ -79,7 +78,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/signin' | '/settings' | '/' | '/chat/$chatid'
+  fullPaths: '/signin' | '/settings' | '/' | '/chat/$chatid'
   fileRoutesByTo: FileRoutesByTo
   to: '/signin' | '/settings' | '/' | '/chat/$chatid'
   id:
