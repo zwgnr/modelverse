@@ -9,7 +9,6 @@
     "dev:frontend": "vite dev --open --clearScreen false"
   },
   "dependencies": {
-    "@ai-sdk/react": "^1.2.12",
     "@convex-dev/better-auth": "^0.6.1",
     "@convex-dev/persistent-text-streaming": "^0.2.3",
     "@convex-dev/react-query": "0.0.0-alpha.8",
@@ -35,14 +34,12 @@
     "cmdk": "^1.1.1",
     "convex": "^1.24.8",
     "jotai": "^2.12.5",
-    "lucide-react": "^0.514.0",
+    "lucide-react": "^0.515.0",
     "react": "19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-shiki": "^0.7.1",
     "tailwind-merge": "^3.3.1",
-    "use-stick-to-bottom": "^1.1.1",
-    "usehooks-ts": "^3.1.1",
     "zod": "^3.25.62"
   },
   "devDependencies": {
