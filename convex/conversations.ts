@@ -6,7 +6,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText } from "ai";
 import { internal } from "./_generated/api";
 
-export const list = query({
+export const get = query({
   handler: async (ctx): Promise<Doc<"conversations">[]> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {

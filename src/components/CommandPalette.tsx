@@ -12,12 +12,14 @@ import { Plus, Search, MessageSquare } from "lucide-react";
 import { Id } from "../../convex/_generated/dataModel";
 import { models } from "@/lib/models";
 import { Link } from "@tanstack/react-router";
+import { Infer } from "convex/values";
+import { modelId } from "convex/schema";
 
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNewChatWithModel?: (modelId: string) => void;
-  onModelSelect: (modelName: string) => void;
+  onModelSelect: (modelName: Infer<typeof modelId>) => void;
   conversations?: Array<{
     _id: Id<"conversations">;
     title?: string;

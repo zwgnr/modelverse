@@ -103,13 +103,12 @@ function RootComponent() {
   const { token } = useRouteContext({ from: Route.id });
   const { theme } = useLoaderData({ from: Route.id });
 
-  // Set auth token on client-side Convex client immediately to prevent auth gap
-  // React.useEffect(() => {
-  //   if (token) {
-  //     // Set the auth token on the Convex client to ensure queries have auth
-  //     context.convexClient.setAuth(async () => token);
-  //   }
-  // }, [token, context.convexClient]);
+  React.useEffect(() => {
+    if (token) {
+      // Set the auth token on the Convex client to ensure queries have auth
+      context.convexClient.setAuth(async () => token);
+    }
+  }, [token, context.convexClient]);
 
   return (
     <ConvexBetterAuthProvider
@@ -134,7 +133,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <TanStackRouterDevtools position="bottom-right" />
+        {/* <TanStackRouterDevtools position="bottom-right" /> */}
         <Scripts />
       </body>
     </html>

@@ -20,12 +20,14 @@ import { useAtom } from "jotai";
 import { cn } from "@/lib/utils";
 import { convexQuery } from "@convex-dev/react-query";
 import { authClient } from "@/lib/auth-client";
+import { modelId } from "convex/schema";
+import { Infer } from "convex/values";
 
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(
-      convexQuery(api.conversations.list, {}),
+      convexQuery(api.conversations.get, {}),
     );
     await context.queryClient.ensureQueryData(
       convexQuery(api.auth.getCurrentUser, {}),
@@ -40,7 +42,7 @@ function RouteComponent() {
   const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
 
   const { data: conversations } = useSuspenseQuery(
-    convexQuery(api.conversations.list, {}),
+    convexQuery(api.conversations.get, {}),
   );
 
   const router = useRouter();
@@ -80,7 +82,7 @@ function RouteComponent() {
     });
   };
 
-  const handleModelSelect = (modelName: string) => {
+  const handleModelSelect = (modelName: Infer<typeof modelId>) => {
     setCurrentModel(modelName);
   };
 

@@ -177,6 +177,22 @@ div[class*="language-"] code {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
+/* Prevent theme switching flashes */
+.shiki {
+  transition: none !important;
+}
+
+/* Ensure consistent height during syntax highlighting load */
+.shiki pre {
+  min-height: 2.5rem;
+}
+
+/* Prevent layout shift during code highlighting */
+pre[class*="language-"],
+.shiki pre {
+  contain: layout style;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

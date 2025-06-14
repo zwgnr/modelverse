@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { StreamIdValidator } from "@convex-dev/persistent-text-streaming";
 
 // Define all valid model IDs as a const array for reuse
 export const MODEL_IDS = [
@@ -45,6 +46,7 @@ export default defineSchema({
     conversationId: v.id("conversations"),
     prompt: v.string(),
     response: v.optional(v.string()),
+    responseStreamId: v.optional(StreamIdValidator),
     model: v.optional(modelId),
     files: v.optional(
       v.array(
@@ -55,5 +57,7 @@ export default defineSchema({
         }),
       ),
     ),
-  }).index("by_conversation", ["conversationId"]),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_stream", ["responseStreamId"]),
 });
