@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import { useShikiHighlighter, rehypeInlineCodeProperty } from "react-shiki";
 import { cn } from "@/lib/utils";
 
+
 export interface MarkdownMessageProps {
   content: string;
   className?: string;

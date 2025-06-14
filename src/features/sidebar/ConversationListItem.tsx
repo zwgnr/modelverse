@@ -194,10 +194,5 @@ export function ConversationRow({
   );
 }
 
-export const ConversationListItem = React.memo(
-  ConversationRow,
-  (a, b) =>
-    a.isVisible === b.isVisible &&
-    a.isActive === b.isActive && // ← TRUE for all but 2 rows
-    a.conversation.title === b.conversation.title, // rename / pin
-);
+export const ConversationListItem = React.memo(ConversationRow);
+
