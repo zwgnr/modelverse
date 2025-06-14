@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, memo, Fragment } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -16,24 +16,19 @@ import { Combobox } from "@/components/ui/combobox";
 import { models, selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
-import {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputActions,
-  PromptInputAction,
-} from "@/components/ui/prompt-input";
+import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 import { Infer } from "convex/values";
 import { modelId } from "convex/schema";
 
 interface PromptAreaProps {
   conversationId?: string;
   isStreaming?: boolean;
-  onSendMessage?: (data: {
+  onSendMessage?: (payload: {
     body: string;
     author: "User";
     conversationId: Id<"conversations">;
     model: Infer<typeof modelId>;
-    files?: FileList | { name: string; contentType: string; url: string }[];
+    files?: { name: string; contentType: string; url: string }[];
     fileData?: {
       filename: string;
       fileType: string;
@@ -47,182 +42,159 @@ interface PromptAreaProps {
     streaming?: string;
     withFiles?: string;
   };
-  // For index page - creates new conversation and navigates
   createNewConversation?: boolean;
-  onNavigateToChat?: (conversationId: string, prompt?: string) => void;
+  onNavigateToChat?: (conversationId: string) => void;
 }
 
-export function PromptArea({
-  conversationId,
-  isStreaming = false,
-  onSendMessage,
-  onStopStream,
-  className,
-  placeholder = {
-    default: "Type your message...",
-    streaming: "AI is responding...",
-    withFiles: "Ask about your files...",
-  },
-  createNewConversation = false,
-  onNavigateToChat,
-}: PromptAreaProps) {
-  const [newMessageText, setNewMessageText] = useState("");
-  const [selectedModel, setSelectedModel] = useAtom(selectedModelAtom);
-  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<
-    { file: File; dataUrl?: string }[]
-  >([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export function PromptArea(props: PromptAreaProps) {
+  const {
+    conversationId,
+    isStreaming = false,
+    onSendMessage,
+    onStopStream,
+    createNewConversation = false,
+    onNavigateToChat,
+    className,
+    placeholder = {
+      default: "Type your message…",
+      streaming: "AI is responding…",
+      withFiles: "Ask about your files…",
+    },
+  } = props;
 
+  /* -------- tiny local states that change per keystroke -------- */
+  const [text, setText] = useState("");
+  const [files, setFiles] = useState<{ file: File; dataUrl?: string }[]>([]);
+  const [web, setWeb] = useState(false);
+  const [model, setModel] = useAtom(selectedModelAtom);
+
+  /* ---------------- convex mutations (stable) ------------------ */
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const createConversation = useMutation(api.conversations.create);
   const sendMessage = useMutation(api.messages.send);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const supportedFiles = files.filter((file) => {
-      const isImage =
-        file.type.startsWith("image/") &&
-        ["image/png", "image/jpeg", "image/webp", "image/gif"].includes(
-          file.type,
-        );
-      const isPDF = file.type === "application/pdf";
-      return isImage || isPDF;
-    });
+  /* ------------------ stable refs & callbacks ------------------- */
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    if (supportedFiles.length !== files.length) {
-      alert(
-        "Only PNG, JPEG, WebP, GIF images and PDF files are supported.",
-      );
-    }
+  const openFileDialog = useCallback(() => fileInputRef.current?.click(), []);
 
-    // Read files and generate data URLs for images
-    supportedFiles.forEach((file) => {
-      if (file.type.startsWith("image/")) {
+  const toggleWeb = useCallback(() => setWeb((v) => !v), []);
+
+  const changeModel = useCallback(
+    (val: string) => setModel(val as any),
+    [setModel],
+  );
+
+  const removeFile = useCallback(
+    (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx)),
+    [],
+  );
+
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = Array.from(e.target.files || []);
+      selected.forEach((file) => {
+        if (!file.type.startsWith("image/") && file.type !== "application/pdf")
+          return;
         const reader = new FileReader();
-        reader.onload = (e) => {
-          setUploadedFiles((prev) => [
+        reader.onload = () =>
+          setFiles((prev) => [
             ...prev,
-            { file, dataUrl: e.target?.result as string },
+            { file, dataUrl: reader.result as string },
           ]);
-        };
         reader.readAsDataURL(file);
-      } else {
-        setUploadedFiles((prev) => [...prev, { file }]);
-      }
-    });
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [],
+  );
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const uploadToStorage = useCallback(
+    async (file: File): Promise<Id<"_storage">> => {
+      const url = await generateUploadUrl();
+      const result = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      const { storageId } = await result.json();
+      return storageId;
+    },
+    [generateUploadUrl],
+  );
+
+  /* ---------------- submit / stop ---------------- */
+  const handleSubmit = useCallback(async () => {
+    if (!text.trim() && files.length === 0) return;
+
+    // upload files
+    const fileData = await Promise.all(
+      files.map(async ({ file }) => ({
+        filename: file.name,
+        fileType: file.type,
+        storageId: await uploadToStorage(file),
+      })),
+    );
+
+    const modelIdToUse = (
+      web && !model.includes(":online") ? `${model}:online` : model
+    ) as Infer<typeof modelId>;
+
+    if (createNewConversation && onNavigateToChat) {
+      const newId = await createConversation({});
+      await sendMessage({
+        prompt: text,
+        conversationId: newId,
+        model: modelIdToUse,
+        files: fileData,
+      });
+      setText("");
+      setFiles([]);
+      onNavigateToChat(newId);
+      return;
     }
-  };
 
-  const removeFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const uploadFileToStorage = async (file: File): Promise<string> => {
-    const uploadUrl = await generateUploadUrl();
-    const result = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-
-    if (!result.ok) {
-      throw new Error(`Upload failed: ${result.statusText}`);
+    if (conversationId && onSendMessage) {
+      const attachments = fileData.map((f) => ({
+        name: f.filename,
+        contentType: f.fileType,
+        url: `convex-storage://${f.storageId}`,
+      }));
+      await onSendMessage({
+        body: text,
+        author: "User",
+        conversationId: conversationId as Id<"conversations">,
+        model: modelIdToUse,
+        files: attachments,
+        fileData,
+      });
+      setText("");
+      setFiles([]);
     }
+  }, [
+    text,
+    files,
+    web,
+    model,
+    createNewConversation,
+    conversationId,
+    onSendMessage,
+    onNavigateToChat,
+    createConversation,
+    sendMessage,
+    uploadToStorage,
+  ]);
 
-    const { storageId } = await result.json();
-    return storageId;
-  };
+  const handleStop = useCallback(() => onStopStream?.(), [onStopStream]);
 
-  const handleSubmit = async () => {
-    if (!newMessageText.trim() && uploadedFiles.length === 0) return;
+  /* --------------- helpers --------------- */
+  const currentPlaceholder = isStreaming
+    ? placeholder.streaming
+    : files.length
+      ? placeholder.withFiles
+      : placeholder.default;
 
-    try {
-      // Upload all files to Convex storage first
-      const fileData = await Promise.all(
-        uploadedFiles.map(async ({ file }) => ({
-          filename: file.name,
-          fileType: file.type,
-          storageId: (await uploadFileToStorage(file)) as Id<"_storage">,
-        })),
-      );
-
-      const modelToUse = (
-        webSearchEnabled && !selectedModel.includes(":online")
-          ? `${selectedModel}:online`
-          : selectedModel
-      ) as Infer<typeof modelId>;
-
-      if (createNewConversation) {
-        if (onNavigateToChat) {
-          // Create the conversation first
-          const newConversationId = await createConversation({});
-
-          // Send the message immediately to the new conversation
-          await sendMessage({
-            prompt: newMessageText,
-            conversationId: newConversationId,
-            model: modelToUse,
-            files: fileData.length > 0 ? fileData : undefined,
-          });
-
-          // Clear the form
-          setNewMessageText("");
-          setUploadedFiles([]);
-
-          // Navigate to the chat page - the chat component will handle streaming
-          onNavigateToChat(newConversationId);
-        }
-        return;
-      }
-
-      // This part is for sending messages in an *existing* conversation
-      if (onSendMessage && conversationId) {
-        // Create attachments for the AI SDK with proper URLs from Convex
-        const attachments = await Promise.all(
-          fileData.map(async (file, index) => {
-            // For now, we'll create a temporary URL that the backend can use
-            // The actual URL will be fetched when needed
-            return {
-              name: file.filename,
-              contentType: file.fileType,
-              url: `convex-storage://${file.storageId}`, // Special URL format
-            };
-          })
-        );
-
-        await onSendMessage({
-          body: newMessageText,
-          author: "User",
-          conversationId: conversationId as Id<"conversations">,
-          model: modelToUse,
-          files: attachments,
-          fileData: fileData.length > 0 ? fileData : undefined,
-        });
-
-        setNewMessageText("");
-        setUploadedFiles([]);
-      }
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      throw error;
-    }
-  };
-
-  const handleStopStream = () => {
-    if (onStopStream) {
-      onStopStream();
-    }
-  };
-
-  const getPlaceholder = () => {
-    if (isStreaming) return placeholder.streaming;
-    if (uploadedFiles.length > 0) return placeholder.withFiles;
-    return placeholder.default;
-  };
+  const canSend = text.trim().length > 0 || files.length > 0;
 
   return (
     <div
@@ -234,168 +206,190 @@ export function PromptArea({
       <div
         className={cn(
           "container mx-auto max-w-4xl",
-          createNewConversation ? "px-0" : "",
+          createNewConversation && "px-0",
         )}
       >
-        <PromptInput
-          value={newMessageText}
-          onValueChange={setNewMessageText}
-          onSubmit={handleSubmit}
-          isLoading={isStreaming}
-          className="p-4 shadow-xl shadow-black/5 backdrop-blur-lg"
-        >
-          {/* Uploaded Files Preview */}
-          {uploadedFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-b border-gray-100 p-2 dark:border-gray-800">
-              {uploadedFiles.map(({ file }, index) => (
-                <div
-                  key={index}
-                  className="bg-secondary text-secondary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
-                >
-                  {file.type.startsWith("image/") ? (
-                    <FileImage className="h-4 w-4" />
-                  ) : (
-                    <FileText className="h-4 w-4" />
-                  )}
-                  <span className="max-w-32 truncate">{file.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-destructive hover:text-destructive-foreground h-4 w-4 p-0"
-                    onClick={() => removeFile(index)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* --------------- Cohesive input container --------------- */}
+        <div className="bg-background/80 overflow-hidden rounded-3xl border shadow-xl shadow-black/5 backdrop-blur-lg">
+          {/* --------------- Text area --------------- */}
+          <PromptInput
+            value={text}
+            onValueChange={setText}
+            onSubmit={handleSubmit}
+            isLoading={isStreaming}
+            className="border-0 bg-transparent p-4 shadow-none"
+          >
+            <PromptInputTextarea
+              placeholder={currentPlaceholder}
+              autoComplete="off"
+              disabled={
+                (!createNewConversation && !conversationId) || isStreaming
+              }
+              className="text-foreground border-0 bg-transparent text-base focus:ring-0"
+            />
+          </PromptInput>
 
-          {/* Text Input */}
-          <PromptInputTextarea
-            placeholder={getPlaceholder()}
-            autoComplete="off"
-            disabled={
-              (!createNewConversation && !conversationId) || isStreaming
-            }
-            className="text-foreground text-base"
+          {/* --------------- Below the textarea (memo) --------------- */}
+          <MemoPreviewAndActions
+            files={files}
+            onRemoveFile={removeFile}
+            openFileDialog={openFileDialog}
+            fileInputRef={fileInputRef}
+            onFileUpload={handleFileUpload}
+            web={web}
+            onToggleWeb={toggleWeb}
+            model={model}
+            onModelChange={changeModel}
+            isStreaming={isStreaming}
+            onSubmit={handleSubmit}
+            onStop={handleStop}
+            canSend={canSend}
           />
-
-          {/* Actions Row */}
-          <div className="flex items-center justify-between pt-1">
-            <PromptInputActions>
-              {/* File Upload Button */}
-              <PromptInputAction tooltip="Upload images or PDFs">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-accent! h-8 w-8 rounded-lg transition-colors"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip className="text-muted-foreground h-4 w-4" />
-                  <span className="sr-only">Upload file</span>
-                </Button>
-              </PromptInputAction>
-
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,application/pdf"
-                multiple
-                onChange={handleFileUpload}
-                style={{ display: "none" }}
-              />
-
-              {/* Web Search Toggle */}
-              <PromptInputAction
-                tooltip={
-                  webSearchEnabled ? "Web search enabled" : "Enable web search"
-                }
-              >
-                <Button
-                  type="button"
-                  variant={webSearchEnabled ? "default" : "ghost"}
-                  size="icon"
-                  onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                  className={cn(
-                    "h-8 w-8 rounded-lg transition-colors",
-                    webSearchEnabled
-                      ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                      : "hover:bg-accent! hover:text-secondary-foreground",
-                  )}
-                >
-                  <Globe
-                    className={cn(
-                      "h-4 w-4",
-                      webSearchEnabled
-                        ? "text-primary-foreground"
-                        : "text-muted-foreground",
-                    )}
-                  />
-                  <span className="sr-only">Toggle web search</span>
-                </Button>
-              </PromptInputAction>
-
-              {/* Model Picker */}
-              <Combobox
-                groupedOptions={models.map((model) => ({
-                  value: model.id,
-                  label: model.name,
-                  group: model.company,
-                }))}
-                value={selectedModel}
-                onValueChange={(value: string) =>
-                  setSelectedModel(value as Infer<typeof modelId>)
-                }
-                placeholder="Select model..."
-                searchPlaceholder="Search models..."
-                className="w-48"
-              />
-
-              {/* Web Search Indicator */}
-              {webSearchEnabled && (
-                <div className="text-primary dark:text-primary flex items-center gap-1 text-xs font-medium">
-                  <Globe className="h-3 w-3" />
-                  Web search enabled
-                </div>
-              )}
-            </PromptInputActions>
-
-            {/* Send/Stop Button */}
-            {isStreaming ? (
-              <Button
-                type="button"
-                onClick={handleStopStream}
-                size="icon"
-                className="bg-foreground hover:bg-foreground/80 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
-                title="Stop generation"
-              >
-                <Square className="h-4 w-4" />
-                <span className="sr-only">Stop generation</span>
-              </Button>
-            ) : (
-              <Button
-                aria-label="Send message"
-                type="button"
-                onClick={handleSubmit}
-                disabled={
-                  (!newMessageText.trim() && uploadedFiles.length === 0) ||
-                  (!createNewConversation && !conversationId) ||
-                  isStreaming
-                }
-                size="icon"
-                className="bg-primary hover:bg-primary/90 disabled:bg-primary/30 disabled:text-primary-foreground/50 h-9 w-9 flex-shrink-0 rounded-lg transition-colors"
-              >
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send message</span>
-              </Button>
-            )}
-          </div>
-        </PromptInput>
+        </div>
       </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*          File preview, buttons, combobox, send/stop row             */
+/* ------------------------------------------------------------------ */
+interface PreviewProps {
+  files: { file: File; dataUrl?: string }[];
+  onRemoveFile: (i: number) => void;
+  openFileDialog: () => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  web: boolean;
+  onToggleWeb: () => void;
+  model: string;
+  onModelChange: (m: string) => void;
+  isStreaming: boolean;
+  onSubmit: () => void;
+  onStop: () => void;
+  canSend: boolean;
+}
+
+const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
+  const {
+    files,
+    onRemoveFile,
+    openFileDialog,
+    fileInputRef,
+    onFileUpload,
+    web,
+    onToggleWeb,
+    model,
+    onModelChange,
+    isStreaming,
+    onSubmit,
+    onStop,
+    canSend,
+  } = p;
+
+  return (
+    <Fragment>
+      {files.length > 0 && (
+        <div className="border-border/50 flex flex-wrap gap-2 border-t px-4 py-3">
+          {files.map(({ file }, i) => (
+            <div
+              key={i}
+              className="bg-secondary/50 text-secondary-foreground flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+            >
+              {file.type.startsWith("image/") ? (
+                <FileImage className="h-4 w-4" />
+              ) : (
+                <FileText className="h-4 w-4" />
+              )}
+              <span className="max-w-32 truncate">{file.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-destructive hover:text-destructive-foreground h-4 w-4 p-0"
+                onClick={() => onRemoveFile(i)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "flex items-center justify-between px-4 py-3",
+          files.length > 0 && "border-border/50 border-t",
+        )}
+      >
+        {/* left side buttons */}
+        <div className="flex items-center gap-2">
+          {/* upload */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openFileDialog}
+            className="hover:bg-accent! h-8 w-8 rounded-lg"
+          >
+            <Paperclip className="text-muted-foreground h-4 w-4" />
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,application/pdf"
+            multiple
+            hidden
+            onChange={onFileUpload}
+          />
+
+          {/* web toggle */}
+          <Button
+            variant={web ? "default" : "ghost"}
+            size="icon"
+            onClick={onToggleWeb}
+            className={cn(
+              "h-8 w-8 rounded-lg transition-colors",
+              web
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "hover:bg-accent! hover:text-secondary-foreground",
+            )}
+          >
+            <Globe className="h-4 w-4" />
+          </Button>
+
+          {/* model picker */}
+          <Combobox
+            className="w-48"
+            groupedOptions={models.map((m) => ({
+              value: m.id,
+              label: m.name,
+              group: m.company,
+            }))}
+            value={model}
+            onValueChange={onModelChange}
+            placeholder="Select model…"
+          />
+        </div>
+
+        {/* right side send / stop */}
+        {isStreaming ? (
+          <Button
+            size="icon"
+            onClick={onStop}
+            className="bg-foreground hover:bg-foreground/80 h-9 w-9 rounded-lg"
+          >
+            <Square className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            size="icon"
+            onClick={onSubmit}
+            disabled={!canSend || isStreaming}
+            className="bg-primary hover:bg-primary/90 disabled:bg-primary/30 h-9 w-9 rounded-lg"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </Fragment>
+  );
+});

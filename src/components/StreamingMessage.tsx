@@ -76,7 +76,7 @@ export function StreamingMessage({
   ]);
 
   return (
-    <div className="server-message">
+    <div className="server-message streaming-code">
       {/* show streamed text if we have it */}
       {text && <MarkdownMessage content={text} />}
 

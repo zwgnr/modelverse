@@ -30,6 +30,10 @@ div[class*="language-"] code {
     "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
     "Liberation Mono", Menlo, monospace !important;
 }
+.shiki, .streaming-code {
+  width: 100%;
+  min-width: 0;   /* allow it to shrink inside flex */
+}
 
 :root {
   --primary: oklch(0.75 0.3 142); /* Bright neon green */

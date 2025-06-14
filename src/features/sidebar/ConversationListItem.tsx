@@ -9,6 +9,7 @@ import {
   Trash2,
   Check,
   X,
+  GitFork,
 } from "lucide-react";
 import { Doc, Id } from "../../../convex/_generated/dataModel.js";
 import { api } from "../../../convex/_generated/api.js";
@@ -20,17 +21,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import React from "react";
 
 interface ConversationListItemProps {
   conversation: Doc<"conversations">;
-  currentConversationId?: Id<"conversations">;
+  isActive: boolean;
   isVisible: boolean;
   onDelete: (conversationId: Id<"conversations">) => void;
 }
 
-export function ConversationListItem({
+export function ConversationRow({
   conversation,
-  currentConversationId,
+  isActive,
   isVisible,
   onDelete,
 }: ConversationListItemProps) {
@@ -76,7 +78,7 @@ export function ConversationListItem({
     <div
       className={cn(
         "relative min-w-0 overflow-hidden rounded-lg",
-        currentConversationId === conversation._id
+        isActive
           ? "bg-accent text-accent-foreground"
           : "hover:bg-accent hover:text-accent-foreground",
         !isVisible && "pointer-events-none",
@@ -121,6 +123,9 @@ export function ConversationListItem({
             <div className="flex items-center gap-2 truncate text-sm font-medium">
               {conversation.isPinned && (
                 <Pin className="h-3 w-3 flex-shrink-0" />
+              )}
+              {conversation.branchParent && (
+                <GitFork className="text-muted-foreground h-3 w-3 flex-shrink-0" />
               )}
               <span className="truncate">{conversation.title}</span>
             </div>
@@ -188,3 +193,11 @@ export function ConversationListItem({
     </div>
   );
 }
+
+export const ConversationListItem = React.memo(
+  ConversationRow,
+  (a, b) =>
+    a.isVisible === b.isVisible &&
+    a.isActive === b.isActive && // ← TRUE for all but 2 rows
+    a.conversation.title === b.conversation.title, // rename / pin
+);

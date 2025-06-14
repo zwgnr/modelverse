@@ -36,6 +36,7 @@ export default defineSchema({
     updatedAt: v.number(),
     hasPendingInitialMessage: v.optional(v.boolean()),
     isPinned: v.optional(v.boolean()),
+    branchParent: v.optional(v.id("conversations")), // Reference to original conversation if this is a branched copy
   })
     .index("by_user", ["userId"])
     .index("by_user_updated", ["userId", "updatedAt"])

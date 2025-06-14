@@ -10,7 +10,7 @@ import {
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { PanelLeft } from "lucide-react";
 import { Search } from "lucide-react";
@@ -26,10 +26,8 @@ import { Infer } from "convex/values";
 export const Route = createFileRoute("/_layout")({
   component: RouteComponent,
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(
-      convexQuery(api.conversations.get, {}),
-    );
-    await context.queryClient.ensureQueryData(
+    context.queryClient.ensureQueryData(convexQuery(api.conversations.get, {}));
+    context.queryClient.ensureQueryData(
       convexQuery(api.auth.getCurrentUser, {}),
     );
   },
@@ -41,38 +39,36 @@ function RouteComponent() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
 
-  const { data: conversations } = useSuspenseQuery(
-    convexQuery(api.conversations.get, {}),
+  const { data: currentUser } = useSuspenseQuery(
+    convexQuery(api.auth.getCurrentUser, {}),
   );
 
   const router = useRouter();
-  const routerState = useRouterState();
 
-  const chatMatch = routerState.matches.find(
-    (match) => match.routeId === "/_layout/chat/$chatid",
+  // Memoize chatid extraction to prevent unnecessary re-renders
+  const currentChatId = useRouterState({
+    select: (s) => {
+      const seg = s.location.pathname.split("/");
+      return seg[1] === "chat" ? seg[seg.length - 1] : undefined;
+    },
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarVisible((v) => !v);
+    setSidebarToggled(true);
+  }, []);
+
+  const handleConversationDelete = useCallback(
+    (deletedConversationId: Id<"conversations">) => {
+      // Navigate away if we're deleting the current conversation
+      if (currentChatId === deletedConversationId) {
+        router.navigate({ to: "/" });
+      }
+    },
+    [currentChatId, router],
   );
-  const chatid = chatMatch
-    ? (chatMatch.params as { chatid: string }).chatid
-    : undefined;
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-    setSidebarToggled(true); // Mark that sidebar has been explicitly toggled
-  };
-
-  const handleConversationDelete = (
-    deletedConversationId: Id<"conversations">,
-  ) => {
-    // Navigate away if we're deleting the current conversation
-    const { chatid } =
-      routerState.matches.find((m) => m.routeId === "/_layout/chat/$chatid")
-        ?.params ?? {};
-    if (chatid === deletedConversationId) {
-      router.navigate({ to: "/" });
-    }
-  };
-
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
     authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -80,11 +76,18 @@ function RouteComponent() {
         },
       },
     });
-  };
+  }, [router]);
 
-  const handleModelSelect = (modelName: Infer<typeof modelId>) => {
-    setCurrentModel(modelName);
-  };
+  const handleModelSelect = useCallback(
+    (modelName: Infer<typeof modelId>) => {
+      setCurrentModel(modelName);
+    },
+    [setCurrentModel],
+  );
+
+  const handleOpenCommandPalette = useCallback(() => {
+    setCommandPaletteOpen(true);
+  }, []);
 
   return (
     <div className="bg-background relative flex h-screen w-screen overflow-hidden">
@@ -93,13 +96,12 @@ function RouteComponent() {
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
         onModelSelect={handleModelSelect}
-        conversations={conversations}
         currentModel={currentModel}
       />
 
       {/* Backdrop for mobile */}
       {sidebarVisible && (
-        <div
+        <button
           className={cn(
             "fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden",
             sidebarToggled && "animate-in fade-in duration-300",
@@ -125,11 +127,10 @@ function RouteComponent() {
           )}
         >
           <Sidebar
-            routerState={routerState}
-            currentConversationId={chatid as Id<"conversations">}
-            conversations={conversations}
+            currentConversationId={currentChatId as Id<"conversations">}
+            currentUser={currentUser}
             onConversationDelete={handleConversationDelete}
-            onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+            onOpenCommandPalette={handleOpenCommandPalette}
             onSignOut={handleSignOut}
             isVisible={sidebarVisible}
             hasBeenToggled={sidebarToggled}
@@ -170,7 +171,7 @@ function RouteComponent() {
                 >
                   {/* Search Icon Button */}
                   <Button
-                    onClick={() => setCommandPaletteOpen(true)}
+                    onClick={handleOpenCommandPalette}
                     variant="outline"
                     size="icon"
                     className="animate-in fade-in slide-in-from-left-3 h-9 w-9 duration-300 hover:scale-105"
@@ -195,8 +196,6 @@ function RouteComponent() {
               </div>
             </div>
           </div>
-
-          {/* Outlet container with proper constraints */}
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <Outlet />
           </div>

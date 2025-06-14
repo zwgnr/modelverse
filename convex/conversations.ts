@@ -215,3 +215,65 @@ export const togglePin = mutation({
     });
   },
 });
+
+export const createBranchedConversation = mutation({
+  args: { 
+    conversationId: v.id("conversations"),
+    title: v.optional(v.string()),
+  },
+  handler: async (ctx, { conversationId, title }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+
+    // Find the original conversation
+    const originalConversation = await ctx.db.get(conversationId);
+    if (!originalConversation) {
+      throw new Error("Conversation not found");
+    }
+
+    // User can branch their own conversations or any conversation they have access to
+    // For now, let's allow branching any conversation the user can access
+    const userCanAccess = originalConversation.userId === userId;
+    if (!userCanAccess) {
+      throw new Error("Unauthorized to branch this conversation");
+    }
+
+    // Get all messages from the original conversation
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) =>
+        q.eq("conversationId", conversationId),
+      )
+      .collect();
+
+    const now = Date.now();
+    const conversationTitle = title || `${originalConversation.title} (Branch)`;
+
+    // Create new conversation
+    const newConversationId = await ctx.db.insert("conversations", {
+      userId,
+      title: conversationTitle,
+      createdAt: now,
+      updatedAt: now,
+      branchParent: conversationId,
+    });
+
+    // Copy all messages to the new conversation
+    for (const message of messages) {
+      await ctx.db.insert("messages", {
+        userId,
+        conversationId: newConversationId,
+        prompt: message.prompt,
+        response: message.response,
+        model: message.model,
+        files: message.files,
+      });
+    }
+
+    return newConversationId;
+  },
+});

@@ -14,17 +14,15 @@ import { models } from "@/lib/models";
 import { Link } from "@tanstack/react-router";
 import { Infer } from "convex/values";
 import { modelId } from "convex/schema";
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "convex/_generated/api";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onNewChatWithModel?: (modelId: string) => void;
   onModelSelect: (modelName: Infer<typeof modelId>) => void;
-  conversations?: Array<{
-    _id: Id<"conversations">;
-    title?: string;
-    createdAt: number;
-  }>;
   currentModel: string;
 }
 
@@ -33,10 +31,12 @@ export function CommandPalette({
   onOpenChange,
   onNewChatWithModel,
   onModelSelect,
-  conversations = [],
   currentModel,
 }: CommandPaletteProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: conversations } = useSuspenseQuery(
+    convexQuery(api.conversations.get, {}),
+  );
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
