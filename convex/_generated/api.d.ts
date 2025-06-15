@@ -13,6 +13,7 @@ import type * as chat from "../chat.js";
 import type * as conversations from "../conversations.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
+import type * as lib_auth from "../lib/auth.js";
 import type * as messages from "../messages.js";
 import type * as streaming from "../streaming.js";
 
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   files: typeof files;
   http: typeof http;
+  "lib/auth": typeof lib_auth;
   messages: typeof messages;
   streaming: typeof streaming;
 }>;

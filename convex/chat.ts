@@ -40,6 +40,14 @@ export const chat = httpAction(async (ctx, request) => {
 			throw new Error("Message not found for streamId");
 		}
 
+		if (message.userId !== user.userId) {
+			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
+				streamId: body.streamId as StreamId,
+				status: "error",
+			});
+			return new Response("Unauthorized", { status: 403, headers: cors });
+		}
+
 		// Check if stream is already completed or in progress
 		const existingStream = await streamingComponent.getStreamBody(
 			ctx,
@@ -71,7 +79,7 @@ export const chat = httpAction(async (ctx, request) => {
 			ctx,
 			request,
 			body.streamId as StreamId,
-			async (ctx, request, streamId, append) => {
+			async (ctx, _request, _streamId, append) => {
 				const abortController = new AbortController();
 				try {
 					// Grab the conversation history so that the AI has context
@@ -85,7 +93,7 @@ export const chat = httpAction(async (ctx, request) => {
 
 					// Initialize OpenRouter
 					const openrouter = createOpenRouter({
-						apiKey: process.env.OPEN_ROUTER_API_KEY!,
+						apiKey: process.env.OPEN_ROUTER_API_KEY,
 					});
 
 					// Start the stream request to OpenRouter

@@ -30,7 +30,7 @@ export default defineSchema({
 		modelUsage: v.array(v.object({ model: modelId, count: v.number() })),
 	}).index("by_email", ["email"]),
 	conversations: defineTable({
-		userId: v.string(),
+		userId: v.id("users"),
 		title: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -43,7 +43,7 @@ export default defineSchema({
 		.index("by_user_pinned_updated", ["userId", "isPinned", "updatedAt"]),
 
 	messages: defineTable({
-		userId: v.string(),
+		userId: v.id("users"),
 		conversationId: v.id("conversations"),
 		prompt: v.string(),
 		response: v.optional(v.string()),

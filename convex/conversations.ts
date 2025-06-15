@@ -11,36 +11,31 @@ import {
 	mutation,
 	query,
 } from "./_generated/server";
+import { getAuthenticatedUserId } from "./lib/auth";
 
 export const get = query({
 	handler: async (ctx): Promise<Doc<"conversations">[]> => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
+		try {
+			const userId = await getAuthenticatedUserId(ctx);
+			// Get conversations ordered by most recently updated
+			const conversations = await ctx.db
+				.query("conversations")
+				.withIndex("by_user_pinned_updated", (q) => q.eq("userId", userId))
+				.order("desc")
+				.collect();
+
+			return conversations;
+		} catch (e) {
+			console.error(e);
 			return [];
 		}
-		const userId = identity.subject;
-
-		// Get conversations ordered by most recently updated
-		const conversations = await ctx.db
-			.query("conversations")
-			.withIndex("by_user_pinned_updated", (q) => q.eq("userId", userId))
-			.order("desc")
-			.collect();
-
-		return conversations;
 	},
 });
 
 export const create = mutation({
 	args: { title: v.optional(v.string()) },
 	handler: async (ctx, { title }) => {
-		const identity = await ctx.auth.getUserIdentity();
-
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		const now = Date.now();
 		const conversationTitle = title || "New Chat";
@@ -59,12 +54,7 @@ export const create = mutation({
 export const updateTitle = mutation({
 	args: { conversationId: v.id("conversations"), title: v.string() },
 	handler: async (ctx, { conversationId, title }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		// Verify the conversation belongs to the user
 		const conversation = await ctx.db.get(conversationId);
@@ -82,12 +72,7 @@ export const updateTitle = mutation({
 export const updateLastActivity = mutation({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		// Verify the conversation belongs to the user
 		const conversation = await ctx.db.get(conversationId);
@@ -104,13 +89,7 @@ export const updateLastActivity = mutation({
 export const deleteConversation = mutation({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
-
+		const userId = await getAuthenticatedUserId(ctx);
 		// Verify the conversation belongs to the user
 		const conversation = await ctx.db.get(conversationId);
 		if (!conversation || conversation.userId !== userId) {
@@ -147,9 +126,7 @@ export const updateTitleInternal = internalMutation({
 export const clearPendingInitialMessage = mutation({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new Error("Not authenticated");
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		const conversation = await ctx.db.get(conversationId);
 		if (!conversation || conversation.userId !== userId) {
@@ -168,7 +145,7 @@ export const generateTitle = internalAction({
 		firstMessage: v.string(),
 	},
 	handler: async (ctx, { conversationId, firstMessage }) => {
-		const apiKey = process.env.OPEN_ROUTER_API_KEY!;
+		const apiKey = process.env.OPEN_ROUTER_API_KEY;
 		const openrouter = createOpenRouter({ apiKey });
 
 		try {
@@ -203,12 +180,7 @@ export const generateTitle = internalAction({
 export const togglePin = mutation({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		const conversation = await ctx.db.get(conversationId);
 		if (!conversation || conversation.userId !== userId) {
@@ -228,12 +200,7 @@ export const createBranchedConversation = mutation({
 		title: v.optional(v.string()),
 	},
 	handler: async (ctx, { conversationId, title }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new Error("Not authenticated");
-		}
-
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		// Find the original conversation
 		const originalConversation = await ctx.db.get(conversationId);

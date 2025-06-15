@@ -5,31 +5,33 @@ import {
 import { v } from "convex/values";
 
 import { components, internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
+import { getAuthenticatedUserId } from "./lib/auth";
 import { modelId } from "./schema";
 import { streamingComponent } from "./streaming";
 
 export const get = query({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }): Promise<Doc<"messages">[]> => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
+		try {
+			const userId = await getAuthenticatedUserId(ctx);
+			const conversation = await ctx.db.get(conversationId);
+			if (!conversation || conversation.userId !== userId) {
+				// This conversation doesn't belong to the user, so return no messages
+				return [];
+			}
+
+			return await ctx.db
+				.query("messages")
+				.withIndex("by_conversation", (q) =>
+					q.eq("conversationId", conversationId),
+				)
+				.collect();
+		} catch (e) {
+			console.error(e);
 			return [];
 		}
-		const userId = identity.subject;
-
-		const conversation = await ctx.db.get(conversationId);
-		if (!conversation || conversation.userId !== userId) {
-			throw new Error("Unauthorized");
-		}
-
-		return await ctx.db
-			.query("messages")
-			.withIndex("by_conversation", (q) =>
-				q.eq("conversationId", conversationId),
-			)
-			.collect();
 	},
 });
 
@@ -49,9 +51,7 @@ export const send = mutation({
 		),
 	},
 	handler: async (ctx, { prompt, conversationId, model, files }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new Error("Not authenticated");
-		const userId = identity.subject as Id<"users">;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		// track usage
 		if (model) {
@@ -119,9 +119,7 @@ export const send = mutation({
 export const saveResponse = mutation({
 	args: { messageId: v.id("messages"), response: v.string() },
 	handler: async (ctx, { messageId, response }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new Error("Not authenticated");
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
@@ -149,9 +147,7 @@ export const getMessageByStreamId = internalQuery({
 export const finalizeStreamedResponse = mutation({
 	args: { messageId: v.id("messages") },
 	handler: async (ctx, { messageId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new Error("Not authenticated");
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
@@ -282,9 +278,7 @@ async function buildUserMessageContent(ctx: any, message: any) {
 export const cancelStream = mutation({
 	args: { messageId: v.id("messages") },
 	handler: async (ctx, { messageId }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new Error("Not authenticated");
-		const userId = identity.subject;
+		const userId = await getAuthenticatedUserId(ctx);
 
 		// Fetch the message and verify ownership
 		const message = await ctx.db.get(messageId);
