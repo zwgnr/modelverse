@@ -20,21 +20,21 @@ export const models: Model[] = [
 		id: MODEL_IDS[0], // "openai/gpt-4o-mini"
 		name: "4o mini",
 		icon: Bot,
-		description: "Fast and efficient for most tasks",
+		description: "Fast and efficient",
 		company: "OpenAI",
 	},
 	{
 		id: MODEL_IDS[1], // "openai/chatgpt-4o-latest"
 		name: "4o",
 		icon: Brain,
-		description: "Latest and most capable ChatGPT model",
+		description: "General purpose, good for most tasks",
 		company: "OpenAI",
 	},
 	{
 		id: MODEL_IDS[2], // "openai/gpt-4.1"
 		name: "4.1",
 		icon: Brain,
-		description: "Advanced reasoning and problem-solving",
+		description: "Coding and problem-solving",
 		company: "OpenAI",
 	},
 	{

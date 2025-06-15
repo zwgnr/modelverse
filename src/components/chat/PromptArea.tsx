@@ -22,11 +22,11 @@ import {
 	X,
 } from "lucide-react";
 
-import { models, selectedModelAtom } from "@/lib/models";
+import { selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
+import { ModelPicker } from "@/components/ui/model-picker";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 
 import { api } from "../../../convex/_generated/api";
@@ -359,18 +359,10 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 					</Button>
 
 					{/* model picker */}
-					<Combobox
+					<ModelPicker
 						className="w-48"
-						groupedOptions={models.map((m) => ({
-							value: m.id,
-							label: m.name,
-							group: m.company,
-						}))}
 						value={model}
-						onValueChange={(value) =>
-							onModelChange(value as Infer<typeof modelId>)
-						}
-						placeholder="Select model…"
+						onValueChange={onModelChange}
 					/>
 				</div>
 
