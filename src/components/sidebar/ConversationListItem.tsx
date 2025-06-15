@@ -127,10 +127,10 @@ export function ConversationRow({
 					>
 						<div className="flex items-center gap-2 truncate font-medium text-sm">
 							{conversation.isPinned && (
-								<Pin className="h-3 w-3 flex-shrink-0" />
+								<Pin className="h-4 w-4 flex-shrink-0 text-blue-400 dark:text-blue-200" />
 							)}
 							{conversation.branchParent && (
-								<GitFork className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+								<GitFork className="h-4 w-4 flex-shrink-0 text-amber-400 dark:text-amber-200" />
 							)}
 							<span className="truncate">{conversation.title}</span>
 						</div>

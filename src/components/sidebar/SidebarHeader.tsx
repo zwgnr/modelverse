@@ -5,7 +5,7 @@ export function SidebarHeader() {
 				<div className="flex items-center justify-center gap-2">
 					<span className="text-xl">💬</span>
 					<div className="font-bold text-foreground text-xl">
-						<span className="text-primary">ask</span>hole
+						<span className="text-primary">uhmmm</span>
 					</div>
 				</div>
 			</div>
