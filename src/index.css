@@ -27,12 +27,13 @@ code.prism-code,
 div[class*="language-"] pre,
 div[class*="language-"] code {
   font-family:
-    "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
-    "Liberation Mono", Menlo, monospace !important;
+    "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
+    monospace !important;
 }
-.shiki, .streaming-code {
+.shiki,
+.streaming-code {
   width: 100%;
-  min-width: 0;   /* allow it to shrink inside flex */
+  min-width: 0; /* allow it to shrink inside flex */
 }
 
 :root {
@@ -71,9 +72,7 @@ div[class*="language-"] code {
   --chart-5: oklch(0.78 0.09 102); /* Light green */
   --sidebar: oklch(99% 0 0); /* Clean neutral sidebar */
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(
-    0.75 0.3 142
-  ); /* Bright neon green sidebar primary */
+  --sidebar-primary: oklch(0.75 0.3 142); /* Bright neon green sidebar primary */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(88% 0 0); /* More visible sidebar accent */
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -107,9 +106,7 @@ div[class*="language-"] code {
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.1 0 0); /* Slightly lighter sidebar */
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(
-    0.8 0.35 142
-  ); /* Ultra bright neon green for sidebar primary */
+  --sidebar-primary: oklch(0.8 0.35 142); /* Ultra bright neon green for sidebar primary */
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.28 0 0); /* More visible dark sidebar accent */
   --sidebar-accent-foreground: oklch(0.985 0 0);
