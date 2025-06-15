@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { useCallback, useState } from "react";
 
+import { Check, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { rehypeInlineCodeProperty, useShikiHighlighter } from "react-shiki";
 
@@ -26,6 +28,17 @@ const CodeHighlight = ({
 	const language = match ? match[1] : undefined;
 
 	const code = String(children);
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = useCallback(async () => {
+		try {
+			await navigator.clipboard.writeText(code);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (err) {
+			console.error("Failed to copy code:", err);
+		}
+	}, [code]);
 
 	// Use theme object with both light and dark variants
 	const theme = {
@@ -40,12 +53,31 @@ const CodeHighlight = ({
 	const isCodeBlock = !inline;
 
 	return isCodeBlock ? (
-		<div className="shiki not-prose relative my-4 [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:px-6 [&_pre]:py-5">
+		<div className="shiki not-prose group relative my-4 [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:px-6 [&_pre]:py-5">
 			{language && (
-				<span className="absolute top-2 right-3 text-muted-foreground/85 text-xs tracking-tighter">
+				<span className="absolute top-2 right-12 text-muted-foreground/85 text-xs tracking-tighter">
 					{language}
 				</span>
 			)}
+			<button
+				type="button"
+				onClick={handleCopy}
+				className={cn(
+					"absolute top-2 right-3 z-10 rounded-md p-1.5 transition-all duration-200",
+					"border bg-background/80 shadow-sm backdrop-blur-sm",
+					"opacity-60 hover:opacity-100 group-hover:opacity-100",
+					"hover:bg-muted-foreground/10 focus:bg-muted-foreground/10",
+					"focus:ring-offset-background",
+					copied && "opacity-100",
+				)}
+				title={copied ? "Copied!" : "Copy code"}
+			>
+				{copied ? (
+					<Check className="h-4 w-4 text-green-500" />
+				) : (
+					<Copy className="h-4 w-4 text-muted-foreground/85" />
+				)}
+			</button>
 			<div className="min-h-[2.5rem]">
 				{highlightedCode || (
 					<pre className="overflow-x-auto rounded-lg bg-muted p-4">
