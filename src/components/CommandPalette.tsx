@@ -142,7 +142,7 @@ export function CommandPalette({
 										<span className="flex items-center gap-2">
 											{model.name}
 											{isSelected && (
-												<span className="rounded bg-blue-100 px-1.5 py-0.5 text-blue-700 text-xs dark:bg-blue-900 dark:text-blue-300">
+												<span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary text-xs">
 													Current
 												</span>
 											)}

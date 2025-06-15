@@ -1,11 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap");
-@import "tailwindcss";
-@import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @theme {
-  --font-geist: "Geist", "sans-serif";
-  --font-geist-mono: "Geist Mono", "monospace";
+  --font-geist: 'Geist', 'sans-serif';
+  --font-geist-mono: 'Geist Mono', 'monospace';
 }
 
 html,
@@ -18,16 +18,36 @@ body {
   box-sizing: border-box;
 }
 
+/* Prevent theme switching flashes */
+html.transitioning * {
+  transition: none !important;
+}
+
+/* Prevent color transitions on theme change, but allow other transitions */
+* {
+  transition-property:
+    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
+    outline-offset !important;
+}
+
+/* Allow specific hover transitions */
+*:hover {
+  transition-property:
+    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
+    outline-offset, background-color, border-color, color !important;
+  transition-duration: 0.15s !important;
+}
+
 /* Force Geist Mono on syntax highlighter */
-pre[class*="language-"],
-code[class*="language-"],
+pre[class*='language-'],
+code[class*='language-'],
 .token,
 pre.prism-code,
 code.prism-code,
-div[class*="language-"] pre,
-div[class*="language-"] code {
+div[class*='language-'] pre,
+div[class*='language-'] code {
   font-family:
-    "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
+    'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
     monospace !important;
 }
 .shiki,
@@ -189,7 +209,7 @@ div[class*="language-"] code {
 }
 
 /* Prevent layout shift during code highlighting */
-pre[class*="language-"],
+pre[class*='language-'],
 .shiki pre {
   contain: layout style;
 }
