@@ -22,7 +22,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				type="button"
 				onClick={() => setTheme("light")}
 				className={cn(
-					"relative inline-flex h-6 w-6 items-center justify-center rounded-l-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+					"relative inline-flex h-9 w-9 items-center justify-center rounded-l-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "light"
 						? "bg-primary text-primary-foreground shadow-md"
 						: "text-muted-foreground opacity-60 hover:bg-accent hover:text-accent-foreground",
@@ -31,13 +31,13 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				aria-pressed={theme === "light"}
 				title="Light mode"
 			>
-				<Sun className="h-3 w-3" />
+				<Sun className="h-5 w-5" />
 			</button>
 			<button
 				type="button"
 				onClick={() => setTheme("dark")}
 				className={cn(
-					"relative inline-flex h-6 w-6 items-center justify-center rounded-r-md border-input border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+					"relative inline-flex h-9 w-9 items-center justify-center rounded-r-md border-input border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "dark"
 						? "bg-primary text-primary-foreground shadow-md"
 						: "text-muted-foreground opacity-60 hover:bg-accent hover:text-accent-foreground",
@@ -46,7 +46,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				aria-pressed={theme === "dark"}
 				title="Dark mode"
 			>
-				<Moon className="h-3 w-3" />
+				<Moon className="h-5 w-5" />
 			</button>
 		</div>
 	);

@@ -29,7 +29,7 @@ export function AccountPopover({
 			<PopoverTrigger asChild>
 				<Button
 					variant="ghost"
-					className="h-auto w-full justify-start p-2 transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+					className="h-auto w-full justify-start p-2 transition-all duration-200 hover:bg-accent! hover:text-accent-foreground"
 				>
 					<Avatar className="mr-3 h-8 w-8">
 						<AvatarFallback className="text-xs">
