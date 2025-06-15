@@ -22,7 +22,7 @@ function IndexComponent() {
 			<div className="w-full max-w-4xl space-y-8 text-center">
 				<div className="space-y-4">
 					<p className="text-muted-foreground text-xl">
-						Ready to answer your dumbest questions.
+						What can I help you with?
 					</p>
 				</div>
 
