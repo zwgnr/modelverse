@@ -74,18 +74,15 @@ export function PromptArea(props: PromptAreaProps) {
 		},
 	} = props;
 
-	/* -------- tiny local states that change per keystroke -------- */
 	const [text, setText] = useState("");
 	const [files, setFiles] = useState<{ file: File; dataUrl?: string }[]>([]);
 	const [web, setWeb] = useState(false);
 	const [model, setModel] = useAtom(selectedModelAtom);
 
-	/* ---------------- convex mutations (stable) ------------------ */
 	const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 	const createConversation = useMutation(api.conversations.create);
 	const sendMessage = useMutation(api.messages.send);
 
-	/* ------------------ stable refs & callbacks ------------------- */
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const openFileDialog = useCallback(() => fileInputRef.current?.click(), []);
@@ -132,7 +129,7 @@ export function PromptArea(props: PromptAreaProps) {
 		[generateUploadUrl],
 	);
 
-	/* ---------------- submit / stop ---------------- */
+	/*  submit / stop  */
 	const handleSubmit = useCallback(async () => {
 		if (!text.trim() && files.length === 0) return;
 
@@ -196,7 +193,6 @@ export function PromptArea(props: PromptAreaProps) {
 
 	const handleStop = useCallback(() => onStopStream?.(), [onStopStream]);
 
-	/* --------------- helpers --------------- */
 	const currentPlaceholder = isStreaming
 		? placeholder.streaming
 		: files.length
@@ -218,15 +214,15 @@ export function PromptArea(props: PromptAreaProps) {
 					createNewConversation && "px-0",
 				)}
 			>
-				{/* --------------- Cohesive input container --------------- */}
+				{/*  input container  */}
 				<div className="overflow-hidden rounded-3xl border bg-background/80 shadow-black/5 shadow-xl backdrop-blur-lg">
-					{/* --------------- Text area --------------- */}
+					{/*  Text area  */}
 					<PromptInput
 						value={text}
 						onValueChange={setText}
 						onSubmit={handleSubmit}
 						isLoading={isStreaming}
-						className="border-0 bg-transparent p-4 shadow-none"
+						className="border-0 bg-background/80 p-4 shadow-none"
 					>
 						<PromptInputTextarea
 							placeholder={currentPlaceholder}
@@ -234,11 +230,11 @@ export function PromptArea(props: PromptAreaProps) {
 							disabled={
 								(!createNewConversation && !conversationId) || isStreaming
 							}
-							className="border-0 bg-transparent text-base text-foreground focus:ring-0"
+							className="border-0 bg-background/80! text-base text-foreground focus:ring-0"
 						/>
 					</PromptInput>
 
-					{/* --------------- Below the textarea (memo) --------------- */}
+					{/*  Below the textarea (memo)  */}
 					<MemoPreviewAndActions
 						files={files}
 						onRemoveFile={removeFile}

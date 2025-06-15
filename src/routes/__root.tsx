@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<{
 	convexQueryClient: ConvexQueryClient;
 }>()({
 	head: () => ({
-		title: "askhole",
+		title: "hmmm",
 		meta: [
 			{
 				charSet: "utf-8",

@@ -116,7 +116,7 @@ function ChatConversation() {
 		convexQuery(api.conversations.get, {}),
 	);
 	const title = useMemo(
-		() => conversations?.find((c) => c._id === chatid)?.title ?? "askhole",
+		() => conversations?.find((c) => c._id === chatid)?.title ?? "hmmm",
 		[conversations, chatid],
 	);
 	useEffect(() => {
