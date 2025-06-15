@@ -143,9 +143,14 @@ function ChatConversation() {
 	useEffect(() => {
 		const m = messages.at(-1);
 		if (m?.responseStreamId && !m.response) {
-			setDriven((s) => new Set(s).add(m._id));
+			// Only mark as driven if this is a new message (not when navigating back)
+			// We can detect this by checking if the conversation has hasPendingInitialMessage
+			const conversation = conversations?.find((c) => c._id === chatid);
+			if (conversation?.hasPendingInitialMessage) {
+				setDriven((s) => new Set(s).add(m._id));
+			}
 		}
-	}, [messages]);
+	}, [messages, conversations, chatid]);
 
 	/* mutations */
 	const sendMessage = useMutation(api.messages.send);

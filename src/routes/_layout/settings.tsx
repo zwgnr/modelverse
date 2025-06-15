@@ -1,6 +1,8 @@
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { createFileRoute } from "@tanstack/react-router";
+
+import { useMutation, useQuery } from "convex/react";
 
 import {
 	BarChart3,
@@ -16,6 +18,7 @@ import {
 	Upload,
 	User,
 } from "lucide-react";
+import { toast } from "sonner";
 
 
 import { Button } from "@/components/ui/button";
@@ -23,9 +26,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+
+import { api } from "../../../convex/_generated/api";
 
 function SettingsPage() {
 	const assistantNameId = useId();
@@ -35,6 +46,26 @@ function SettingsPage() {
 	const newPasswordId = useId();
 	const confirmPasswordId = useId();
 	const apiKeyId = useId();
+
+	const user = useQuery(api.auth.getCurrentUser);
+	const storeKey = useMutation(api.users.storeOpenRouterKey);
+	// const setUseBYOKMutation = useMutation(api.users.setUseBYOK);
+	const deleteKey = useMutation(api.users.deleteOpenRouterKey);
+
+	const [openRouterKey, setOpenRouterKey] = useState("");
+	const [showKey, setShowKey] = useState(false);
+	// const [useBYOK, setUseBYOK] = useState(false);
+
+	useEffect(() => {
+		if (user) {
+		//	setUseBYOK(user.useBYOK ?? false);
+			if (user.openRouterKey) {
+				setOpenRouterKey("********************");
+			} else {
+				setOpenRouterKey("");
+			}
+		}
+	}, [user]);
 
 	return (
 		<div className="flex min-h-screen flex-col bg-card">
@@ -47,21 +78,34 @@ function SettingsPage() {
 					</p>
 				</div>
 
-				<Tabs defaultValue="general" className="flex min-h-0 flex-1 flex-col space-y-6">
-					<TabsList className="mb-4 grid w-full grid-cols-5">
+				<Tabs
+					defaultValue="general"
+					className="flex min-h-0 flex-1 flex-col space-y-6"
+				>
+					<TabsList className="mb-4 grid w-full grid-cols-6">
 						<TabsTrigger value="general" className="flex items-center gap-2">
 							<Settings className="h-4 w-4" />
 							General
 						</TabsTrigger>
-						<TabsTrigger value="customization" className="flex items-center gap-2">
+						<TabsTrigger
+							value="customization"
+							className="flex items-center gap-2"
+						>
 							<Bot className="h-4 w-4" />
 							Customize
+						</TabsTrigger>
+						<TabsTrigger value="apiKeys" className="flex items-center gap-2">
+							<Key className="h-4 w-4" />
+							API Keys
 						</TabsTrigger>
 						<TabsTrigger value="usage" className="flex items-center gap-2">
 							<BarChart3 className="h-4 w-4" />
 							Usage
 						</TabsTrigger>
-						<TabsTrigger value="subscription" className="flex items-center gap-2">
+						<TabsTrigger
+							value="subscription"
+							className="flex items-center gap-2"
+						>
 							<CreditCard className="h-4 w-4" />
 							Subscription
 						</TabsTrigger>
@@ -72,7 +116,10 @@ function SettingsPage() {
 					</TabsList>
 
 					<div className="flex min-h-0 flex-1 flex-col">
-						<TabsContent value="general" className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+						<TabsContent
+							value="general"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
 							{/* Enhanced Profile Section */}
 							<Card className="p-6">
 								<CardHeader>
@@ -98,7 +145,11 @@ function SettingsPage() {
 												</Button>
 											</div>
 											<div className="flex flex-col gap-2 sm:flex-row">
-												<Button variant="outline" size="sm" className="flex items-center gap-2">
+												<Button
+													variant="outline"
+													size="sm"
+													className="flex items-center gap-2"
+												>
 													<Upload className="h-4 w-4" />
 													Upload Photo
 												</Button>
@@ -111,7 +162,9 @@ function SettingsPage() {
 										{/* Profile Info */}
 										<div className="flex-1 space-y-4">
 											<div>
-												<p className="text-muted-foreground">user@example.com</p>
+												<p className="text-muted-foreground">
+													user@example.com
+												</p>
 												<p className="text-muted-foreground text-sm">
 													Member since December 2024
 												</p>
@@ -135,8 +188,12 @@ function SettingsPage() {
 								<CardContent className="space-y-6">
 									<div className="space-y-2">
 										<div className="flex items-center justify-between">
-											<span className="font-medium text-sm">Messages this month</span>
-											<span className="text-muted-foreground text-sm">2,847 / 5,000</span>
+											<span className="font-medium text-sm">
+												Messages this month
+											</span>
+											<span className="text-muted-foreground text-sm">
+												2,847 / 5,000
+											</span>
 										</div>
 										<Progress value={57} className="h-2" />
 										<p className="text-muted-foreground text-xs">
@@ -147,11 +204,15 @@ function SettingsPage() {
 									<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 										<div className="rounded-lg border p-4 text-center">
 											<div className="font-semibold text-2xl">2,847</div>
-											<div className="text-muted-foreground text-sm">Total Messages</div>
+											<div className="text-muted-foreground text-sm">
+												Total Messages
+											</div>
 										</div>
 										<div className="rounded-lg border p-4 text-center">
 											<div className="font-semibold text-2xl">156</div>
-											<div className="text-muted-foreground text-sm">This Week</div>
+											<div className="text-muted-foreground text-sm">
+												This Week
+											</div>
 										</div>
 										<div className="rounded-lg border p-4 text-center">
 											<div className="font-semibold text-2xl">23</div>
@@ -162,13 +223,16 @@ function SettingsPage() {
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="customization" className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+						<TabsContent
+							value="customization"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
 							{/* ai Configuration */}
 							<Card className="p-6">
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
 										<Bot className="h-5 w-5 text-blue-600" />
-										 Customize
+										Customize
 									</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-6">
@@ -181,10 +245,18 @@ function SettingsPage() {
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="gpt-4">GPT-4</SelectItem>
-												<SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-												<SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-												<SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-												<SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
+												<SelectItem value="gpt-3.5-turbo">
+													GPT-3.5 Turbo
+												</SelectItem>
+												<SelectItem value="claude-3-opus">
+													Claude 3 Opus
+												</SelectItem>
+												<SelectItem value="claude-3-sonnet">
+													Claude 3 Sonnet
+												</SelectItem>
+												<SelectItem value="claude-3-haiku">
+													Claude 3 Haiku
+												</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
@@ -214,14 +286,17 @@ function SettingsPage() {
 
 									{/* Custom Instructions */}
 									<div className="space-y-2">
-										<Label htmlFor={customInstructionsId}>Custom Instructions</Label>
+										<Label htmlFor={customInstructionsId}>
+											Custom Instructions
+										</Label>
 										<Textarea
 											id={customInstructionsId}
 											placeholder="Enter specific instructions for how the AI should assist you..."
 											className="min-h-[120px]"
 										/>
 										<p className="text-muted-foreground text-xs">
-											Provide detailed instructions for how the AI should help you with tasks
+											Provide detailed instructions for how the AI should help
+											you with tasks
 										</p>
 									</div>
 
@@ -233,7 +308,77 @@ function SettingsPage() {
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="usage" className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+						<TabsContent
+							value="apiKeys"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
+							<Card className="p-6">
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2">
+										<Key className="h-5 w-5 text-blue-600" />
+										Bring Your Own Key (BYOK)
+									</CardTitle>
+									<p className="pt-2 text-muted-foreground text-sm">
+										Use your own OpenRouter API key for premium model access.
+									</p>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div className="space-y-2">
+										<Label htmlFor={apiKeyId}>OpenRouter API Key</Label>
+										<div className="flex gap-2">
+											<Input
+												id={apiKeyId}
+												type={showKey ? "text" : "password"}
+												value={openRouterKey}
+												onChange={(e) => setOpenRouterKey(e.target.value)}
+												placeholder="Enter your OpenRouter API key"
+											/>
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => setShowKey(!showKey)}
+											>
+												<Eye className="h-4 w-4" />
+											</Button>
+										</div>
+										<p className="flex items-center gap-2 pt-1 text-muted-foreground text-xs">
+											<Lock className="h-3 w-3" />
+											Your API key is encrypted and stored securely.
+										</p>
+									</div>
+									<div className="flex items-center gap-2">
+										<Button
+											onClick={async () => {
+												await storeKey({ key: openRouterKey });
+												toast.success("OpenRouter key saved!");
+												setOpenRouterKey("********************");
+											}}
+											disabled={
+												!openRouterKey || openRouterKey.includes("*")
+											}
+										>
+											Save Key
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={async () => {
+												await deleteKey();
+												toast.success("OpenRouter key deleted!");
+												setOpenRouterKey("");
+											}}
+											disabled={!user?.openRouterKey}
+										>
+											Delete Key
+										</Button>
+									</div>
+								</CardContent>
+							</Card>
+						</TabsContent>
+
+						<TabsContent
+							value="usage"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
 							{/* Usage by Model */}
 							<Card className="p-6">
 								<CardHeader>
@@ -250,8 +395,12 @@ function SettingsPage() {
 									<div className="flex h-64 items-center justify-center rounded-lg border-2 border-muted-foreground/25 border-dashed">
 										<div className="space-y-2 text-center">
 											<BarChart3 className="mx-auto h-8 w-8 text-muted-foreground" />
-											<p className="text-muted-foreground text-sm">Model Usage Chart</p>
-											<p className="text-muted-foreground text-xs">Bar chart showing usage by model</p>
+											<p className="text-muted-foreground text-sm">
+												Model Usage Chart
+											</p>
+											<p className="text-muted-foreground text-xs">
+												Bar chart showing usage by model
+											</p>
 										</div>
 									</div>
 
@@ -260,26 +409,42 @@ function SettingsPage() {
 										<div className="rounded-lg border p-4">
 											<div className="mb-2 flex items-center justify-between">
 												<span className="font-medium text-sm">GPT-4</span>
-												<span className="text-muted-foreground text-xs">45%</span>
+												<span className="text-muted-foreground text-xs">
+													45%
+												</span>
 											</div>
 											<Progress value={45} className="mb-2 h-2" />
-											<p className="text-muted-foreground text-xs">1,281 messages</p>
+											<p className="text-muted-foreground text-xs">
+												1,281 messages
+											</p>
 										</div>
 										<div className="rounded-lg border p-4">
 											<div className="mb-2 flex items-center justify-between">
-												<span className="font-medium text-sm">Claude 3 Sonnet</span>
-												<span className="text-muted-foreground text-xs">35%</span>
+												<span className="font-medium text-sm">
+													Claude 3 Sonnet
+												</span>
+												<span className="text-muted-foreground text-xs">
+													35%
+												</span>
 											</div>
 											<Progress value={35} className="mb-2 h-2" />
-											<p className="text-muted-foreground text-xs">996 messages</p>
+											<p className="text-muted-foreground text-xs">
+												996 messages
+											</p>
 										</div>
 										<div className="rounded-lg border p-4">
 											<div className="mb-2 flex items-center justify-between">
-												<span className="font-medium text-sm">GPT-3.5 Turbo</span>
-												<span className="text-muted-foreground text-xs">20%</span>
+												<span className="font-medium text-sm">
+													GPT-3.5 Turbo
+												</span>
+												<span className="text-muted-foreground text-xs">
+													20%
+												</span>
 											</div>
 											<Progress value={20} className="mb-2 h-2" />
-											<p className="text-muted-foreground text-xs">570 messages</p>
+											<p className="text-muted-foreground text-xs">
+												570 messages
+											</p>
 										</div>
 									</div>
 								</CardContent>
@@ -298,8 +463,12 @@ function SettingsPage() {
 									<div className="flex h-64 items-center justify-center rounded-lg border-2 border-muted-foreground/25 border-dashed">
 										<div className="space-y-2 text-center">
 											<BarChart3 className="mx-auto h-8 w-8 text-muted-foreground" />
-											<p className="text-muted-foreground text-sm">Usage Timeline Chart</p>
-											<p className="text-muted-foreground text-xs">Line chart showing usage over time</p>
+											<p className="text-muted-foreground text-sm">
+												Usage Timeline Chart
+											</p>
+											<p className="text-muted-foreground text-xs">
+												Line chart showing usage over time
+											</p>
 										</div>
 									</div>
 								</CardContent>
@@ -336,7 +505,10 @@ function SettingsPage() {
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="subscription" className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+						<TabsContent
+							value="subscription"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
 							<Card className="p-4">
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
@@ -392,7 +564,10 @@ function SettingsPage() {
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="security" className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+						<TabsContent
+							value="security"
+							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
+						>
 							{/* Change Password */}
 							<Card className="p-6">
 								<CardHeader>
@@ -422,7 +597,9 @@ function SettingsPage() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor={confirmPasswordId}>Confirm New Password</Label>
+										<Label htmlFor={confirmPasswordId}>
+											Confirm New Password
+										</Label>
 										<Input
 											id={confirmPasswordId}
 											type="password"
@@ -482,7 +659,8 @@ function SettingsPage() {
 										Delete Account
 									</Button>
 									<p className="mt-2 text-muted-foreground text-xs">
-										This action cannot be undone. All your data will be permanently deleted.
+										This action cannot be undone. All your data will be
+										permanently deleted.
 									</p>
 								</CardContent>
 							</Card>

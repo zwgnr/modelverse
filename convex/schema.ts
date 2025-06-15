@@ -27,6 +27,9 @@ export default defineSchema({
 	users: defineTable({
 		name: v.optional(v.string()),
 		email: v.optional(v.string()),
+		openRouterKey: v.optional(v.string()),
+		openRouterKeyId: v.optional(v.string()),
+		useBYOK: v.optional(v.boolean()),
 		modelUsage: v.array(v.object({ model: modelId, count: v.number() })),
 	}).index("by_email", ["email"]),
 	conversations: defineTable({

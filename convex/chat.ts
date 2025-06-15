@@ -17,17 +17,32 @@ const cors = {
 
 export const chat = httpAction(async (ctx, request) => {
 	try {
-		const user = await betterAuthComponent.getAuthUser(ctx);
+		const authUser = await betterAuthComponent.getAuthUser(ctx);
 
 		const body = (await request.json()) as {
 			streamId: string;
 		};
 
-		if (!user) {
+		if (!authUser) {
 			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
 				streamId: body.streamId as StreamId,
 				status: "error",
 			});
+			// Find the message to get the conversation ID for clearing pending flag
+			const message = await ctx.runQuery(
+				internal.messages.getMessageByStreamId,
+				{
+					streamId: body.streamId as StreamId,
+				},
+			);
+			if (message) {
+				await ctx.runMutation(
+					internal.conversations.clearPendingInitialMessageInternal,
+					{
+						conversationId: message.conversationId,
+					},
+				);
+			}
 			return new Response("Unauthorized", { status: 401, headers: cors });
 		}
 
@@ -40,12 +55,40 @@ export const chat = httpAction(async (ctx, request) => {
 			throw new Error("Message not found for streamId");
 		}
 
-		if (message.userId !== user.userId) {
+		if (message.userId !== authUser.userId) {
 			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
 				streamId: body.streamId as StreamId,
 				status: "error",
 			});
+			await ctx.runMutation(
+				internal.conversations.clearPendingInitialMessageInternal,
+				{
+					conversationId: message.conversationId,
+				},
+			);
 			return new Response("Unauthorized", { status: 403, headers: cors });
+		}
+
+		// Find the full user document from our database
+		const user = await ctx.runQuery(internal.users.getUserByEmail, {
+			email: authUser.email,
+		});
+
+		if (!user) {
+			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
+				streamId: body.streamId as StreamId,
+				status: "error",
+			});
+			await ctx.runMutation(
+				internal.conversations.clearPendingInitialMessageInternal,
+				{
+					conversationId: message.conversationId,
+				},
+			);
+			return new Response("User not found in database", {
+				status: 404,
+				headers: cors,
+			});
 		}
 
 		// Check if stream is already completed or in progress
@@ -90,10 +133,17 @@ export const chat = httpAction(async (ctx, request) => {
 							messageId: message._id,
 						},
 					);
-
+					let apiKey = process.env.OPEN_ROUTER_API_KEY;
+					if (user.useBYOK) {
+						const byokKey = await ctx.runAction(
+							internal.users.getOpenRouterKey,
+							{},
+						);
+						apiKey = byokKey ?? "";
+					}
 					// Initialize OpenRouter
 					const openrouter = createOpenRouter({
-						apiKey: process.env.OPEN_ROUTER_API_KEY,
+						apiKey,
 					});
 
 					// Start the stream request to OpenRouter
@@ -107,6 +157,24 @@ export const chat = httpAction(async (ctx, request) => {
 							...history,
 						],
 						abortSignal: abortController.signal,
+						onError: async ({ error }) => {
+							console.error("Error from streamText:", error);
+							await ctx.runMutation(
+								streamingComponent.component.lib.setStreamStatus,
+								{
+									streamId: _streamId,
+									status: "error",
+								},
+							);
+							// Clear the pending initial message flag
+							await ctx.runMutation(
+								internal.conversations.clearPendingInitialMessageInternal,
+								{
+									conversationId: message.conversationId,
+								},
+							);
+							throw error;
+						},
 					});
 
 					// Append each chunk to the persistent stream as they come in from OpenRouter

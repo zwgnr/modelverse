@@ -45,6 +45,7 @@ export const { createUser, updateUser, deleteUser, createSession } =
 			return ctx.db.insert("users", {
 				email: user.email,
 				modelUsage: [],
+				useBYOK: true,
 			});
 		},
 

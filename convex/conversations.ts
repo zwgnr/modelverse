@@ -123,6 +123,15 @@ export const updateTitleInternal = internalMutation({
 	},
 });
 
+export const clearPendingInitialMessageInternal = internalMutation({
+	args: { conversationId: v.id("conversations") },
+	handler: async (ctx, { conversationId }) => {
+		await ctx.db.patch(conversationId, {
+			hasPendingInitialMessage: false,
+		});
+	},
+});
+
 export const clearPendingInitialMessage = mutation({
 	args: { conversationId: v.id("conversations") },
 	handler: async (ctx, { conversationId }) => {
@@ -143,9 +152,20 @@ export const generateTitle = internalAction({
 	args: {
 		conversationId: v.id("conversations"),
 		firstMessage: v.string(),
+		userId: v.id("users"),
 	},
-	handler: async (ctx, { conversationId, firstMessage }) => {
-		const apiKey = process.env.OPEN_ROUTER_API_KEY;
+	handler: async (ctx, { conversationId, firstMessage, userId }) => {
+		// Get the user to check if they have a custom API key
+		const user = await ctx.runQuery(internal.users.get, { id: userId });
+
+		let apiKey = process.env.OPEN_ROUTER_API_KEY;
+		if (user?.useBYOK) {
+			const byokKey = await ctx.runAction(internal.users.getOpenRouterKey, {
+				userId,
+			});
+			apiKey = byokKey ?? "";
+		}
+
 		const openrouter = createOpenRouter({ apiKey });
 
 		try {

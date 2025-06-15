@@ -109,6 +109,7 @@ export const send = mutation({
 			ctx.scheduler.runAfter(0, internal.conversations.generateTitle, {
 				conversationId,
 				firstMessage: prompt,
+				userId,
 			});
 		}
 
@@ -126,6 +127,14 @@ export const saveResponse = mutation({
 		if (message.userId !== userId) throw new Error("Unauthorized");
 
 		await ctx.db.patch(messageId, { response });
+
+		// Clear the pending initial message flag if this conversation has it set
+		const conversation = await ctx.db.get(message.conversationId);
+		if (conversation?.hasPendingInitialMessage) {
+			await ctx.db.patch(message.conversationId, {
+				hasPendingInitialMessage: false,
+			});
+		}
 	},
 });
 
@@ -170,6 +179,14 @@ export const finalizeStreamedResponse = mutation({
 				response: streamBody.text,
 				// Keep responseStreamId linked for now
 			});
+
+			// Clear the pending initial message flag if this conversation has it set
+			const conversation = await ctx.db.get(message.conversationId);
+			if (conversation?.hasPendingInitialMessage) {
+				await ctx.db.patch(message.conversationId, {
+					hasPendingInitialMessage: false,
+				});
+			}
 		}
 	},
 });
@@ -309,6 +326,14 @@ export const cancelStream = mutation({
 
 		if (streamBody.text) {
 			await ctx.db.patch(messageId, { response: streamBody.text });
+		}
+
+		// Clear the pending initial message flag if this conversation has it set
+		const conversation = await ctx.db.get(message.conversationId);
+		if (conversation?.hasPendingInitialMessage) {
+			await ctx.db.patch(message.conversationId, {
+				hasPendingInitialMessage: false,
+			});
 		}
 	},
 });

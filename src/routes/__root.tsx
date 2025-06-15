@@ -15,6 +15,8 @@ import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import type { ConvexQueryClient } from "@convex-dev/react-query";
 import type { ConvexReactClient } from "convex/react";
 
+import { Toaster } from "sonner";
+
 import { authClient } from "@/lib/auth-client";
 
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
@@ -138,6 +140,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 				{children}
 				{/* <TanStackRouterDevtools position="bottom-right" /> */}
 				<Scripts />
+				<Toaster />
 			</body>
 		</html>
 	);

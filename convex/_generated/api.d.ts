@@ -14,8 +14,10 @@ import type * as conversations from "../conversations.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_encryption from "../lib/encryption.js";
 import type * as messages from "../messages.js";
 import type * as streaming from "../streaming.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -38,8 +40,10 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/encryption": typeof lib_encryption;
   messages: typeof messages;
   streaming: typeof streaming;
+  users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
