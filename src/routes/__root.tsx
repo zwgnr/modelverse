@@ -69,9 +69,10 @@ export const Route = createRootRouteWithContext<{
 			});
 		}
 
-		// If the user is not signed in and is not on the sign-in page,
+		// If the user is not signed in and is not on the sign-in page or public pages,
 		// redirect them to the sign-in page.
-		if (!userId && ctx.location.pathname !== "/signin") {
+		const publicPaths = ["/signin", "/terms", "/privacy"];
+		if (!userId && !publicPaths.includes(ctx.location.pathname)) {
 			throw redirect({
 				to: "/signin",
 				search: {

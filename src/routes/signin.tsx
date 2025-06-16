@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { Github } from "lucide-react";
 import { z } from "zod";
@@ -112,13 +112,17 @@ export function SignInForm() {
 				{/* Footer */}
 				<p className="text-center text-muted-foreground text-xs">
 					By continuing, you agree to our{" "}
-					<Button variant="link" className="h-auto p-0 text-xs underline">
-						Terms of Service
-					</Button>{" "}
+					<Link to="/terms">
+						<Button variant="link" className="h-auto p-0 text-xs underline">
+							Terms of Service
+						</Button>
+					</Link>{" "}
 					and{" "}
-					<Button variant="link" className="h-auto p-0 text-xs underline">
-						Privacy Policy
-					</Button>
+					<Link to="/privacy">
+						<Button variant="link" className="h-auto p-0 text-xs underline">
+							Privacy Policy
+						</Button>
+					</Link>
 				</p>
 			</div>
 		</div>

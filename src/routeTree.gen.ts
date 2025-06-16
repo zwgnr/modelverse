@@ -11,7 +11,9 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
@@ -25,9 +27,19 @@ import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/
 
 const rootServerRouteImport = createServerRootRoute()
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRoute = LayoutRouteImport.update({
@@ -81,7 +93,9 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
+  '/terms': typeof TermsRoute
   '/settings': typeof LayoutSettingsRouteWithChildren
   '/': typeof LayoutIndexRoute
   '/chat/$chatid': typeof LayoutChatChatidRoute
@@ -92,7 +106,9 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof LayoutSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
+  '/terms': typeof TermsRoute
   '/': typeof LayoutIndexRoute
   '/chat/$chatid': typeof LayoutChatChatidRoute
   '/settings/api-keys': typeof LayoutSettingsApiKeysRoute
@@ -104,7 +120,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/signin': typeof SigninRoute
+  '/terms': typeof TermsRoute
   '/_layout/settings': typeof LayoutSettingsRouteWithChildren
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/chat/$chatid': typeof LayoutChatChatidRoute
@@ -117,7 +135,9 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/privacy'
     | '/signin'
+    | '/terms'
     | '/settings'
     | '/'
     | '/chat/$chatid'
@@ -128,7 +148,9 @@ export interface FileRouteTypes {
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/privacy'
     | '/signin'
+    | '/terms'
     | '/'
     | '/chat/$chatid'
     | '/settings/api-keys'
@@ -139,7 +161,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_layout'
+    | '/privacy'
     | '/signin'
+    | '/terms'
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/chat/$chatid'
@@ -152,7 +176,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   SigninRoute: typeof SigninRoute
+  TermsRoute: typeof TermsRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
@@ -178,11 +204,25 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signin': {
       id: '/signin'
       path: '/signin'
       fullPath: '/signin'
       preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -299,7 +339,9 @@ const LayoutRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   SigninRoute: SigninRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
