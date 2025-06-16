@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Planet } from "@/components/ui/svg/planet";
 
 export const Route = createFileRoute("/signin")({
 	validateSearch: z.object({
@@ -94,7 +95,7 @@ export function SignInForm() {
 				{/* Branding */}
 				<div className="space-y-2 text-center">
 					<div className="mb-4 flex items-center justify-center gap-2">
-						<span className="text-2xl">💬</span>
+					<Planet />
 						<div className="font-bold text-2xl text-foreground">
 							<span className="text-primary">modelverse</span>
 						</div>
