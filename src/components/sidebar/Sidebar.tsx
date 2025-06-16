@@ -13,7 +13,6 @@ import { DeleteConfirmationDialog } from "@/components/sidebar/DeleteConfirmatio
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { AccountPopover as AccountPopoverInner } from "./AccountPopover";
 import { ConversationListItem } from "./ConversationListItem";
 import { SidebarActions as SidebarActionsInner } from "./SidebarActions";
 import { SidebarHeader as SidebarHeaderInner } from "./SidebarHeader";
@@ -49,7 +48,6 @@ interface SidebarProps {
 
 const SidebarHeader = React.memo(SidebarHeaderInner);
 const SidebarActions = React.memo(SidebarActionsInner);
-const AccountPopover = React.memo(AccountPopoverInner);
 
 export function Sidebar({
 	currentConversationId,
@@ -116,10 +114,6 @@ export function Sidebar({
 						))
 					)}
 				</div>
-			</div>
-
-			<div className="-mx-2 flex-shrink-0 border-border border-t p-1 pt-3">
-				<AccountPopover currentUser={currentUser} onSignOut={onSignOut} />
 			</div>
 
 			<DeleteConfirmationDialog

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { MessageCirclePlus, Search } from "lucide-react";
+import { MessageCirclePlus, Telescope } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ export function SidebarActions({ onOpenCommandPalette }: SidebarActionsProps) {
 					)}
 					title="Command Palette (⌘K)"
 				>
-					<Search className="mr-3 h-4 w-4 opacity-70" />
+					<Telescope className="mr-3 h-4 w-4 opacity-70" />
 					<span className="text-muted-foreground">Search</span>
 					<div className="ml-auto flex items-center">
 						<kbd className="inline-flex h-4 select-none items-center gap-1 rounded border border-input/30 bg-muted/50 px-1.5 font-medium font-mono text-[9px] text-muted-foreground/80 backdrop-blur-sm">

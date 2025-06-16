@@ -22,7 +22,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				type="button"
 				onClick={() => setTheme("light")}
 				className={cn(
-					"relative inline-flex h-9 w-9 items-center justify-center rounded-l-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+					"relative inline-flex h-8 w-8 items-center justify-center rounded-l-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "light"
 						? "bg-primary text-primary-foreground shadow-md"
 						: "text-muted-foreground opacity-60 hover:bg-secondary hover:text-secondary-foreground",
@@ -37,7 +37,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				type="button"
 				onClick={() => setTheme("dark")}
 				className={cn(
-					"relative inline-flex h-9 w-9 items-center justify-center rounded-r-md border-border border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+					"relative inline-flex h-8 w-8 items-center justify-center rounded-r-md border-border border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "dark"
 						? "bg-primary text-primary-foreground shadow-md"
 						: "text-muted-foreground opacity-60 hover:bg-secondary hover:text-secondary-foreground",

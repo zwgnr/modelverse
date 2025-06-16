@@ -20,6 +20,7 @@ import { authClient } from "@/lib/auth-client";
 import { selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
+import { AccountPopover } from "@/components/account-popover";
 import { CommandPalette } from "@/components/CommandPalette";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -214,6 +215,7 @@ function RouteComponent() {
 									</Button>
 								</div>
 							</div>
+							<AccountPopover currentUser={currentUser} onSignOut={handleSignOut} />
 						</div>
 					</div>
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
