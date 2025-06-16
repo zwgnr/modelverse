@@ -79,9 +79,9 @@ div[class*='language-'] code {
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(92.2% 0 0); /* Subtle blue-tinted secondary */
   --secondary-foreground: oklch(0.22 0 0);
-  --muted: oklch(95% 0.008 240); /* Subtle blue-tinted muted */
-  --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(14.5% 0 0);
+  --muted: oklch(87% 0 0); 
+  --muted-foreground: oklch(70.8% 0 0);
+  --accent: oklch(0.7 0.3 240);
   --accent-foreground: oklch(0.18 0 0);
   --destructive: oklch(59.632% 0.23595 26.538);
   --border: oklch(90% 0.008 240); /* Subtle blue-tinted border */
@@ -113,7 +113,7 @@ div[class*='language-'] code {
   --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(26.9% 0 0); /* Subtle blue-tinted dark secondary */
   --secondary-foreground: oklch(0.9 0 0);
-  --muted: oklch(0.14 0.01 240); /* Subtle blue-tinted dark muted */
+  --muted: oklch(43.9% 0 0); /* Subtle blue-tinted dark muted */
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.7 0.3 240); /* Subtle blue-tinted dark accent */
   --accent-foreground: oklch(0.95 0 0);
@@ -352,29 +352,39 @@ pre[class*='language-'],
   }
 }
 
-.sidebar-scroll {
-  overflow-y: scroll;
+/* Global scrollbar styling for all scroll areas */
+* {
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--secondary) transparent; /* Firefox */
-  /* Negative margin put the scrollbar in right place */
-  margin-right: -2px;
-  padding-right: 8px;
+  scrollbar-color: var(--muted) transparent; /* Firefox */
 }
 
-/* WebKit scrollbar styling */
-.sidebar-scroll::-webkit-scrollbar {
+/* WebKit scrollbar styling for all elements */
+::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.sidebar-scroll::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.sidebar-scroll::-webkit-scrollbar-thumb {
-  background: var(--secondary);
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
   border-radius: 3px;
 }
 
-.sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Sidebar specific styling with overlay behavior */
+.sidebar-scroll {
+  overflow-y: scroll;
+  /* Negative margin put the scrollbar in right place */
+  margin-right: -2px;
+  padding-right: 8px;
 }
