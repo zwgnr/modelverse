@@ -15,6 +15,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { ConversationListItem } from "./ConversationListItem";
 import { SidebarActions as SidebarActionsInner } from "./SidebarActions";
+import { SidebarFooter as SidebarFooterInner } from "./SidebarFooter";
 import { SidebarHeader as SidebarHeaderInner } from "./SidebarHeader";
 
 type CurrentUser = {
@@ -48,6 +49,7 @@ interface SidebarProps {
 
 const SidebarHeader = React.memo(SidebarHeaderInner);
 const SidebarActions = React.memo(SidebarActionsInner);
+const SidebarFooter = React.memo(SidebarFooterInner);
 
 export function Sidebar({
 	currentConversationId,
@@ -91,31 +93,35 @@ export function Sidebar({
 				<SidebarActions onOpenCommandPalette={onOpenCommandPalette} />
 			</div>
 
-			<div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto p-2">
-				<div className="space-y-1">
-					{!conversations || conversations.length === 0 ? (
-						<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
-							<div className="mb-4 text-muted-foreground">
-								<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
+			<div className="relative min-h-0 flex-1">
+				<div className="sidebar-scroll h-full overflow-y-auto p-2">
+					<div className="space-y-1">
+						{!conversations || conversations.length === 0 ? (
+							<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+								<div className="mb-4 text-muted-foreground">
+									<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
+								</div>
+								<h3 className="mb-2 font-medium text-foreground text-sm">
+									No conversations yet
+								</h3>
 							</div>
-							<h3 className="mb-2 font-medium text-foreground text-sm">
-								No conversations yet
-							</h3>
-						</div>
-					) : (
-						conversations.map((conversation) => (
-							<ConversationListItem
-								key={conversation._id}
-								conversation={conversation}
-								isActive={conversation._id === currentConversationId}
-								isVisible={isVisible}
-								onDelete={handleDeleteClick}
-							/>
-						))
-					)}
+						) : (
+							conversations.map((conversation) => (
+								<ConversationListItem
+									key={conversation._id}
+									conversation={conversation}
+									isActive={conversation._id === currentConversationId}
+									isVisible={isVisible}
+									onDelete={handleDeleteClick}
+								/>
+							))
+						)}
+					</div>
 				</div>
+				<div className="pointer-events-none absolute bottom-0 left-0 h-10 w-full bg-gradient-to-t from-background to-transparent" />
 			</div>
 
+			<SidebarFooter />
 			<DeleteConfirmationDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
