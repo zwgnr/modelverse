@@ -30,9 +30,13 @@ export const createAuth = (ctx: GenericCtx) =>
 			},
 		},
 		plugins: [convex()],
+		user: {
+			deleteUser: {
+				enabled: true,
+			},
+		},
 	});
 
-// These are required named exports
 export const { createUser, updateUser, deleteUser, createSession } =
 	betterAuthComponent.createAuthFunctions<DataModel>({
 		// Must create a user and return the user id
@@ -46,7 +50,51 @@ export const { createUser, updateUser, deleteUser, createSession } =
 
 		// Delete the user when they are deleted from Better Auth
 		onDeleteUser: async (ctx, userId) => {
-			await ctx.db.delete(userId as Id<"users">);
+			const userIdTyped = userId as Id<"users">;
+			
+			// Delete all user's conversations and their messages
+			const conversations = await ctx.db
+				.query("conversations")
+				.withIndex("by_user", (q) => q.eq("userId", userIdTyped))
+				.collect();
+
+			for (const conversation of conversations) {
+				// Delete all messages in each conversation
+				const messages = await ctx.db
+					.query("messages")
+					.withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+					.collect();
+
+				// Collect all file storage IDs to delete
+				const storageIdsToDelete = [];
+				for (const message of messages) {
+					if (message.files) {
+						for (const file of message.files) {
+							storageIdsToDelete.push(file.storageId);
+						}
+					}
+				}
+
+				// Delete all messages
+				for (const message of messages) {
+					await ctx.db.delete(message._id);
+				}
+
+				// Delete associated files from storage
+				for (const storageId of storageIdsToDelete) {
+					try {
+						await ctx.storage.delete(storageId);
+					} catch (error) {
+						console.error(`Failed to delete file ${storageId}:`, error);
+					}
+				}
+
+				// Delete the conversation
+				await ctx.db.delete(conversation._id);
+			}
+
+			// Finally delete the user
+			await ctx.db.delete(userIdTyped);
 		},
 	});
 

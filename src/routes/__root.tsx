@@ -141,7 +141,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 				{children}
 				{/* <TanStackRouterDevtools position="bottom-right" /> */}
 				<Scripts />
-				<Toaster />
+				<Toaster richColors/>
 			</body>
 		</html>
 	);
