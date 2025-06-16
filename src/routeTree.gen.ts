@@ -15,6 +15,11 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutSettingsIndexRouteImport } from './routes/_layout/settings/index'
+import { Route as LayoutSettingsUsageRouteImport } from './routes/_layout/settings/usage'
+import { Route as LayoutSettingsSecurityRouteImport } from './routes/_layout/settings/security'
+import { Route as LayoutSettingsCustomizeRouteImport } from './routes/_layout/settings/customize'
+import { Route as LayoutSettingsApiKeysRouteImport } from './routes/_layout/settings/api-keys'
 import { Route as LayoutChatChatidRouteImport } from './routes/_layout/chat.$chatid'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
 
@@ -39,6 +44,31 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutSettingsIndexRoute = LayoutSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutSettingsRoute,
+} as any)
+const LayoutSettingsUsageRoute = LayoutSettingsUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => LayoutSettingsRoute,
+} as any)
+const LayoutSettingsSecurityRoute = LayoutSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => LayoutSettingsRoute,
+} as any)
+const LayoutSettingsCustomizeRoute = LayoutSettingsCustomizeRouteImport.update({
+  id: '/customize',
+  path: '/customize',
+  getParentRoute: () => LayoutSettingsRoute,
+} as any)
+const LayoutSettingsApiKeysRoute = LayoutSettingsApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => LayoutSettingsRoute,
+} as any)
 const LayoutChatChatidRoute = LayoutChatChatidRouteImport.update({
   id: '/chat/$chatid',
   path: '/chat/$chatid',
@@ -52,29 +82,60 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
-  '/settings': typeof LayoutSettingsRoute
+  '/settings': typeof LayoutSettingsRouteWithChildren
   '/': typeof LayoutIndexRoute
   '/chat/$chatid': typeof LayoutChatChatidRoute
+  '/settings/api-keys': typeof LayoutSettingsApiKeysRoute
+  '/settings/customize': typeof LayoutSettingsCustomizeRoute
+  '/settings/security': typeof LayoutSettingsSecurityRoute
+  '/settings/usage': typeof LayoutSettingsUsageRoute
+  '/settings/': typeof LayoutSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
-  '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/chat/$chatid': typeof LayoutChatChatidRoute
+  '/settings/api-keys': typeof LayoutSettingsApiKeysRoute
+  '/settings/customize': typeof LayoutSettingsCustomizeRoute
+  '/settings/security': typeof LayoutSettingsSecurityRoute
+  '/settings/usage': typeof LayoutSettingsUsageRoute
+  '/settings': typeof LayoutSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/signin': typeof SigninRoute
-  '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/settings': typeof LayoutSettingsRouteWithChildren
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/chat/$chatid': typeof LayoutChatChatidRoute
+  '/_layout/settings/api-keys': typeof LayoutSettingsApiKeysRoute
+  '/_layout/settings/customize': typeof LayoutSettingsCustomizeRoute
+  '/_layout/settings/security': typeof LayoutSettingsSecurityRoute
+  '/_layout/settings/usage': typeof LayoutSettingsUsageRoute
+  '/_layout/settings/': typeof LayoutSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/signin' | '/settings' | '/' | '/chat/$chatid'
+  fullPaths:
+    | '/signin'
+    | '/settings'
+    | '/'
+    | '/chat/$chatid'
+    | '/settings/api-keys'
+    | '/settings/customize'
+    | '/settings/security'
+    | '/settings/usage'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/signin' | '/settings' | '/' | '/chat/$chatid'
+  to:
+    | '/signin'
+    | '/'
+    | '/chat/$chatid'
+    | '/settings/api-keys'
+    | '/settings/customize'
+    | '/settings/security'
+    | '/settings/usage'
+    | '/settings'
   id:
     | '__root__'
     | '/_layout'
@@ -82,6 +143,11 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/chat/$chatid'
+    | '/_layout/settings/api-keys'
+    | '/_layout/settings/customize'
+    | '/_layout/settings/security'
+    | '/_layout/settings/usage'
+    | '/_layout/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,6 +206,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/settings/': {
+      id: '/_layout/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof LayoutSettingsIndexRouteImport
+      parentRoute: typeof LayoutSettingsRoute
+    }
+    '/_layout/settings/usage': {
+      id: '/_layout/settings/usage'
+      path: '/usage'
+      fullPath: '/settings/usage'
+      preLoaderRoute: typeof LayoutSettingsUsageRouteImport
+      parentRoute: typeof LayoutSettingsRoute
+    }
+    '/_layout/settings/security': {
+      id: '/_layout/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof LayoutSettingsSecurityRouteImport
+      parentRoute: typeof LayoutSettingsRoute
+    }
+    '/_layout/settings/customize': {
+      id: '/_layout/settings/customize'
+      path: '/customize'
+      fullPath: '/settings/customize'
+      preLoaderRoute: typeof LayoutSettingsCustomizeRouteImport
+      parentRoute: typeof LayoutSettingsRoute
+    }
+    '/_layout/settings/api-keys': {
+      id: '/_layout/settings/api-keys'
+      path: '/api-keys'
+      fullPath: '/settings/api-keys'
+      preLoaderRoute: typeof LayoutSettingsApiKeysRouteImport
+      parentRoute: typeof LayoutSettingsRoute
+    }
     '/_layout/chat/$chatid': {
       id: '/_layout/chat/$chatid'
       path: '/chat/$chatid'
@@ -161,14 +262,34 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface LayoutSettingsRouteChildren {
+  LayoutSettingsApiKeysRoute: typeof LayoutSettingsApiKeysRoute
+  LayoutSettingsCustomizeRoute: typeof LayoutSettingsCustomizeRoute
+  LayoutSettingsSecurityRoute: typeof LayoutSettingsSecurityRoute
+  LayoutSettingsUsageRoute: typeof LayoutSettingsUsageRoute
+  LayoutSettingsIndexRoute: typeof LayoutSettingsIndexRoute
+}
+
+const LayoutSettingsRouteChildren: LayoutSettingsRouteChildren = {
+  LayoutSettingsApiKeysRoute: LayoutSettingsApiKeysRoute,
+  LayoutSettingsCustomizeRoute: LayoutSettingsCustomizeRoute,
+  LayoutSettingsSecurityRoute: LayoutSettingsSecurityRoute,
+  LayoutSettingsUsageRoute: LayoutSettingsUsageRoute,
+  LayoutSettingsIndexRoute: LayoutSettingsIndexRoute,
+}
+
+const LayoutSettingsRouteWithChildren = LayoutSettingsRoute._addFileChildren(
+  LayoutSettingsRouteChildren,
+)
+
 interface LayoutRouteChildren {
-  LayoutSettingsRoute: typeof LayoutSettingsRoute
+  LayoutSettingsRoute: typeof LayoutSettingsRouteWithChildren
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutChatChatidRoute: typeof LayoutChatChatidRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutSettingsRoute: LayoutSettingsRoute,
+  LayoutSettingsRoute: LayoutSettingsRouteWithChildren,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutChatChatidRoute: LayoutChatChatidRoute,
 }
