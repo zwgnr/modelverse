@@ -7,10 +7,10 @@ import { useMutation } from "convex/react";
 import {
 	Check,
 	Edit2,
-	GitFork,
 	MoreVertical,
 	Pin,
 	PinOff,
+	Split,
 	Trash2,
 	X,
 } from "lucide-react";
@@ -125,12 +125,9 @@ export function ConversationRow({
 						params={{ chatid: conversation._id }}
 						className="block w-full min-w-0 p-2 pr-8"
 					>
-						<div className="flex items-center gap-1 truncate font-medium text-sm">
-							{conversation.isPinned && (
-								<Pin className="h-4 w-4 flex-shrink-0 text-blue-400 dark:text-blue-200" />
-							)}
+						<div className="flex items-center gap-1 truncate text-sm">
 							{conversation.branchParent && (
-								<GitFork className="h-4 w-4 flex-shrink-0 text-amber-400 dark:text-amber-200" />
+								<Split className="h-4 w-4 flex-shrink-0 text-amber-400 dark:text-amber-200" />
 							)}
 							<span className="truncate">{conversation.title}</span>
 						</div>

@@ -84,39 +84,81 @@ export function Sidebar({
 	return (
 		<div
 			className={cn(
-				"flex h-screen w-64 flex-col overflow-hidden border-r p-3 pt-3",
+				"flex h-screen w-64 flex-col overflow-hidden border-r pt-2",
 				!isVisible && "pointer-events-none",
 			)}
 		>
-			<div className="flex-shrink-0">
+			<div className="flex-shrink-0 px-2 pb-2">
 				<SidebarHeader />
 				<SidebarActions onOpenCommandPalette={onOpenCommandPalette} />
 			</div>
 
 			<div className="relative min-h-0 flex-1">
-				<div className="sidebar-scroll h-full overflow-y-auto p-2">
-					<div className="space-y-1">
-						{!conversations || conversations.length === 0 ? (
-							<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
-								<div className="mb-4 text-muted-foreground">
-									<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
-								</div>
-								<h3 className="mb-2 font-medium text-foreground text-sm">
-									No conversations yet
-								</h3>
+				<div className="sidebar-scroll h-full overflow-y-auto px-4">
+					{!conversations || conversations.length === 0 ? (
+						<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+							<div className="mb-4 text-muted-foreground">
+								<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
 							</div>
-						) : (
-							conversations.map((conversation) => (
-								<ConversationListItem
-									key={conversation._id}
-									conversation={conversation}
-									isActive={conversation._id === currentConversationId}
-									isVisible={isVisible}
-									onDelete={handleDeleteClick}
-								/>
-							))
-						)}
-					</div>
+							<h3 className="mb-2 font-medium text-foreground text-sm">
+								No conversations yet
+							</h3>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{/* Pinned Conversations Section */}
+							{conversations.some(conv => conv.isPinned) && (
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 px-2 py-1">
+										<h3 className="font-bold text-muted-foreground text-xs tracking-wider">
+											Pinned
+										</h3>
+									</div>
+									<div className="space-y-1">
+										{conversations
+											.filter(conversation => conversation.isPinned)
+											.map((conversation) => (
+												<ConversationListItem
+													key={conversation._id}
+													conversation={conversation}
+													isActive={conversation._id === currentConversationId}
+													isVisible={isVisible}
+													onDelete={handleDeleteClick}
+												/>
+											))
+										}
+									</div>
+								</div>
+							)}
+
+							{/* Regular Conversations Section */}
+							{conversations.some(conv => !conv.isPinned) && (
+								<div className="space-y-2">
+									{conversations.some(conv => conv.isPinned) && (
+										<div className="flex items-center gap-2 px-2 py-1">
+											<h3 className="font-bold text-muted-foreground text-xs tracking-wider">
+												Recent
+											</h3>
+										</div>
+									)}
+									<div className="space-y-1">
+										{conversations
+											.filter(conversation => !conversation.isPinned)
+											.map((conversation) => (
+												<ConversationListItem
+													key={conversation._id}
+													conversation={conversation}
+													isActive={conversation._id === currentConversationId}
+													isVisible={isVisible}
+													onDelete={handleDeleteClick}
+												/>
+											))
+										}
+									</div>
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 				<div className="pointer-events-none absolute bottom-0 left-0 h-10 w-full bg-gradient-to-t from-background to-transparent" />
 			</div>

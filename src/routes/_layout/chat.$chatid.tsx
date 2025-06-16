@@ -21,7 +21,7 @@ import { convexQuery } from "@convex-dev/react-query";
 import { useMutation } from "convex/react";
 import type { Infer } from "convex/values";
 
-import { GitFork } from "lucide-react";
+import { Split } from "lucide-react";
 
 import { useAtBottom } from "@/hooks/useAtBottom";
 
@@ -111,7 +111,7 @@ const Row = memo(function Row({
             <div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs">
               {getModelDisplayName(m.model) ?? m.model}
               <Button aria-label="Fork" variant="ghost" size="icon" onClick={onFork} title="Fork">
-                <GitFork size={16} />
+                <Split size={16} />
               </Button>
             </div>
           )}
