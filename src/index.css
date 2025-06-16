@@ -103,22 +103,22 @@ div[class*='language-'] code {
 }
 
 .dark {
-  --background: oklch(26.9% 0 0); /* Subtle blue-tinted dark background */
+  --background: oklch(20.5% 0 0); /* Subtle blue-tinted dark background */
   --foreground: oklch(0.95 0 0);
-  --card: oklch(26.9% 0 0); /* Subtle blue-tinted dark cards */
+  --card: oklch(20.5% 0 0); /* Subtle blue-tinted dark cards */
   --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(26.9% 0 0); /* Subtle blue-tinted dark popover */
+  --popover: oklch(20.5% 0 0); /* Subtle blue-tinted dark popover */
   --popover-foreground: oklch(0.95 0 0);
   --primary: oklch(87% 0 0); /* Bright blue for primary */
   --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(37.1% 0 0); /* Subtle blue-tinted dark secondary */
+  --secondary: oklch(26.9% 0 0); /* Subtle blue-tinted dark secondary */
   --secondary-foreground: oklch(0.9 0 0);
   --muted: oklch(0.14 0.01 240); /* Subtle blue-tinted dark muted */
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.7 0.3 240); /* Subtle blue-tinted dark accent */
   --accent-foreground: oklch(0.95 0 0);
   --destructive: oklch(38.597% 0.13655 25.615);
-  --border: oklch(37.1% 0 0);/* Subtle blue-tinted dark border */
+  --border: oklch(26.9% 0 0);/* Subtle blue-tinted dark border */
   --input: oklch(0.15 0.01 240); /* Subtle blue-tinted dark input */
   --ring: oklch(0.7 0.3 240); /* Bright blue for focus ring */
   --chart-1: oklch(0.7 0.3 240); /* Bright blue chart color */

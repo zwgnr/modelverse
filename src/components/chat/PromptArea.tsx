@@ -215,14 +215,14 @@ export function PromptArea(props: PromptAreaProps) {
 				)}
 			>
 				{/*  input container  */}
-				<div className="overflow-hidden rounded-4xl border border-border bg-background shadow-black/5 shadow-sm backdrop-blur-lg">
+				<div className="relative overflow-hidden rounded-4xl border border-black/10 bg-black/[0.01] shadow-black/5 shadow-xl backdrop-blur-md backdrop-saturate-150 before:absolute before:inset-0 before:rounded-4xl before:bg-gradient-to-br before:from-black/2 before:via-transparent before:to-transparent dark:border-white/10 dark:bg-white/[0.01] dark:shadow-black/30 dark:before:from-white/2">
 					{/*  Text area  */}
 					<PromptInput
 						value={text}
 						onValueChange={setText}
 						onSubmit={handleSubmit}
 						isLoading={isStreaming}
-						className="border-0 bg-transparent p-4 shadow-none"
+						className="relative z-10 border-0 bg-transparent p-4 shadow-none"
 					>
 						<PromptInputTextarea
 							placeholder={currentPlaceholder}
@@ -230,7 +230,7 @@ export function PromptArea(props: PromptAreaProps) {
 							disabled={
 								(!createNewConversation && !conversationId) || isStreaming
 							}
-							className="border-0 bg-transparent! text-foreground focus:ring-0"
+							className="border-0 bg-transparent! text-foreground placeholder:text-foreground/70 focus:ring-0 dark:placeholder:text-foreground/60"
 						/>
 					</PromptInput>
 
@@ -292,11 +292,11 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 	return (
 		<Fragment>
 			{files.length > 0 && (
-				<div className="flex flex-wrap gap-2 border-border/50 border-t px-2 py-2">
+				<div className="relative z-10 flex flex-wrap gap-2 border-black/5 border-t px-2 py-2 dark:border-white/5">
 					{files.map(({ file }, i) => (
 						<div
 							key={file.name}
-							className="flex items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2 text-secondary-foreground text-sm"
+							className="flex items-center gap-2 rounded-lg border border-black/10 bg-black/[0.01] px-3 py-2 text-foreground text-sm dark:border-white/10 dark:bg-white/[0.02]"
 						>
 							{file.type.startsWith("image/") ? (
 								<FileImage className="h-4 w-4" />
@@ -307,7 +307,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+								className="h-4 w-4 p-0 hover:bg-destructive/30 hover:text-destructive-foreground"
 								onClick={() => onRemoveFile(i)}
 							>
 								<X className="h-3 w-3" />
@@ -319,8 +319,8 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 
 			<div
 				className={cn(
-					"flex items-center justify-between px-3 py-3",
-					files.length > 0 && "border-border/50 border-t",
+					"relative z-10 flex items-center justify-between px-3 py-3",
+					files.length > 0 && "border-black/5 border-t dark:border-white/5",
 				)}
 			>
 				{/* left side buttons */}
@@ -330,7 +330,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						variant="ghost"
 						size="icon"
 						onClick={openFileDialog}
-						className="h-8 w-8 rounded-lg text-muted hover:bg-accent"
+						className="h-8 w-8 rounded-lg border border-black/5 bg-transparent text-muted hover:bg-black/10 dark:border-white/5 dark:hover:bg-white/10"
 					>
 						<Paperclip className="h-4 w-4 text-muted-foreground" />
 					</Button>
@@ -349,13 +349,18 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						size="icon"
 						onClick={onToggleWeb}
 						className={cn(
-							"h-8 w-8 rounded-lg transition-colors",
+							"h-8 w-8 rounded-lg border transition-all duration-200",
 							web
-								? "bg-primary"
-								: "",
+								? "border-primary/30 bg-primary/20 text-primary shadow-md shadow-primary/10 hover:bg-primary/30"
+								: "border-black/5 bg-transparent hover:bg-black/10! dark:border-white/5 dark:hover:bg-white/10!",
 						)}
 					>
-						<Globe className={cn("h-4 w-4 text-muted-foreground", web && "text-primary-foreground")} />
+						<Globe
+							className={cn(
+								"h-4 w-4",
+								web ? "text-primary" : "text-muted-foreground",
+							)}
+						/>
 					</Button>
 
 					{/* model picker */}
@@ -371,7 +376,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 					<Button
 						size="icon"
 						onClick={onStop}
-						className="h-9 w-9 rounded-xl bg-foreground hover:bg-foreground/80"
+						className="h-9 w-9 rounded-xl border border-black/10 bg-foreground/90 shadow-md hover:bg-foreground/80 dark:border-white/10"
 					>
 						<Square className="h-4 w-4" />
 					</Button>
@@ -380,7 +385,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						size="icon"
 						onClick={onSubmit}
 						disabled={!canSend || isStreaming}
-						className="h-9 w-9 rounded-xl bg-primary hover:bg-primary/90 disabled:bg-primary/30"
+						className="h-9 w-9 rounded-xl bg-primary/90 shadow-md shadow-primary/15 hover:bg-primary/80 disabled:bg-primary/40 disabled:shadow-primary/10"
 					>
 						<Send className="h-4 w-4" />
 					</Button>
