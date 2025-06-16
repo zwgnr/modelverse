@@ -112,7 +112,7 @@ export function ModelPicker({
 					<ChevronDown className="h-4 w-4 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-80 border-0 p-0 shadow-xl" align="start">
+			<PopoverContent className="z-50 w-80 border-0 p-0 shadow-xl" align="start">
 				<Command className="overflow-hidden rounded-lg border border-border backdrop-blur-lg">
 					<CommandInput placeholder="Search models..." className="border-0" />
 					<CommandList className="max-h-96">

@@ -158,8 +158,9 @@ function RouteComponent() {
 									onClick={toggleSidebar}
 									variant="ghost"
 									size="icon"
-									className="mr-2 hover:scale-110"
+									className="mr-2 rounded-xl hover:scale-110"
 									title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
+									aria-label="Toggle sidebar"
 								>
 									<PanelLeft
 										className={cn(
@@ -181,23 +182,34 @@ function RouteComponent() {
 									{/* Search Icon Button */}
 									<Button
 										onClick={handleOpenCommandPalette}
-										variant="outline"
+										variant="ghost"
 										size="icon"
-										className="fade-in slide-in-from-left-3 h-9 w-9 animate-in duration-300 hover:scale-105"
+										className={cn(
+											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all duration-300",
+											"rounded-xl border border-border shadow-xs backdrop-blur-sm hover:shadow-sm",
+											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+										)}
 										title="Search (⌘K)"
+										aria-label="Search"
 									>
-										<Search className="h-4 w-4" />
+										<Search className="h-4 w-4 opacity-70" />
 									</Button>
 
 									{/* New Chat Button */}
 									<Button
+										aria-label="New Chat"
 										asChild
+										variant="outline"
 										size="icon"
-										className="fade-in slide-in-from-left-3 h-9 w-9 animate-in delay-75 duration-300 hover:scale-105"
+										className={cn(
+											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all delay-75 duration-300",
+											"rounded-xl shadow-xs backdrop-blur-sm hover:shadow-sm",
+											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+										)}
 										title="New Chat (⌘N)"
 									>
 										<Link to="/">
-											<MessageCirclePlus className="h-4 w-4 text-primary-foreground" />
+											<MessageCirclePlus className="h-4 w-4 opacity-80" />
 										</Link>
 									</Button>
 								</div>

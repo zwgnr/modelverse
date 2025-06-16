@@ -34,6 +34,7 @@ import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
 import { PromptArea } from "@/components/chat/PromptArea";
 import { ScrollToBottomButton } from "@/components/chat/ScrollToBottom";
 import { StreamingMessage } from "@/components/chat/StreamingMessage";
+import { Button } from "@/components/ui/button";
 
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
@@ -109,9 +110,9 @@ const Row = memo(function Row({
           {m.model && (!driven || m.response) && (
             <div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs">
               {getModelDisplayName(m.model) ?? m.model}
-              <button type="button" onClick={onFork} title="Fork">
-                <GitFork size={12} />
-              </button>
+              <Button aria-label="Fork" variant="ghost" size="icon" onClick={onFork} title="Fork">
+                <GitFork size={16} />
+              </Button>
             </div>
           )}
         </div>
@@ -297,7 +298,7 @@ function ChatConversation() {
         <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-40 h-32 bg-gradient-to-t from-background via-background/80 to-transparent" />
 
         {!atBottom && (
-          <div className="-translate-x-1/2 absolute bottom-44 left-1/2 z-60 transform">
+          <div className="-translate-x-1/2 absolute bottom-44 left-1/2 z-40 transform">
             <ScrollToBottomButton onClick={scrollToBottom} />
           </div>
         )}

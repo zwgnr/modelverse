@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 
 import { MessageCirclePlus, Search } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 
 interface SidebarActionsProps {
@@ -15,14 +17,18 @@ export function SidebarActions({ onOpenCommandPalette }: SidebarActionsProps) {
 				{/* Full width search command palette */}
 				<Button
 					onClick={onOpenCommandPalette}
-					variant="outline"
-					className="h-10 flex-1 justify-start border-secondary border-dashed text-left text-sm transition-all duration-200 hover:bg-secondary hover:text-secondary-foreground"
+					variant="ghost"
+					className={cn(
+						"h-10 flex-1 justify-start text-left text-sm transition-all duration-200",
+						"rounded-xl border border-border shadow-xs backdrop-blur-sm",
+						"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
+					)}
 					title="Command Palette (⌘K)"
 				>
-					<Search className="mr-3 h-4 w-4" />
-					<span>Search</span>
+					<Search className="mr-3 h-4 w-4 opacity-70" />
+					<span className="text-muted-foreground">Search</span>
 					<div className="ml-auto flex items-center">
-						<kbd className="inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium font-mono text-[9px] text-muted-foreground opacity-100">
+						<kbd className="inline-flex h-4 select-none items-center gap-1 rounded border border-input/30 bg-muted/50 px-1.5 font-medium font-mono text-[9px] text-muted-foreground/80 backdrop-blur-sm">
 							<span className="text-xs">
 								{typeof navigator !== "undefined" &&
 								navigator.platform.includes("Mac")
@@ -36,14 +42,20 @@ export function SidebarActions({ onOpenCommandPalette }: SidebarActionsProps) {
 
 				{/* New Chat Button */}
 				<Button
+					aria-label="New Chat"
 					asChild
-					//variant="outline"
+					variant="outline"
 					size="icon"
 					title="New Chat (⌘N)"
-					className="h-10 w-10 transition-all duration-200"
+					className={cn(
+						"h-10 w-10 transition-all duration-200",
+						"rounded-xl shadow-xs backdrop-blur-sm",
+						" hover:shadow-sm",
+						"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
+					)}
 				>
 					<Link to="/">
-						<MessageCirclePlus className="h-4 w-4 text-primary-foreground" />
+						<MessageCirclePlus className="h-4 w-4 opacity-80" />
 					</Link>
 				</Button>
 			</div>
