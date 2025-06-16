@@ -54,10 +54,8 @@ const SidebarFooter = React.memo(SidebarFooterInner);
 
 export function Sidebar({
 	currentConversationId,
-	currentUser,
 	onConversationDelete,
 	onOpenCommandPalette,
-	onSignOut,
 	isVisible,
 }: SidebarProps) {
 	const deleteConversation = useMutation(api.conversations.deleteConversation);
@@ -85,7 +83,7 @@ export function Sidebar({
 	return (
 		<div
 			className={cn(
-				"flex h-screen w-64 flex-col overflow-hidden border-r pt-2",
+				"flex h-screen w-64 flex-col overflow-hidden border-r pt-2 pb-1",
 				!isVisible && "pointer-events-none",
 			)}
 		>

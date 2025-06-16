@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 
-import { createFileRoute, useNavigate, } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { Shield, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,6 +57,36 @@ function SecuritySettings() {
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
+			{/* Links to Legal Documents */}
+			<Card className="p-6">
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<Shield className="h-5 w-5" />
+						Legal & Privacy
+					</CardTitle>
+					<p className="text-muted-foreground text-sm">
+						Review our privacy and terms of service policies
+					</p>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0">
+						<Link to="/privacy">
+							<Button variant="outline" className="w-full sm:w-auto">
+								Privacy Policy
+							</Button>
+						</Link>
+						<Link to="/terms">
+							<Button variant="outline" className="w-full sm:w-auto">
+								Terms of Service
+							</Button>
+						</Link>
+					</div>
+					<p className="text-muted-foreground text-xs">
+						These documents explain how we handle your data and the terms of using our service.
+					</p>
+				</CardContent>
+			</Card>
+
 			{/* Delete Account */}
 			<Card className="border-destructive/20 p-6">
 				<CardHeader>
@@ -71,7 +101,7 @@ function SecuritySettings() {
 				<CardContent>
 					<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 						<DialogTrigger asChild>
-							<Button variant="destructive" className="w-full">
+							<Button variant="destructive">
 								<Trash2 className="mr-2 h-4 w-4" />
 								Delete Account
 							</Button>
