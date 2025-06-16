@@ -1,6 +1,7 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useQuery } from "convex/react";
+import { convexQuery } from "@convex-dev/react-query";
 
 import { BarChart3 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
@@ -68,7 +69,7 @@ function getProviderIconWithColor(model: string) {
 }
 
 function UsageSettings() {
-	const user = useQuery(api.auth.getCurrentUser);
+	const { data: user } = useSuspenseQuery(convexQuery(api.auth.getCurrentUser, {}));
 
 	// Process model usage data with proper deduplication
 	const processedUsageData =

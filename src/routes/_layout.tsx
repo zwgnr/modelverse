@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Link,
@@ -42,6 +42,9 @@ export const Route = createFileRoute("/_layout")({
 			context.queryClient.ensureQueryData(
 				convexQuery(api.auth.getCurrentUser, {}),
 			),
+			context.queryClient.ensureQueryData(
+				convexQuery(api.users.getCustomization, {}),
+			),
 		]);
 	},
 });
@@ -52,6 +55,7 @@ function RouteComponent() {
 	const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 	const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
 	const [, setDefaultModel] = useAtom(defaultModelAtom);
+
 
 	const { data: currentUser } = useSuspenseQuery(
 		convexQuery(api.auth.getCurrentUser, {}),
@@ -159,7 +163,6 @@ function RouteComponent() {
 				>
 					<Sidebar
 						currentConversationId={currentChatId as Id<"conversations">}
-						currentUser={currentUser}
 						onConversationDelete={handleConversationDelete}
 						onOpenCommandPalette={handleOpenCommandPalette}
 						onSignOut={handleSignOut}

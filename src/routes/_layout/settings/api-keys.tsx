@@ -1,8 +1,10 @@
 import { useEffect, useId, useState } from "react";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useMutation, useQuery } from "convex/react";
+import { convexQuery } from "@convex-dev/react-query";
+import { useMutation } from "convex/react";
 
 import { Eye, Key, Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -21,7 +23,9 @@ export const Route = createFileRoute("/_layout/settings/api-keys")({
 function ApiKeysSettings() {
 	const apiKeyId = useId();
 
-	const user = useQuery(api.auth.getCurrentUser);
+	const { data: user } = useSuspenseQuery(
+		convexQuery(api.auth.getCurrentUser, {}),
+	);
 	const storeKey = useMutation(api.users.storeOpenRouterKey);
 	const deleteKey = useMutation(api.users.deleteOpenRouterKey);
 

@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { LogOut, Settings, User } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle.js";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Popover,
@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/popover";
 
 interface AccountPopoverProps {
-	currentUser: { email?: string | null } | null;
+	currentUser: {
+		email?: string | null;
+		image?: string;
+		name?: string;
+	} | null;
 	onSignOut: () => void;
 }
 
@@ -33,7 +37,17 @@ export function AccountPopover({
 				>
 					<Avatar className="h-10 w-10">
 						<AvatarFallback className="bg-secondary text-sm">
-							<User className="h-4 w-4" />
+							{currentUser?.image ? (
+								<img
+									src={currentUser.image}
+									alt="Profile"
+									className="h-full w-full rounded-full object-cover"
+								/>
+							) : (
+								currentUser?.name?.[0] || currentUser?.email?.[0] || (
+									<User className="h-4 w-4" />
+								)
+							)}
 						</AvatarFallback>
 					</Avatar>
 				</Button>
@@ -79,4 +93,4 @@ export function AccountPopover({
 			</PopoverContent>
 		</Popover>
 	);
-} 
+}

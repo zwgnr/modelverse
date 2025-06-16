@@ -1,19 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, } from "@tanstack/react-router";
 
-import { useQuery } from "convex/react";
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "convex/_generated/api";
 
 import { BarChart3, MessageSquare, TrendingUp, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { api } from "../../../../convex/_generated/api";
 
 export const Route = createFileRoute("/_layout/settings/")({
 	component: GeneralSettings,
 });
 
 function GeneralSettings() {
-	const user = useQuery(api.auth.getCurrentUser);
+	const { data: user } = useSuspenseQuery(
+		convexQuery(api.auth.getCurrentUser, {}),
+	);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">

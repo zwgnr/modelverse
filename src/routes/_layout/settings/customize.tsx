@@ -1,9 +1,10 @@
 import { useId, useState } from "react";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { convexQuery } from "@convex-dev/react-query";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 
 import DOMPurify from "isomorphic-dompurify";
 import { Bot, Plus, X } from "lucide-react";
@@ -50,7 +51,9 @@ function CustomizationSettings() {
 	const traitsId = useId();
 	const customInstructionsId = useId();
 
-	const customization = useQuery(api.users.getCustomization);
+	const { data: customization } = useSuspenseQuery(
+		convexQuery(api.users.getCustomization, {}),
+	);
 	const updateCustomization = useMutation(api.users.updateCustomization);
 
 	const [unsavedChanges, setUnsavedChanges] = useState<{

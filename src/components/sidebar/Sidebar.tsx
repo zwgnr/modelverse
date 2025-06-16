@@ -18,28 +18,8 @@ import { SidebarActions as SidebarActionsInner } from "./SidebarActions";
 import { SidebarFooter as SidebarFooterInner } from "./SidebarFooter";
 import { SidebarHeader as SidebarHeaderInner } from "./SidebarHeader";
 
-type CurrentUser = {
-	totalMessages: number;
-	totalConversations: number;
-	image?: string;
-	twoFactorEnabled?: boolean;
-	name: string;
-	email: string;
-	emailVerified: boolean;
-	userId: string;
-	createdAt: number;
-	updatedAt: number;
-	_id?: Id<"users">;
-	_creationTime?: number;
-	modelUsage?: {
-		model: string;
-		count: number;
-	}[];
-} | null;
-
 interface SidebarProps {
 	currentConversationId?: Id<"conversations">;
-	currentUser: CurrentUser;
 	onConversationDelete?: (deletedConversationId: Id<"conversations">) => void;
 	onOpenChange?: (open: boolean) => void;
 	onOpenCommandPalette?: () => void;
