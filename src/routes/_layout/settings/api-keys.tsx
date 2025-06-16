@@ -16,7 +16,7 @@ import { api } from "../../../../convex/_generated/api";
 
 export const Route = createFileRoute("/_layout/settings/api-keys")({
 	component: ApiKeysSettings,
-}); 
+});
 
 function ApiKeysSettings() {
 	const apiKeyId = useId();
@@ -28,15 +28,15 @@ function ApiKeysSettings() {
 	const [openRouterKey, setOpenRouterKey] = useState("");
 	const [showKey, setShowKey] = useState(false);
 
+	const hasApiKey = !!user?.openRouterKey;
+
 	useEffect(() => {
-		if (user) {
-			if (user.openRouterKey) {
-				setOpenRouterKey("********************");
-			} else {
-				setOpenRouterKey("");
-			}
+		if (hasApiKey) {
+			setOpenRouterKey("********************");
+		} else {
+			setOpenRouterKey("");
 		}
-	}, [user]);
+	}, [hasApiKey]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
@@ -47,7 +47,7 @@ function ApiKeysSettings() {
 						Bring Your Own Key (BYOK)
 					</CardTitle>
 					<p className="pt-2 text-muted-foreground text-sm">
-						Use your own OpenRouter API key for premium model access.
+						Use your own OpenRouter API key for access to all models.
 					</p>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -61,13 +61,15 @@ function ApiKeysSettings() {
 								onChange={(e) => setOpenRouterKey(e.target.value)}
 								placeholder="Enter your OpenRouter API key"
 							/>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setShowKey(!showKey)}
-							>
-								<Eye className="h-4 w-4" />
-							</Button>
+							{!hasApiKey && (
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={() => setShowKey(!showKey)}
+								>
+									<Eye className="h-4 w-4" />
+								</Button>
+							)}
 						</div>
 						<p className="flex items-center gap-2 pt-1 text-muted-foreground text-xs">
 							<Lock className="h-3 w-3" />
@@ -79,11 +81,8 @@ function ApiKeysSettings() {
 							onClick={async () => {
 								await storeKey({ key: openRouterKey });
 								toast.success("OpenRouter key saved!");
-								setOpenRouterKey("********************");
 							}}
-							disabled={
-								!openRouterKey || openRouterKey.includes("*")
-							}
+							disabled={!openRouterKey || openRouterKey.includes("*")}
 						>
 							Save Key
 						</Button>
@@ -94,7 +93,7 @@ function ApiKeysSettings() {
 								toast.success("OpenRouter key deleted!");
 								setOpenRouterKey("");
 							}}
-							disabled={!user?.openRouterKey}
+							disabled={!hasApiKey}
 						>
 							Delete Key
 						</Button>
@@ -104,4 +103,3 @@ function ApiKeysSettings() {
 		</div>
 	);
 }
-

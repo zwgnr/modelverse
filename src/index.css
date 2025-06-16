@@ -83,7 +83,7 @@ div[class*='language-'] code {
   --muted-foreground: oklch(0.5 0 0);
   --accent: oklch(14.5% 0 0);
   --accent-foreground: oklch(0.18 0 0);
-  --destructive: oklch(82.111% 0.07867 13.911);
+  --destructive: oklch(59.632% 0.23595 26.538);
   --border: oklch(90% 0.008 240); /* Subtle blue-tinted border */
   --input: oklch(92% 0.008 240); /* Subtle blue-tinted input */
   --ring: oklch(0.6 0.25 240); /* Nice blue ring */

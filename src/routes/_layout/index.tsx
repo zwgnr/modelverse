@@ -1,6 +1,12 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 
+import { convexQuery } from "@convex-dev/react-query";
+
+import { Onboarding } from "@/components/chat/onboarding";
 import { PromptArea } from "@/components/chat/PromptArea";
+
+import { api } from "../../../convex/_generated/api";
 
 export const Route = createFileRoute("/_layout/")({
 	component: IndexComponent,
@@ -8,6 +14,11 @@ export const Route = createFileRoute("/_layout/")({
 
 function IndexComponent() {
 	const router = useRouter();
+
+	/* User */
+	const { data: currentUser } = useSuspenseQuery(
+		convexQuery(api.auth.getCurrentUser, {}),
+	);
 
 	const handleNavigateToChat = (conversationId: string) => {
 		router.navigate({
@@ -17,20 +28,28 @@ function IndexComponent() {
 		});
 	};
 
+	// Check if user has encrypted OpenRouter API key
+	const hasApiKey = !!currentUser?.openRouterKey;
+
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center px-4">
 			<div className="w-full max-w-4xl space-y-8 text-center">
-				<div className="space-y-4">
-					<p className="text-3xl text-foreground">
-						What can I help you with?
-					</p>
-				</div>
-
-				<PromptArea
-					createNewConversation={true}
-					onNavigateToChat={handleNavigateToChat}
-					className="relative"
-				/>
+				{hasApiKey ? (
+					<>
+					<div className="space-y-4">
+						<p className="text-3xl text-foreground">
+							What can I help you with?
+						</p>
+					</div>
+					<PromptArea
+						createNewConversation={true}
+						onNavigateToChat={handleNavigateToChat}
+						className="relative"
+					/>
+					</>
+				) : (
+					<Onboarding />
+				)}
 			</div>
 		</div>
 	);
