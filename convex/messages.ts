@@ -265,7 +265,7 @@ async function buildUserMessageContent(ctx: any, message: any) {
 	const contentParts = [];
 
 	// Add text content first
-	if (message.prompt && message.prompt.trim()) {
+	if (message.prompt?.trim()) {
 		contentParts.push({
 			type: "text",
 			text: message.prompt,

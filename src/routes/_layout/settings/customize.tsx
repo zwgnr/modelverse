@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convexQuery } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "convex/react";
 
+import DOMPurify from "isomorphic-dompurify";
 import { Bot, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -192,7 +193,7 @@ function CustomizationSettings() {
 										variant="secondary"
 										className="flex items-center gap-1"
 									>
-										{trait}
+										{DOMPurify.sanitize(trait)}
 										<button
 											type="button"
 											onClick={() => removeTrait(trait)}
@@ -281,7 +282,7 @@ function CustomizationSettings() {
 							id={customInstructionsId}
 							placeholder="Enter specific instructions for how the AI should assist you..."
 							className="min-h-[120px]"
-							value={currentCustomInstructions}
+							value={DOMPurify.sanitize(currentCustomInstructions)}
 							onChange={(e) => {
 								const value = e.target.value;
 								const validation = validateCustomInstructions(value);

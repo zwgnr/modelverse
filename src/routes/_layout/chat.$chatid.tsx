@@ -21,6 +21,7 @@ import { convexQuery } from "@convex-dev/react-query";
 import { useMutation } from "convex/react";
 import type { Infer } from "convex/values";
 
+import DOMPurify from "isomorphic-dompurify";
 import { Split } from "lucide-react";
 
 import { useAtBottom } from "@/hooks/useAtBottom";
@@ -51,9 +52,6 @@ export const Route = createFileRoute("/_layout/chat/$chatid")({
   component: ChatConversation,
 });
 
-/* -----------------------------------------------------------------------------
- * Message row
- * ---------------------------------------------------------------------------*/
 interface RowProps {
   m: Doc<"messages">;
   driven: boolean;
@@ -76,7 +74,7 @@ const Row = memo(function Row({
       {/* User bubble */}
       <div className="flex justify-end">
         <Bubble className="flex w-fit max-w-2xs items-center bg-secondary text-secondary-foreground">
-          {m.prompt}
+          {DOMPurify.sanitize(m.prompt)}
           {!!m.files?.length && (
             <div className="mt-3 space-y-2">
               {m.files.map((f) => (

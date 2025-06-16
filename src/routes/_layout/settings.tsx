@@ -47,7 +47,7 @@ function SettingsLayout() {
 	];
 
 	return (
-		<div className="flex min-h-screen flex-col bg-card">
+		<div className="flex min-h-screen flex-col bg-card px-12">
 			<div className="container mx-auto mb-24 flex min-h-0 max-w-6xl flex-1 flex-col">
 				{/* Header */}
 				<div className="mb-8">
