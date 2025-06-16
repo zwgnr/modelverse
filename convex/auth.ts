@@ -60,10 +60,19 @@ export const getCurrentUser = query({
 		const user = await ctx.db.get(userMetadata.userId as Id<"users">);
 		const totalMessages =
 			user?.modelUsage?.reduce((acc, { count }) => acc + count, 0) ?? 0;
+		
+		// Get total conversations count
+		const totalConversations = await ctx.db
+			.query("conversations")
+			.withIndex("by_user", (q) => q.eq("userId", userMetadata.userId as Id<"users">))
+			.collect()
+			.then(conversations => conversations.length);
+		
 		return {
 			...user,
 			...userMetadata,
 			totalMessages,
+			totalConversations,
 		};
 	},
 });

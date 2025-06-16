@@ -122,10 +122,11 @@ export const getModelDisplayName = (modelId: string): string | null => {
 		[MODEL_IDS[2]]: "GPT-4.1",
 		[MODEL_IDS[3]]: "Claude Sonnet 4",
 		[MODEL_IDS[4]]: "Claude Opus 4",
-		[MODEL_IDS[5]]: "Gemini 2.5 Flash",
-		[MODEL_IDS[6]]: "Gemini 2.5 Pro",
-		[MODEL_IDS[7]]: "DeepSeek R1",
-		[MODEL_IDS[8]]: "Grok 3",
+		[MODEL_IDS[5]]: "Gemini 2.0 Flash",
+		[MODEL_IDS[6]]: "Gemini 2.5 Flash",
+		[MODEL_IDS[7]]: "Gemini 2.5 Pro",
+		[MODEL_IDS[8]]: "DeepSeek R1",
+		[MODEL_IDS[9]]: "Grok 3",
 	};
 
 	const displayName = modelNames[baseModel] || baseModel;

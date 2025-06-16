@@ -21,6 +21,12 @@ function SettingsLayout() {
 			path: "/settings",
 		},
 		{
+			value: "usage",
+			label: "Usage",
+			icon: BarChart3,
+			path: "/settings/usage",
+		},
+		{
 			value: "customize",
 			label: "Customize",
 			icon: Bot,
@@ -33,12 +39,6 @@ function SettingsLayout() {
 			path: "/settings/api-keys",
 		},
 		{
-			value: "usage",
-			label: "Usage",
-			icon: BarChart3,
-			path: "/settings/usage",
-		},
-		{
 			value: "security",
 			label: "Security",
 			icon: Shield,
@@ -48,17 +48,14 @@ function SettingsLayout() {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-card">
-			<div className="container mx-auto mb-16 flex min-h-0 max-w-6xl flex-1 flex-col p-8">
+			<div className="container mx-auto mb-24 flex min-h-0 max-w-6xl flex-1 flex-col">
 				{/* Header */}
 				<div className="mb-8">
 					<h1 className="font-bold text-3xl">Settings</h1>
-					<p className="mt-2 text-muted-foreground">
-						Manage your account and application preferences
-					</p>
 				</div>
 
 				{/* Navigation */}
-				<div className="mb-6 grid w-full grid-cols-5 rounded-lg bg-muted p-1">
+				<div className="mb-6 grid w-full grid-cols-5 gap-2 rounded-lg bg-secondary p-1">
 					{tabs.map((tab) => {
 						const Icon = tab.icon;
 						const isActive = location.pathname === tab.path;
@@ -71,7 +68,7 @@ function SettingsLayout() {
 									"flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors",
 									isActive
 										? "bg-background text-foreground shadow-sm"
-										: "text-muted-foreground hover:text-foreground"
+										: "text-secondary-foreground hover:bg-background/50"
 								)}
 							>
 								<Icon className="h-4 w-4" />

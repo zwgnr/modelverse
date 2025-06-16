@@ -20,6 +20,7 @@ import { SidebarHeader as SidebarHeaderInner } from "./SidebarHeader";
 
 type CurrentUser = {
 	totalMessages: number;
+	totalConversations: number;
 	image?: string;
 	twoFactorEnabled?: boolean;
 	name: string;
