@@ -3,7 +3,7 @@ import * as React from "react";
 import type { modelId } from "convex/schema";
 import type { Infer } from "convex/values";
 
-import { Check, ChevronDown, } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 import type { Model } from "@/lib/models";
 import { models } from "@/lib/models";
@@ -41,7 +41,7 @@ interface ModelPickerProps {
 const providerIcons = {
 	OpenAI: OpenAIIcon,
 	Anthropic: AnthropicIcon,
-	Google: GeminiIcon, 
+	Google: GeminiIcon,
 	"X.AI": xAIGrok,
 	DeepSeek: DeepSeek,
 };
@@ -103,9 +103,7 @@ export function ModelPicker({
 						{selectedModel && (
 							<div className="flex items-center justify-center">
 								{React.createElement(providerIcons[selectedModel.company], {
-									className: cn(
-										"h-4 w-4 shrink-0 transition-colors"
-									)
+									className: cn("h-4 w-4 shrink-0 transition-colors"),
 								})}
 							</div>
 						)}
@@ -116,24 +114,29 @@ export function ModelPicker({
 					<ChevronDown className="h-4 w-4 shrink-0 opacity-0 transition-transform group-hover:opacity-100 group-data-[state=open]:rotate-180" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="z-50 w-80 border-0 p-0 shadow-xl" align="start">
-				<Command className="overflow-hidden rounded-lg border border-border backdrop-blur-lg">
+			<PopoverContent
+				className="z-50 w-80 rounded-lg border-0 p-0 shadow-xl"
+				align="start"
+			>
+				<Command className="overflow-hidden rounded-lg border border-border">
 					<CommandInput placeholder="Search models..." className="border-0" />
 					<CommandList className="max-h-96">
 						<CommandEmpty>No models found.</CommandEmpty>
-						
+
 						{Object.entries(groupedModels).map(([company, companyModels]) => (
 							<CommandGroup key={company} className="p-2">
 								<div className="mb-1 flex items-center gap-2 px-2 py-1">
 									<div
 										className={cn(
 											"h-2 w-2 rounded-full",
-											companyAccentColors[company as keyof typeof companyAccentColors],
+											companyAccentColors[
+												company as keyof typeof companyAccentColors
+											],
 										)}
 									/>
 									<span className="font-medium text-sm">{company}</span>
 								</div>
-								
+
 								{companyModels.map((model) => {
 									const isSelected = value === model.id;
 									const ProviderIcon = providerIcons[model.company];
@@ -146,20 +149,17 @@ export function ModelPicker({
 												onValueChange?.(model.id);
 												setOpen(false);
 											}}
-											className={cn(
-												"group relative cursor-pointer rounded-lg p-4 transition-all duration-200 ",
-												"",
-											)}
+											className="group relative cursor-pointer rounded-lg p-4 transition-all duration-200 "
 										>
 											<div className="flex items-start gap-3">
-												<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background/50 transition-colors">
+												<div className="flex h-8 w-8 items-center justify-center rounded-lg border border-muted transition-colors">
 													{React.createElement(ProviderIcon, {
 														className: cn(
 															"h-4 w-4 transition-colors",
-															isSelected 
+															isSelected
 																? companyIconColors[model.company]
-																: "text-muted-foreground"
-														)
+																: "text-muted-foreground",
+														),
 													})}
 												</div>
 												<div className="min-w-0 flex-1">
@@ -168,10 +168,12 @@ export function ModelPicker({
 															{model.name}
 														</span>
 														{isSelected && (
-															<Check className={cn(
-																"h-3 w-3",
-																companyIconColors[model.company]
-															)} />
+															<Check
+																className={cn(
+																	"h-3 w-3",
+																	companyIconColors[model.company],
+																)}
+															/>
 														)}
 													</div>
 													{model.description && (
@@ -191,4 +193,4 @@ export function ModelPicker({
 			</PopoverContent>
 		</Popover>
 	);
-} 
+}

@@ -79,7 +79,7 @@ div[class*='language-'] code {
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(92.2% 0 0); /* Subtle blue-tinted secondary */
   --secondary-foreground: oklch(0.22 0 0);
-  --muted: oklch(87% 0 0); 
+  --muted: oklch(87% 0 0); /* Subtle blue-tinted muted */
   --muted-foreground: oklch(70.8% 0 0);
   --accent: oklch(0.7 0.3 240);
   --accent-foreground: oklch(0.18 0 0);
@@ -100,6 +100,7 @@ div[class*='language-'] code {
   --sidebar-accent-foreground: oklch(0.18 0 0);
   --sidebar-border: oklch(88% 0.01 240); /* Subtle blue-tinted sidebar border */
   --sidebar-ring: oklch(0.6 0.25 240);
+  --scroll: oklch(87% 0 0);
 }
 
 .dark {
@@ -134,6 +135,7 @@ div[class*='language-'] code {
   --sidebar-accent-foreground: oklch(0.9 0 0);
   --sidebar-border: oklch(0.18 0.012 240); /* Subtle blue-tinted dark sidebar border */
   --sidebar-ring: oklch(0.7 0.3 240);
+  --scroll: oklch(43.9% 0 0);
 }
 
 @theme inline {
@@ -355,7 +357,7 @@ pre[class*='language-'],
 /* Global scrollbar styling for all scroll areas */
 * {
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--muted) transparent; /* Firefox */
+  scrollbar-color: var(--scroll) transparent; /* Firefox */
 }
 
 /* WebKit scrollbar styling for all elements */
