@@ -25,8 +25,8 @@ import {
 import { selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
+import { ModelPicker } from "@/components/chat/model-picker";
 import { Button } from "@/components/ui/button";
-import { ModelPicker } from "@/components/ui/model-picker";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 
 import { api } from "../../../convex/_generated/api";
@@ -215,14 +215,14 @@ export function PromptArea(props: PromptAreaProps) {
 				)}
 			>
 				{/*  input container  */}
-				<div className="overflow-hidden rounded-3xl border bg-background/80 shadow-black/5 shadow-xl backdrop-blur-lg">
+				<div className="overflow-hidden rounded-4xl border border-border bg-background shadow-black/5 shadow-sm backdrop-blur-lg">
 					{/*  Text area  */}
 					<PromptInput
 						value={text}
 						onValueChange={setText}
 						onSubmit={handleSubmit}
 						isLoading={isStreaming}
-						className="border-0 bg-background/80 p-4 shadow-none"
+						className="border-0 bg-transparent p-4 shadow-none"
 					>
 						<PromptInputTextarea
 							placeholder={currentPlaceholder}
@@ -230,7 +230,7 @@ export function PromptArea(props: PromptAreaProps) {
 							disabled={
 								(!createNewConversation && !conversationId) || isStreaming
 							}
-							className="border-0 bg-background/80! text-base text-foreground focus:ring-0"
+							className="border-0 bg-transparent! text-foreground focus:ring-0"
 						/>
 					</PromptInput>
 
@@ -292,7 +292,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 	return (
 		<Fragment>
 			{files.length > 0 && (
-				<div className="flex flex-wrap gap-2 border-border/50 border-t px-4 py-3">
+				<div className="flex flex-wrap gap-2 border-border/50 border-t px-2 py-2">
 					{files.map(({ file }, i) => (
 						<div
 							key={file.name}
@@ -319,7 +319,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 
 			<div
 				className={cn(
-					"flex items-center justify-between px-4 py-3",
+					"flex items-center justify-between px-3 py-3",
 					files.length > 0 && "border-border/50 border-t",
 				)}
 			>
@@ -330,7 +330,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						variant="ghost"
 						size="icon"
 						onClick={openFileDialog}
-						className="h-8 w-8 rounded-lg hover:bg-accent!"
+						className="h-8 w-8 rounded-lg text-muted hover:bg-accent"
 					>
 						<Paperclip className="h-4 w-4 text-muted-foreground" />
 					</Button>
@@ -351,11 +351,11 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						className={cn(
 							"h-8 w-8 rounded-lg transition-colors",
 							web
-								? "bg-primary text-primary-foreground hover:bg-primary/90"
-								: "hover:bg-accent! hover:text-secondary-foreground",
+								? "bg-primary"
+								: "",
 						)}
 					>
-						<Globe className="h-4 w-4" />
+						<Globe className={cn("h-4 w-4 text-muted-foreground", web && "text-primary-foreground")} />
 					</Button>
 
 					{/* model picker */}
@@ -371,7 +371,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 					<Button
 						size="icon"
 						onClick={onStop}
-						className="h-9 w-9 rounded-lg bg-foreground hover:bg-foreground/80"
+						className="h-9 w-9 rounded-xl bg-foreground hover:bg-foreground/80"
 					>
 						<Square className="h-4 w-4" />
 					</Button>
@@ -380,7 +380,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						size="icon"
 						onClick={onSubmit}
 						disabled={!canSend || isStreaming}
-						className="h-9 w-9 rounded-lg bg-primary hover:bg-primary/90 disabled:bg-primary/30"
+						className="h-9 w-9 rounded-xl bg-primary hover:bg-primary/90 disabled:bg-primary/30"
 					>
 						<Send className="h-4 w-4" />
 					</Button>

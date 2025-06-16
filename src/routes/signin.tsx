@@ -96,7 +96,7 @@ export function SignInForm() {
 					<div className="mb-4 flex items-center justify-center gap-2">
 						<span className="text-2xl">💬</span>
 						<div className="font-bold text-2xl text-foreground">
-							<span className="text-primary">hmmm</span>
+							<span className="text-primary">modelverse</span>
 						</div>
 					</div>
 				</div>

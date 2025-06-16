@@ -86,8 +86,8 @@ export function StreamingMessage({
 
 			{/* error or timeout banner */}
 			{(status === "error" || status === "timeout") && (
-				<div className="mt-2 rounded-md bg-red-100 p-4 text-red-500">
-					Error loading response
+				<div className="mt-2 rounded-md bg-destructive p-4 text-destructive-foreground">
+					error streaming response
 				</div>
 			)}
 

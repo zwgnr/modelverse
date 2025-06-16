@@ -14,7 +14,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-center rounded-md border border-input bg-background",
+				"flex items-center rounded-md border border-border bg-background",
 				className,
 			)}
 		>
@@ -25,7 +25,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 					"relative inline-flex h-9 w-9 items-center justify-center rounded-l-md font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "light"
 						? "bg-primary text-primary-foreground shadow-md"
-						: "text-muted-foreground opacity-60 hover:bg-accent hover:text-accent-foreground",
+						: "text-muted-foreground opacity-60 hover:bg-secondary hover:text-secondary-foreground",
 				)}
 				aria-label="Switch to light mode"
 				aria-pressed={theme === "light"}
@@ -37,10 +37,10 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 				type="button"
 				onClick={() => setTheme("dark")}
 				className={cn(
-					"relative inline-flex h-9 w-9 items-center justify-center rounded-r-md border-input border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+					"relative inline-flex h-9 w-9 items-center justify-center rounded-r-md border-border border-l font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 					theme === "dark"
 						? "bg-primary text-primary-foreground shadow-md"
-						: "text-muted-foreground opacity-60 hover:bg-accent hover:text-accent-foreground",
+						: "text-muted-foreground opacity-60 hover:bg-secondary hover:text-secondary-foreground",
 				)}
 				aria-label="Switch to dark mode"
 				aria-pressed={theme === "dark"}

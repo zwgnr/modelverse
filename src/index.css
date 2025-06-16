@@ -27,7 +27,7 @@ html.transitioning * {
 * {
   transition-property:
     transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
-    outline-offset !important;
+    outline-offset, width !important;
 }
 
 /* Allow specific hover transitions */
@@ -56,82 +56,84 @@ div[class*='language-'] code {
   min-width: 0; /* allow it to shrink inside flex */
 }
 
+
 :root {
-  --primary: oklch(0.75 0.3 142); /* Bright neon green */
+  --primary: oklch(0.6 0.25 240); /* Nice blue */
   --primary-text: #111827;
   --secondary-text: #374151;
   --tertiary-text: #4b5563;
   --secondary-background: #f9f9f9; /* More neutral instead of green tint */
   --bubbles-background: white;
   --bubbles-mine-background: #f4f4f5; /* Neutral user bubble instead of green */
-  --focus-ring: oklch(0.75 0.3 142 / 0.5); /* Bright neon green focus ring */
+  --focus-ring: oklch(0.6 0.25 240 / 0.5); /* Nice blue focus ring */
   color-scheme: light dark;
 
   --radius: 0.625rem;
-  --background: oklch(98% 0 0); /* Clean neutral background */
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(100% 0 0); /* Pure white cards */
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(100% 0 0); /* Pure white popover */
-  --popover-foreground: oklch(0.145 0 0);
+  --background: oklch(98.5% 0 0); /* neutral 100 */
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(98.5% 0 0); /* Subtle blue-tinted cards */
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(98.5% 0 0); /* Subtle blue-tinted popover */
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(14.5% 0 0); /* Nice blue */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(96% 0 0); /* Clean neutral secondary */
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(96% 0 0); /* Clean neutral muted */
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(88% 0 0); /* More visible neutral accent */
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(92% 0 0); /* Clean neutral border */
-  --input: oklch(92% 0 0);
-  --ring: oklch(0.75 0.3 142); /* Bright neon green ring */
-  --chart-1: oklch(0.75 0.3 142); /* Bright neon green chart color */
+  --secondary: oklch(92.2% 0 0); /* Subtle blue-tinted secondary */
+  --secondary-foreground: oklch(0.22 0 0);
+  --muted: oklch(95% 0.008 240); /* Subtle blue-tinted muted */
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(14.5% 0 0);
+  --accent-foreground: oklch(0.18 0 0);
+  --destructive: oklch(82.111% 0.07867 13.911);
+  --border: oklch(90% 0.008 240); /* Subtle blue-tinted border */
+  --input: oklch(92% 0.008 240); /* Subtle blue-tinted input */
+  --ring: oklch(0.6 0.25 240); /* Nice blue ring */
+  --chart-1: oklch(0.6 0.25 240); /* Nice blue chart color */
   --chart-2: oklch(0.75 0.08 162); /* Cool cyan */
   --chart-3: oklch(0.8 0.06 122); /* Soft lime green */
   --chart-4: oklch(0.72 0.1 182); /* Cool teal */
   --chart-5: oklch(0.78 0.09 102); /* Light green */
-  --sidebar: oklch(99% 0 0); /* Clean neutral sidebar */
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.75 0.3 142); /* Bright neon green sidebar primary */
+  --sidebar: oklch(97% 0 0); /* neutral 100 */
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.6 0.25 240); /* Nice blue sidebar primary */
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(88% 0 0); /* More visible sidebar accent */
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(92% 0 0);
-  --sidebar-ring: oklch(0.75 0.3 142);
+  --sidebar-accent: oklch(87% 0 0);
+  --sidebar-accent-foreground: oklch(0.18 0 0);
+  --sidebar-border: oklch(88% 0.01 240); /* Subtle blue-tinted sidebar border */
+  --sidebar-ring: oklch(0.6 0.25 240);
 }
 
 .dark {
-  --background: oklch(0.08 0 0); /* Clean neutral dark background */
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.18 0 0); /* Lighter cards for better contrast */
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.18 0 0); /* Lighter popover for better contrast */
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.8 0.35 142); /* Ultra bright neon green for primary */
+  --background: oklch(26.9% 0 0); /* Subtle blue-tinted dark background */
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(26.9% 0 0); /* Subtle blue-tinted dark cards */
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(26.9% 0 0); /* Subtle blue-tinted dark popover */
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(87% 0 0); /* Bright blue for primary */
   --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.2 0 0); /* Lighter secondary for better contrast */
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.16 0 0); /* Lighter muted for better contrast */
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.28 0 0); /* More visible dark accent */
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.25 0 0); /* Lighter borders for better definition */
-  --input: oklch(0.2 0 0); /* Lighter inputs for better contrast */
-  --ring: oklch(0.8 0.35 142); /* Ultra bright neon green for focus ring */
-  --chart-1: oklch(0.8 0.35 142); /* Ultra bright neon green chart color */
+  --secondary: oklch(37.1% 0 0); /* Subtle blue-tinted dark secondary */
+  --secondary-foreground: oklch(0.9 0 0);
+  --muted: oklch(0.14 0.01 240); /* Subtle blue-tinted dark muted */
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.7 0.3 240); /* Subtle blue-tinted dark accent */
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(38.597% 0.13655 25.615);
+  --border: oklch(37.1% 0 0);/* Subtle blue-tinted dark border */
+  --input: oklch(0.15 0.01 240); /* Subtle blue-tinted dark input */
+  --ring: oklch(0.7 0.3 240); /* Bright blue for focus ring */
+  --chart-1: oklch(0.7 0.3 240); /* Bright blue chart color */
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.1 0 0); /* Slightly lighter sidebar */
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.8 0.35 142); /* Ultra bright neon green for sidebar primary */
+  --sidebar: oklch(0.08 0.008 240); /* Subtle blue-tinted dark sidebar */
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.7 0.3 240); /* Bright blue for sidebar primary */
   --sidebar-primary-foreground: oklch(0.145 0 0);
-  --sidebar-accent: oklch(0.28 0 0); /* More visible dark sidebar accent */
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0); /* Lighter sidebar borders */
-  --sidebar-ring: oklch(0.8 0.35 142);
+  --sidebar-accent: oklch(0.22 0.015 240); /* Subtle blue-tinted dark sidebar accent */
+  --sidebar-accent-foreground: oklch(0.9 0 0);
+  --sidebar-border: oklch(0.18 0.012 240); /* Subtle blue-tinted dark sidebar border */
+  --sidebar-ring: oklch(0.7 0.3 240);
 }
 
 @theme inline {
@@ -348,4 +350,37 @@ pre[class*='language-'],
   100% {
     opacity: 1;
   }
+}
+
+/* Sidebar scroll - hide scrollbar by default, show only when hovering the container */
+.sidebar-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Show scrollbar only when hovering the container */
+.sidebar-scroll:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
 }

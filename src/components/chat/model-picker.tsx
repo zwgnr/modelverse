@@ -28,7 +28,7 @@ import { AnthropicIcon } from "@/components/ui/svg/anthropic";
 import { OpenAIIcon } from "@/components/ui/svg/openai";
 import xAIGrok from "@/components/ui/svg/xia";
 
-import { GeminiIcon } from "./svg/gemini";
+import { GeminiIcon } from "../ui/svg/gemini";
 
 interface ModelPickerProps {
 	value?: string;
@@ -88,10 +88,10 @@ export function ModelPicker({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
-					variant="outline"
+					variant="ghost"
 					aria-expanded={open}
 					className={cn(
-						"group relative h-10 justify-between overflow-hidden border-0 bg-secondary/30 px-3 text-left font-medium transition-all hover:bg-secondary/50",
+						"group relative h-10 justify-between overflow-hidden px-3 text-left font-medium transition-all data-[state=open]:bg-secondary dark:data-[state=open]:bg-secondary/50",
 						className,
 					)}
 				>
@@ -100,8 +100,7 @@ export function ModelPicker({
 							<div className="flex items-center justify-center">
 								{React.createElement(providerIcons[selectedModel.company], {
 									className: cn(
-										"h-4 w-4 shrink-0 transition-colors",
-										companyIconColors[selectedModel.company]
+										"h-4 w-4 shrink-0 transition-colors"
 									)
 								})}
 							</div>
@@ -114,7 +113,7 @@ export function ModelPicker({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-80 border-0 p-0 shadow-xl" align="start">
-				<Command className="overflow-hidden rounded-lg border border-border/50 bg-secondary backdrop-blur-lg">
+				<Command className="overflow-hidden rounded-lg border border-border backdrop-blur-lg">
 					<CommandInput placeholder="Search models..." className="border-0" />
 					<CommandList className="max-h-96">
 						<CommandEmpty>No models found.</CommandEmpty>
@@ -144,8 +143,8 @@ export function ModelPicker({
 												setOpen(false);
 											}}
 											className={cn(
-												"group relative cursor-pointer rounded-lg p-4 transition-all duration-200",
-												"hover:bg-secondary/50",
+												"group relative cursor-pointer rounded-lg p-4 transition-all duration-200 ",
+												"",
 											)}
 										>
 											<div className="flex items-start gap-3">

@@ -16,7 +16,7 @@ export function SidebarActions({ onOpenCommandPalette }: SidebarActionsProps) {
 				<Button
 					onClick={onOpenCommandPalette}
 					variant="outline"
-					className="h-9 flex-1 justify-start border-dashed text-left text-sm transition-all duration-200 hover:bg-secondary hover:text-secondary-foreground"
+					className="h-10 flex-1 justify-start border-secondary border-dashed text-left text-sm transition-all duration-200 hover:bg-secondary hover:text-secondary-foreground"
 					title="Command Palette (⌘K)"
 				>
 					<Search className="mr-3 h-4 w-4" />
@@ -37,13 +37,13 @@ export function SidebarActions({ onOpenCommandPalette }: SidebarActionsProps) {
 				{/* New Chat Button */}
 				<Button
 					asChild
-					variant="outline"
+					//variant="outline"
 					size="icon"
 					title="New Chat (⌘N)"
-					className="transition-all duration-200 hover:scale-105"
+					className="h-10 w-10 transition-all duration-200"
 				>
 					<Link to="/">
-						<MessageCirclePlus className="h-4 w-4 text-primary" />
+						<MessageCirclePlus className="h-4 w-4 text-primary-foreground" />
 					</Link>
 				</Button>
 			</div>

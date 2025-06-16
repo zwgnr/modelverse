@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<{
 	convexQueryClient: ConvexQueryClient;
 }>()({
 	head: () => ({
-		title: "hmmm",
+		title: "modelverse",
 		meta: [
 			{
 				charSet: "utf-8",
@@ -47,7 +47,7 @@ export const Route = createRootRouteWithContext<{
 			{ rel: "stylesheet", href: appCss },
 			{
 				rel: "icon",
-				href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>",
+				href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪐</text></svg>",
 			},
 		],
 	}),
@@ -136,7 +136,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body>
+			<body className="font-geist antialiased">
 				{children}
 				{/* <TanStackRouterDevtools position="bottom-right" /> */}
 				<Scripts />

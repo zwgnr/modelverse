@@ -60,9 +60,9 @@ const Row = memo(function Row({
 		<div className="flex w-full max-w-4xl flex-col space-y-2">
 			{/* user bubble */}
 			<div className="flex justify-end">
-				<Bubble className="flex w-fit max-w-2xs items-center bg-accent text-secondary-foreground">
+				<Bubble className="flex w-fit max-w-2xs items-center bg-secondary text-secondary-foreground">
 					{m.prompt}
-					{m.files?.length && (
+					{!!m.files?.length && (
 						<div className="mt-3 space-y-2">
 							{m.files.map((f) => (
 								<FileDisplay key={f.filename} file={f} messageId={m._id} />
@@ -116,7 +116,7 @@ function ChatConversation() {
 		convexQuery(api.conversations.get, {}),
 	);
 	const title = useMemo(
-		() => conversations?.find((c) => c._id === chatid)?.title ?? "hmmm",
+		() => conversations?.find((c) => c._id === chatid)?.title ?? "modelverse",
 		[conversations, chatid],
 	);
 	useEffect(() => {

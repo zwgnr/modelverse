@@ -21,7 +21,7 @@ function IndexComponent() {
 		<div className="flex flex-1 flex-col items-center justify-center px-4">
 			<div className="w-full max-w-4xl space-y-8 text-center">
 				<div className="space-y-4">
-					<p className="text-muted-foreground text-xl">
+					<p className="text-3xl text-foreground">
 						What can I help you with?
 					</p>
 				</div>

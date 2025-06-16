@@ -148,17 +148,17 @@ function RouteComponent() {
 			</div>
 
 			{/* Main content area */}
-			<div className="flex min-w-0 flex-1 flex-col p-2">
-				<div className="flex h-full flex-col overflow-hidden rounded-xl bg-card">
+			<div className="flex min-w-0 flex-1 flex-col p-0 transition-all duration-300 ease-out">
+				<div className="flex h-full flex-col overflow-hidden bg-card">
 					{/* Header */}
-					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-4 py-3 backdrop-blur-sm">
+					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-4 py-5 backdrop-blur-sm">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<Button
 									onClick={toggleSidebar}
 									variant="ghost"
-									size="sm"
-									className="mr-2 transition-all duration-200 hover:scale-105 hover:bg-accent/50"
+									size="icon"
+									className="mr-2 hover:scale-110"
 									title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
 								>
 									<PanelLeft
@@ -172,7 +172,7 @@ function RouteComponent() {
 								{/* Collapsed Sidebar Actions */}
 								<div
 									className={cn(
-										"flex items-center gap-2 transition-all duration-300",
+										"flex items-center gap-2",
 										sidebarVisible
 											? "pointer-events-none scale-95 opacity-0"
 											: "scale-100 opacity-100",
@@ -192,13 +192,12 @@ function RouteComponent() {
 									{/* New Chat Button */}
 									<Button
 										asChild
-										variant="outline"
 										size="icon"
 										className="fade-in slide-in-from-left-3 h-9 w-9 animate-in delay-75 duration-300 hover:scale-105"
 										title="New Chat (⌘N)"
 									>
 										<Link to="/">
-											<MessageCirclePlus className="h-4 w-4 text-primary" />
+											<MessageCirclePlus className="h-4 w-4 text-primary-foreground" />
 										</Link>
 									</Button>
 								</div>

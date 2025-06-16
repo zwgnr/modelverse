@@ -10,7 +10,6 @@ import { MessageCirclePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { DeleteConfirmationDialog } from "@/components/sidebar/DeleteConfirmationDialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -59,7 +58,6 @@ export function Sidebar({
 	onOpenCommandPalette,
 	onSignOut,
 	isVisible,
-	hasBeenToggled = false,
 }: SidebarProps) {
 	const deleteConversation = useMutation(api.conversations.deleteConversation);
 	const { data: conversations } = useSuspenseQuery(
@@ -86,32 +84,16 @@ export function Sidebar({
 	return (
 		<div
 			className={cn(
-				"flex h-screen w-64 flex-col overflow-hidden p-2 transition-all duration-300 ease-out",
-				hasBeenToggled &&
-					isVisible &&
-					"slide-in-from-left animate-in duration-300 ease-out",
-				hasBeenToggled &&
-					!isVisible &&
-					"slide-out-to-left pointer-events-none animate-out duration-300 ease-in",
-				!hasBeenToggled && !isVisible && "pointer-events-none",
+				"flex h-screen w-64 flex-col overflow-hidden border-r p-3 pt-3",
+				!isVisible && "pointer-events-none",
 			)}
 		>
-			<div
-				className={cn(
-					"flex-shrink-0 transition-all duration-300",
-					!isVisible && "pointer-events-none opacity-0",
-				)}
-			>
+			<div className="flex-shrink-0">
 				<SidebarHeader />
 				<SidebarActions onOpenCommandPalette={onOpenCommandPalette} />
 			</div>
 
-			<ScrollArea
-				className={cn(
-					"[&>div>div]:!block min-h-0 flex-1 p-2 transition-all duration-300",
-					!isVisible && "pointer-events-none opacity-0",
-				)}
-			>
+			<div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto p-2">
 				<div className="space-y-1">
 					{!conversations || conversations.length === 0 ? (
 						<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
@@ -134,14 +116,9 @@ export function Sidebar({
 						))
 					)}
 				</div>
-			</ScrollArea>
+			</div>
 
-			<div
-				className={cn(
-					"flex-shrink-0 border-t p-2 transition-all duration-300",
-					!isVisible && "pointer-events-none opacity-0",
-				)}
-			>
+			<div className="-mx-2 flex-shrink-0 border-border border-t p-1 pt-3">
 				<AccountPopover currentUser={currentUser} onSignOut={onSignOut} />
 			</div>
 

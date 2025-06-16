@@ -29,15 +29,15 @@ export function AccountPopover({
 			<PopoverTrigger asChild>
 				<Button
 					variant="ghost"
-					className="h-auto w-full justify-start p-2 transition-all duration-200 hover:bg-accent! hover:text-accent-foreground"
+					className="h-auto w-full justify-start p-2 transition-all duration-200"
 				>
 					<Avatar className="mr-3 h-8 w-8">
-						<AvatarFallback className="text-xs">
+						<AvatarFallback className="text-sm">
 							<User className="h-4 w-4" />
 						</AvatarFallback>
 					</Avatar>
 					<div className="min-w-0 flex-1 text-left">
-						<p className="truncate text-muted-foreground text-xs">
+						<p className="truncate text-muted-foreground text-sm">
 							{currentUser?.email ?? "anon"}
 						</p>
 					</div>
@@ -52,7 +52,7 @@ export function AccountPopover({
 							</AvatarFallback>
 						</Avatar>
 						<div className="min-w-0 flex-1">
-							<p className="truncate text-muted-foreground text-xs">
+							<p className="truncate text-muted-foreground text-sm">
 								{currentUser?.email ?? "anon"}
 							</p>
 						</div>
