@@ -109,7 +109,7 @@ export function ModelPicker({
 							{selectedModel?.name || "Select model…"}
 						</span>
 					</div>
-					<ChevronDown className="h-4 w-4 shrink-0 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
+					<ChevronDown className="h-4 w-4 shrink-0 opacity-0 transition-transform group-hover:opacity-100 group-data-[state=open]:rotate-180" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="z-50 w-80 border-0 p-0 shadow-xl" align="start">

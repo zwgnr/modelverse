@@ -7,15 +7,12 @@ import { useMutation, useQuery } from "convex/react";
 import {
 	BarChart3,
 	Bot,
-	Camera,
-	CreditCard,
 	Eye,
 	Key,
 	Lock,
 	MessageSquare,
 	Settings,
 	Shield,
-	Upload,
 	User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -42,9 +39,6 @@ function SettingsPage() {
 	const assistantNameId = useId();
 	const traitsId = useId();
 	const customInstructionsId = useId();
-	const currentPasswordId = useId();
-	const newPasswordId = useId();
-	const confirmPasswordId = useId();
 	const apiKeyId = useId();
 
 	const user = useQuery(api.auth.getCurrentUser);
@@ -69,7 +63,7 @@ function SettingsPage() {
 
 	return (
 		<div className="flex min-h-screen flex-col bg-card">
-			<div className="container mx-auto mb-16 flex min-h-0 max-w-6xl flex-1 flex-col px-4 py-8">
+			<div className="container mx-auto mb-16 flex min-h-0 max-w-6xl flex-1 flex-col p-8">
 				{/* Header */}
 				<div className="mb-8">
 					<h1 className="font-bold text-3xl">Settings</h1>
@@ -82,7 +76,7 @@ function SettingsPage() {
 					defaultValue="general"
 					className="flex min-h-0 flex-1 flex-col space-y-6"
 				>
-					<TabsList className="mb-4 grid w-full grid-cols-6">
+					<TabsList className="mb-4 grid w-full grid-cols-5">
 						<TabsTrigger value="general" className="flex items-center gap-2">
 							<Settings className="h-4 w-4" />
 							General
@@ -102,15 +96,8 @@ function SettingsPage() {
 							<BarChart3 className="h-4 w-4" />
 							Usage
 						</TabsTrigger>
-						<TabsTrigger
-							value="subscription"
-							className="flex items-center gap-2"
-						>
-							<CreditCard className="h-4 w-4" />
-							Subscription
-						</TabsTrigger>
 						<TabsTrigger value="security" className="flex items-center gap-2">
-							<Lock className="h-4 w-4" />
+							<Shield className="h-4 w-4" />
 							Security
 						</TabsTrigger>
 					</TabsList>
@@ -133,40 +120,29 @@ function SettingsPage() {
 										{/* Avatar Section */}
 										<div className="flex flex-col items-center space-y-4">
 											<div className="relative">
-												<div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 font-bold text-4xl text-white">
-													Z
-												</div>
-												<Button
-													size="sm"
-													className="absolute right-0 bottom-0 h-8 w-8 rounded-full p-0"
-													variant="secondary"
-												>
-													<Camera className="h-4 w-4" />
-												</Button>
-											</div>
-											<div className="flex flex-col gap-2 sm:flex-row">
-												<Button
-													variant="outline"
-													size="sm"
-													className="flex items-center gap-2"
-												>
-													<Upload className="h-4 w-4" />
-													Upload Photo
-												</Button>
-												<Button variant="ghost" size="sm">
-													Remove
-												</Button>
+												{user?.image ? (
+													<img 
+														src={user.image} 
+														alt="Profile" 
+														className="h-32 w-32 rounded-full border-4 border-primary/20 object-cover"
+													/>
+												) : (
+													<div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 font-bold text-4xl text-white">
+														{user?.name?.[0] || user?.email?.[0] || "U"}
+													</div>
+												)}
 											</div>
 										</div>
 
 										{/* Profile Info */}
 										<div className="flex-1 space-y-4">
 											<div>
+												<h3 className="font-medium text-lg">{user?.name || "User"}</h3>
 												<p className="text-muted-foreground">
-													user@example.com
+													{user?.email}
 												</p>
 												<p className="text-muted-foreground text-sm">
-													Member since December 2024
+													Member since {user?._creationTime ? new Date(user._creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
 												</p>
 											</div>
 										</div>
@@ -506,143 +482,9 @@ function SettingsPage() {
 						</TabsContent>
 
 						<TabsContent
-							value="subscription"
-							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
-						>
-							<Card className="p-4">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<CreditCard className="h-5 w-5 text-blue-600" />
-										Subscription Plan
-									</CardTitle>
-									<p className="text-muted-foreground text-sm">
-										Manage your subscription and billing
-									</p>
-								</CardHeader>
-								<CardContent>
-									<div className="space-y-4">
-										<div className="rounded-lg border p-4">
-											<h3 className="font-medium">Free Plan</h3>
-											<p className="text-muted-foreground text-sm">
-												Basic features with limited usage
-											</p>
-											<p className="mt-1 text-muted-foreground text-xs">
-												$0/month
-											</p>
-										</div>
-										<Button className="w-full">Upgrade to Pro</Button>
-									</div>
-								</CardContent>
-							</Card>
-
-							<Card className="p-4">
-								<CardHeader>
-									<CardTitle>Billing Information</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<ul className="space-y-3">
-										<li className="flex items-center justify-between py-2">
-											<span className="text-sm">Payment Method</span>
-											<Button variant="ghost" size="sm" className="text-xs">
-												Add Card
-											</Button>
-										</li>
-										<li className="flex items-center justify-between py-2">
-											<span className="text-sm">Billing History</span>
-											<Button variant="ghost" size="sm" className="text-xs">
-												View
-											</Button>
-										</li>
-										<li className="flex items-center justify-between py-2">
-											<span className="text-sm">Download Invoices</span>
-											<Button variant="ghost" size="sm" className="text-xs">
-												Download
-											</Button>
-										</li>
-									</ul>
-								</CardContent>
-							</Card>
-						</TabsContent>
-
-						<TabsContent
 							value="security"
 							className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto"
 						>
-							{/* Change Password */}
-							<Card className="p-6">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Lock className="h-5 w-5 text-blue-600" />
-										Change Password
-									</CardTitle>
-									<p className="text-muted-foreground text-sm">
-										Update your account password
-									</p>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									<div className="space-y-2">
-										<Label htmlFor={currentPasswordId}>Current Password</Label>
-										<Input
-											id={currentPasswordId}
-											type="password"
-											placeholder="Enter your current password"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label htmlFor={newPasswordId}>New Password</Label>
-										<Input
-											id={newPasswordId}
-											type="password"
-											placeholder="Enter your new password"
-										/>
-									</div>
-									<div className="space-y-2">
-										<Label htmlFor={confirmPasswordId}>
-											Confirm New Password
-										</Label>
-										<Input
-											id={confirmPasswordId}
-											type="password"
-											placeholder="Confirm your new password"
-										/>
-									</div>
-									<Button className="mt-4">Update Password</Button>
-								</CardContent>
-							</Card>
-
-							{/* API Key */}
-							<Card className="p-6">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Key className="h-5 w-5 text-blue-600" />
-										API Key
-									</CardTitle>
-									<p className="text-muted-foreground text-sm">
-										Manage your API access key
-									</p>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									<div className="space-y-2">
-										<Label htmlFor={apiKeyId}>API Key</Label>
-										<div className="flex gap-2">
-											<Input
-												id={apiKeyId}
-												type="password"
-												value="sk-1234567890abcdef1234567890abcdef"
-												readOnly
-											/>
-											<Button variant="outline" size="sm">
-												<Eye className="h-4 w-4" />
-											</Button>
-										</div>
-									</div>
-									<div className="flex gap-2">
-										<Button variant="outline">Regenerate Key</Button>
-										<Button variant="outline">Copy Key</Button>
-									</div>
-								</CardContent>
-							</Card>
-
 							{/* Delete Account */}
 							<Card className="border-destructive/20 p-6">
 								<CardHeader>
