@@ -28,6 +28,7 @@ import { AnthropicIcon } from "@/components/ui/svg/anthropic";
 import { OpenAIIcon } from "@/components/ui/svg/openai";
 import xAIGrok from "@/components/ui/svg/xia";
 
+import { DeepSeek } from "../ui/svg/deepseek";
 import { GeminiIcon } from "../ui/svg/gemini";
 
 interface ModelPickerProps {
@@ -42,6 +43,7 @@ const providerIcons = {
 	Anthropic: AnthropicIcon,
 	Google: GeminiIcon, 
 	"X.AI": xAIGrok,
+	DeepSeek: DeepSeek,
 };
 
 // Company icon colors for selected state
@@ -50,6 +52,7 @@ const companyIconColors = {
 	Anthropic: "text-orange-500",
 	Google: "text-blue-500",
 	"X.AI": "text-purple-500",
+	DeepSeek: "text-cyan-500",
 };
 
 // Company accent colors for indicators
@@ -58,6 +61,7 @@ const companyAccentColors = {
 	Anthropic: "bg-orange-500",
 	Google: "bg-blue-500",
 	"X.AI": "bg-purple-500",
+	DeepSeek: "bg-cyan-500",
 };
 
 export function ModelPicker({

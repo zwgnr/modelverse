@@ -8,7 +8,11 @@ export const MODEL_IDS = [
 	"openai/chatgpt-4o-latest",
 	"openai/gpt-4.1",
 	"anthropic/claude-sonnet-4",
+	"anthropic/claude-opus-4",
+	"google/gemini-2.0-flash-001",
 	"google/gemini-2.5-flash-preview-05-20",
+	"google/gemini-2.5-pro-preview",
+	"deepseek/deepseek-r1-0528",
 	"x-ai/grok-3-beta",
 ] as const;
 

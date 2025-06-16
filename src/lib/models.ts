@@ -12,7 +12,7 @@ export interface Model {
 	name: string;
 	icon?: ComponentType;
 	description?: string;
-	company: "OpenAI" | "Anthropic" | "Google" | "X.AI";
+	company: "OpenAI" | "Anthropic" | "Google" | "X.AI" | "DeepSeek";
 }
 
 export const models: Model[] = [
@@ -41,21 +41,49 @@ export const models: Model[] = [
 		id: MODEL_IDS[3], // "anthropic/claude-sonnet-4"
 		name: "Claude Sonnet 4",
 		icon: Zap,
-		description: "Powerful reasoning and analysis",
+		description: "Precision and controllability",
 		company: "Anthropic",
 	},
 	{
-		id: MODEL_IDS[4], // "google/gemini-2.5-flash-preview-05-20"
-		name: "Gemini 2.5 Flash",
+		id: MODEL_IDS[4], // "anthropic/claude-opus-4"
+		name: "Claude Opus 4",
+		icon: Zap,
+		description: "Coding and problem-solving",
+		company: "Anthropic",
+	},
+	{
+		id: MODEL_IDS[5], // "google/gemini-2.0-flash-001"
+		name: "Gemini 2.0 Flash",
 		icon: Sparkles,
-		description: "Google's fast multimodal AI model",
+		description: "Speed",
 		company: "Google",
 	},
 	{
-		id: MODEL_IDS[5], // "x-ai/grok-3-beta"
+		id: MODEL_IDS[6], // "google/gemini-2.5-flash-preview-05-20"
+		name: "Gemini 2.5 Flash",
+		icon: Sparkles,
+		description: "Fast multimodal model",
+		company: "Google",
+	},
+	{
+		id: MODEL_IDS[7], // "google/gemini-2.5-pro-preview"
+		name: "Gemini 2.5 Pro",
+		icon: Sparkles,
+		description: "Google's most capable model",
+		company: "Google",
+	},
+	{
+		id: MODEL_IDS[8], // "deepseek/deepseek-r1-0528"
+		name: "DeepSeek R1",
+		icon: Brain,
+		description: "Advanced reasoning",
+		company: "DeepSeek",
+	},
+	{
+		id: MODEL_IDS[9], // "x-ai/grok-3-beta"
 		name: "Grok 3",
 		icon: Zap,
-		description: "X.AI's latest conversational AI model",
+		description: "Conversational AI model",
 		company: "X.AI",
 	},
 ];
@@ -93,8 +121,11 @@ export const getModelDisplayName = (modelId: string): string | null => {
 		[MODEL_IDS[1]]: "GPT-4o",
 		[MODEL_IDS[2]]: "GPT-4.1",
 		[MODEL_IDS[3]]: "Claude Sonnet 4",
-		[MODEL_IDS[4]]: "Gemini 2.5 Flash",
-		[MODEL_IDS[5]]: "Grok 3",
+		[MODEL_IDS[4]]: "Claude Opus 4",
+		[MODEL_IDS[5]]: "Gemini 2.5 Flash",
+		[MODEL_IDS[6]]: "Gemini 2.5 Pro",
+		[MODEL_IDS[7]]: "DeepSeek R1",
+		[MODEL_IDS[8]]: "Grok 3",
 	};
 
 	const displayName = modelNames[baseModel] || baseModel;
