@@ -104,8 +104,28 @@ export const deleteConversation = mutation({
 			)
 			.collect();
 
+		// Collect all file storage IDs to delete
+		const storageIdsToDelete = [];
+		for (const message of messages) {
+			if (message.files) {
+				for (const file of message.files) {
+					storageIdsToDelete.push(file.storageId);
+				}
+			}
+		}
+
+		// Delete all messages
 		for (const message of messages) {
 			await ctx.db.delete(message._id);
+		}
+
+		// Delete associated files from storage
+		for (const storageId of storageIdsToDelete) {
+			try {
+				await ctx.storage.delete(storageId);
+			} catch (error) {
+				console.error(`Failed to delete file ${storageId}:`, error);
+			}
 		}
 
 		// Delete the conversation
