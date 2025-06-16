@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -17,7 +17,11 @@ import { useAtom } from "jotai";
 import { MessageCirclePlus, PanelLeft, Search } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
-import { selectedModelAtom } from "@/lib/models";
+import {
+	defaultModelAtom,
+	selectedModelAtom,
+	setDefaultModelFromDB,
+} from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 import { AccountPopover } from "@/components/account-popover";
@@ -47,10 +51,27 @@ function RouteComponent() {
 	const [sidebarToggled, setSidebarToggled] = useState(false);
 	const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 	const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
+	const [, setDefaultModel] = useAtom(defaultModelAtom);
 
 	const { data: currentUser } = useSuspenseQuery(
 		convexQuery(api.auth.getCurrentUser, {}),
 	);
+
+	const { data: customization } = useSuspenseQuery(
+		convexQuery(api.users.getCustomization, {}),
+	);
+
+	// Initialize default model from database
+	useEffect(() => {
+		if (customization) {
+			const dbDefaultModel = setDefaultModelFromDB(customization.defaultModel);
+			setDefaultModel(dbDefaultModel);
+			// Only set current model if it hasn't been set yet (first load)
+			setCurrentModel((prev) =>
+				prev === "openai/gpt-4o-mini" ? dbDefaultModel : prev,
+			);
+		}
+	}, [customization, setDefaultModel, setCurrentModel]);
 
 	const router = useRouter();
 
@@ -188,7 +209,7 @@ function RouteComponent() {
 										className={cn(
 											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all duration-300",
 											"rounded-xl border border-border shadow-xs backdrop-blur-sm hover:shadow-sm",
-											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
 										)}
 										title="Search (⌘K)"
 										aria-label="Search"
@@ -205,7 +226,7 @@ function RouteComponent() {
 										className={cn(
 											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all delay-75 duration-300",
 											"rounded-xl shadow-xs backdrop-blur-sm hover:shadow-sm",
-											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0"
+											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
 										)}
 										title="New Chat (⌘N)"
 									>
@@ -215,7 +236,10 @@ function RouteComponent() {
 									</Button>
 								</div>
 							</div>
-							<AccountPopover currentUser={currentUser} onSignOut={handleSignOut} />
+							<AccountPopover
+								currentUser={currentUser}
+								onSignOut={handleSignOut}
+							/>
 						</div>
 					</div>
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">

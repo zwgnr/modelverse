@@ -4,7 +4,12 @@ import { hexToBytes } from "@noble/ciphers/utils";
 
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { internalAction, internalQuery, mutation } from "./_generated/server";
+import {
+	internalAction,
+	internalQuery,
+	mutation,
+	query,
+} from "./_generated/server";
 import { getAuthenticatedUserId } from "./lib/auth";
 import { decrypt, encrypt } from "./lib/encryption";
 
@@ -138,5 +143,85 @@ export const deleteOpenRouterKey = mutation({
 			openRouterKey: undefined,
 			//	useBYOK: false,
 		});
+	},
+});
+
+export const updateCustomization = mutation({
+	args: {
+		defaultModel: v.optional(v.string()),
+		personalityTraits: v.optional(v.array(v.string())),
+		customInstructions: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		// Update user customization settings
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new Error("Not authenticated");
+		}
+
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_email", (q) => q.eq("email", identity.email))
+			.unique();
+
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		// Validation for array length, trait length and instructions length
+		if (args.personalityTraits) {
+			if (args.personalityTraits.length > 50) {
+				throw new Error("Maximum 50 personality traits allowed");
+			}
+			for (const trait of args.personalityTraits) {
+				if (trait.length > 100) {
+					throw new Error(
+						"Each personality trait must be 100 characters or less",
+					);
+				}
+			}
+		}
+
+		if (args.customInstructions && args.customInstructions.length > 3000) {
+			throw new Error("Custom instructions must be 3000 characters or less");
+		}
+
+		const updateData: Record<string, unknown> = {};
+		if (args.defaultModel !== undefined) {
+			updateData.defaultModel = args.defaultModel;
+		}
+		if (args.personalityTraits !== undefined) {
+			updateData.personalityTraits = args.personalityTraits;
+		}
+		if (args.customInstructions !== undefined) {
+			updateData.customInstructions = args.customInstructions;
+		}
+
+		return await ctx.db.patch(user._id, updateData);
+	},
+});
+
+export const getCustomization = query({
+	args: {},
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			return null;
+		}
+
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_email", (q) => q.eq("email", identity.email))
+			.unique();
+
+		if (!user) {
+			return null;
+		}
+
+		return {
+			defaultModel: user.defaultModel,
+			personalityTraits: user.personalityTraits,
+			customInstructions: user.customInstructions,
+		};
 	},
 });

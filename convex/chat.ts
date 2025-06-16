@@ -15,6 +15,27 @@ const cors = {
 	"Access-Control-Max-Age": "86400",
 };
 
+function buildSystemMessage(
+	personalityTraits?: string[],
+	customInstructions?: string,
+): string {
+	const currentYear = new Date().getFullYear();
+	let systemMessage = `You are a helpful assistant. The year is ${currentYear}. Do not mention your knowledge cutoff date.`;
+
+	if (personalityTraits && personalityTraits.length > 0) {
+		const traitsText = personalityTraits
+			.map((trait) => `"${trait}"`)
+			.join(", ");
+		systemMessage += `\n\nTake on a ${traitsText} personality.`;
+	}
+
+	if (customInstructions?.trim()) {
+		systemMessage += `\n\nPlease also follow these instructions: ${customInstructions.trim()}`;
+	}
+
+	return systemMessage;
+}
+
 export const chat = httpAction(async (ctx, request) => {
 	try {
 		const authUser = await betterAuthComponent.getAuthUser(ctx);
@@ -152,7 +173,10 @@ export const chat = httpAction(async (ctx, request) => {
 						messages: [
 							{
 								role: "system",
-								content: `You are a helpful assistant. The user is asking a question, and you should provide a clear and concise response. The year is ${new Date().getFullYear()}. Do not mention your knowledge cutoff date.`,
+								content: buildSystemMessage(
+									user.personalityTraits,
+									user.customInstructions,
+								),
 							},
 							...history,
 						],

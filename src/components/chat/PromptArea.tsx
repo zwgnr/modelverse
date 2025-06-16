@@ -3,6 +3,7 @@ import {
 	Fragment,
 	memo,
 	useCallback,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -22,7 +23,7 @@ import {
 	X,
 } from "lucide-react";
 
-import { selectedModelAtom } from "@/lib/models";
+import { defaultModelAtom, selectedModelAtom } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 import { ModelPicker } from "@/components/chat/model-picker";
@@ -78,6 +79,14 @@ export function PromptArea(props: PromptAreaProps) {
 	const [files, setFiles] = useState<{ file: File; dataUrl?: string }[]>([]);
 	const [web, setWeb] = useState(false);
 	const [model, setModel] = useAtom(selectedModelAtom);
+	const [defaultModel] = useAtom(defaultModelAtom);
+
+	// Initialize model with default for new conversations
+	useEffect(() => {
+		if (createNewConversation && !conversationId) {
+			setModel(defaultModel);
+		}
+	}, [createNewConversation, conversationId, defaultModel, setModel]);
 
 	const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 	const createConversation = useMutation(api.conversations.create);

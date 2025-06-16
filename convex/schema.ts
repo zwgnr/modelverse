@@ -35,6 +35,10 @@ export default defineSchema({
 		openRouterKeyId: v.optional(v.string()),
 		useBYOK: v.optional(v.boolean()),
 		modelUsage: v.array(v.object({ model: modelId, count: v.number() })),
+		// Customization settings
+		defaultModel: v.optional(modelId),
+		personalityTraits: v.optional(v.array(v.string())),
+		customInstructions: v.optional(v.string()),
 	}).index("by_email", ["email"]),
 	conversations: defineTable({
 		userId: v.id("users"),
