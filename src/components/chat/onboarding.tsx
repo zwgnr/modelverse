@@ -33,19 +33,17 @@ export function Onboarding({ className }: OnboardingProps) {
             This gives you access to premium models with your own usage limits.
           </p>
           
-          <div className="rounded-lg border border-border/50 bg-muted/50 p-4">
-            <p className="flex items-center justify-center gap-2 text-muted-foreground text-xs">
-              <Lock className="h-3.5 w-3.5" />
-              Your API key is encrypted and stored securely
-            </p>
-          </div>
-
-          <Button asChild size="lg" className="group w-full">
+          <Button asChild size="lg">
             <Link to="/settings/api-keys">
               Add OpenRouter API Key
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+
+          <p className="flex items-center justify-center gap-2 text-muted-foreground text-xs">
+            <Lock className="h-3 w-3" />
+            Your API key is encrypted and stored securely
+          </p>
         </CardContent>
       </Card>
     </div>
