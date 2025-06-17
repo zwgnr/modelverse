@@ -34,12 +34,28 @@ export default defineSchema({
 		openRouterKey: v.optional(v.string()),
 		openRouterKeyId: v.optional(v.string()),
 		useBYOK: v.optional(v.boolean()),
-		modelUsage: v.array(v.object({ model: modelId, count: v.number() })),
 		// Customization settings
 		defaultModel: v.optional(modelId),
 		personalityTraits: v.optional(v.array(v.string())),
 		customInstructions: v.optional(v.string()),
 	}).index("by_email", ["email"]),
+
+	usage: defineTable({
+		userId: v.id("users"),
+		messageId: v.id("messages"),
+		model: modelId,
+		promptTokens: v.optional(v.number()),
+		completionTokens: v.optional(v.number()),
+		totalTokens: v.optional(v.number()),
+		reasoningTokens: v.optional(v.number()),
+		cachedTokens: v.optional(v.number()),
+		cost: v.optional(v.number()), // Cost in credits
+		timestamp: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_timestamp", ["userId", "timestamp"])
+		.index("by_message", ["messageId"]),
+
 	conversations: defineTable({
 		userId: v.id("users"),
 		title: v.string(),

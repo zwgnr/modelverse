@@ -11,11 +11,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_layout/settings/")({
 	component: GeneralSettings,
+	loader: async ({ context }) => {
+		await context.convexClient.query(api.usage.getUserUsageStats, {});
+	},
 });
 
 function GeneralSettings() {
 	const { data: user } = useSuspenseQuery(
 		convexQuery(api.auth.getCurrentUser, {}),
+	);
+	const { data: usageStats } = useSuspenseQuery(
+		convexQuery(api.usage.getUserUsageStats, {}),
 	);
 
 	return (
@@ -86,7 +92,7 @@ function GeneralSettings() {
 								<MessageSquare className="h-4 w-4 text-purple-500" />
 								<span className="font-medium text-sm">Conversations</span>
 							</div>
-							<p className="font-bold text-3xl">{user?.totalConversations ?? 0}</p>
+							<p className="font-bold text-3xl">{usageStats?.totalConversations ?? 0}</p>
 							<p className="text-muted-foreground text-xs">
 								All time chats
 							</p>
@@ -98,7 +104,7 @@ function GeneralSettings() {
 								<MessageSquare className="h-4 w-4 text-blue-500" />
 								<span className="font-medium text-sm">Messages</span>
 							</div>
-							<p className="font-bold text-3xl">{user?.totalMessages ?? 0}</p>
+							<p className="font-bold text-3xl">{usageStats?.totalMessages ?? 0}</p>
 							<p className="text-muted-foreground text-xs">
 								Total exchanges
 							</p>
@@ -111,7 +117,7 @@ function GeneralSettings() {
 								<span className="font-medium text-sm">Models Used</span>
 							</div>
 							<p className="font-bold text-3xl">
-								{user?.modelUsage?.length ?? 0}
+								{usageStats?.modelUsage?.length ?? 0}
 							</p>
 							<p className="text-muted-foreground text-xs">
 								Different AI models
@@ -125,16 +131,16 @@ function GeneralSettings() {
 								<span className="font-medium text-sm">Most Used</span>
 							</div>
 							<p className="font-bold text-lg">
-								{user?.modelUsage && user.modelUsage.length > 0
-									? user.modelUsage.reduce((prev, current) =>
+								{usageStats?.modelUsage && usageStats.modelUsage.length > 0
+									? usageStats.modelUsage.reduce((prev, current) =>
 											prev.count > current.count ? prev : current,
 										).model.split("/")[1]?.replace("-", " ") || "None"
 									: "None"}
 							</p>
 							<p className="text-muted-foreground text-xs">
-								{user?.modelUsage && user.modelUsage.length > 0
+								{usageStats?.modelUsage && usageStats.modelUsage.length > 0
 									? `${
-											user.modelUsage.reduce((prev, current) =>
+											usageStats.modelUsage.reduce((prev, current) =>
 												prev.count > current.count ? prev : current,
 											).count
 										} messages`

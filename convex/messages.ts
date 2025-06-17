@@ -53,25 +53,6 @@ export const send = mutation({
 	handler: async (ctx, { prompt, conversationId, model, files }) => {
 		const userId = await getAuthenticatedUserId(ctx);
 
-		// track usage
-		if (model) {
-			const user = await ctx.db.get(userId);
-			if (!user) throw new Error("User not found");
-
-			const modelUsage = user.modelUsage ?? [];
-			const modelIndex = modelUsage.findIndex((u) => u.model === model);
-
-			if (modelIndex === -1) {
-				modelUsage.push({ model, count: 1 });
-			} else {
-				modelUsage[modelIndex].count++;
-			}
-
-			await ctx.db.patch(userId, {
-				modelUsage,
-			});
-		}
-
 		const conversation = await ctx.db.get(conversationId);
 		if (!conversation) throw new Error("Conversation not found");
 		if (conversation.userId !== userId) throw new Error("Unauthorized");
@@ -337,3 +318,5 @@ export const cancelStream = mutation({
 		}
 	},
 });
+
+

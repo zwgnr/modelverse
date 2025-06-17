@@ -17,6 +17,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_encryption from "../lib/encryption.js";
 import type * as messages from "../messages.js";
 import type * as streaming from "../streaming.js";
+import type * as usage from "../usage.js";
 import type * as users from "../users.js";
 
 import type {
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   "lib/encryption": typeof lib_encryption;
   messages: typeof messages;
   streaming: typeof streaming;
+  usage: typeof usage;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

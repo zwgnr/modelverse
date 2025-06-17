@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText } from "ai";
+import OpenAI from "openai";
 
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
@@ -34,7 +33,7 @@ export const get = query({
 });
 
 export const create = mutation({
-	args: { 
+	args: {
 		title: v.optional(v.string()),
 		model: v.optional(modelId),
 	},
@@ -191,11 +190,14 @@ export const generateTitle = internalAction({
 			apiKey = byokKey ?? "";
 		}
 
-		const openrouter = createOpenRouter({ apiKey });
+		const openai = new OpenAI({
+			apiKey,
+			baseURL: "https://openrouter.ai/api/v1",
+		});
 
 		try {
-			const result = await generateText({
-				model: openrouter.chat("openai/gpt-4o-mini"),
+			const result = await openai.chat.completions.create({
+				model: "google/gemini-2.0-flash-001",
 				messages: [
 					{
 						role: "system",
@@ -207,13 +209,13 @@ export const generateTitle = internalAction({
 						content: `Generate a short title for a conversation that starts with: "${firstMessage}"`,
 					},
 				],
-				maxTokens: 50,
+				max_tokens: 25,
 			});
 
 			// Update the conversation title using internal mutation
 			await ctx.runMutation(internal.conversations.updateTitleInternal, {
 				conversationId,
-				title: result.text.trim(),
+				title: result.choices[0]?.message?.content?.trim() || "New Chat",
 			});
 		} catch (e) {
 			console.error("Failed to generate conversation title:", e);
@@ -298,9 +300,9 @@ export const createBranchedConversation = mutation({
 });
 
 export const updateModel = mutation({
-	args: { 
-		conversationId: v.id("conversations"), 
-		model: modelId 
+	args: {
+		conversationId: v.id("conversations"),
+		model: modelId,
 	},
 	handler: async (ctx, { conversationId, model }) => {
 		const userId = await getAuthenticatedUserId(ctx);
@@ -320,17 +322,20 @@ export const updateModel = mutation({
 
 export const getById = query({
 	args: { conversationId: v.id("conversations") },
-	handler: async (ctx, { conversationId }): Promise<Doc<"conversations"> | null> => {
+	handler: async (
+		ctx,
+		{ conversationId },
+	): Promise<Doc<"conversations"> | null> => {
 		try {
 			const userId = await getAuthenticatedUserId(ctx);
-			
+
 			const conversation = await ctx.db.get(conversationId);
-			
+
 			// Verify the conversation belongs to the user
 			if (!conversation || conversation.userId !== userId) {
 				return null;
 			}
-			
+
 			return conversation;
 		} catch (e) {
 			console.error(e);

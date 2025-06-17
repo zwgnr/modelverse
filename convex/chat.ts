@@ -1,7 +1,6 @@
 import type { StreamId } from "@convex-dev/persistent-text-streaming";
 
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { streamText } from "ai";
+import OpenAI from "openai";
 
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
@@ -162,51 +161,55 @@ export const chat = httpAction(async (ctx, request) => {
 						);
 						apiKey = byokKey ?? "";
 					}
-					// Initialize OpenRouter
-					const openrouter = createOpenRouter({
+
+					// Initialize OpenAI client for OpenRouter
+					const openai = new OpenAI({
 						apiKey,
+						baseURL: "https://openrouter.ai/api/v1",
 					});
 
 					// Start the stream request to OpenRouter
-					const result = streamText({
-						model: openrouter.chat(message.model || "openai/gpt-4o-mini"),
-						messages: [
-							{
-								role: "system",
-								content: buildSystemMessage(
-									user.personalityTraits,
-									user.customInstructions,
-								),
+					const stream = await openai.chat.completions.create(
+						{
+							model: message.model || "openai/gpt-4o-mini",
+							messages: [
+								{
+									role: "system",
+									content: buildSystemMessage(
+										user.personalityTraits,
+										user.customInstructions,
+									),
+								},
+								...history,
+							],
+							stream: true,
+							stream_options: {
+								include_usage: true,
 							},
-							...history,
-						],
-						abortSignal: abortController.signal,
-						onError: async ({ error }) => {
-							console.error("Error from streamText:", error);
-							await ctx.runMutation(
-								streamingComponent.component.lib.setStreamStatus,
-								{
-									streamId: _streamId,
-									status: "error",
-								},
-							);
-							// Clear the pending initial message flag
-							await ctx.runMutation(
-								internal.conversations.clearPendingInitialMessageInternal,
-								{
-									conversationId: message.conversationId,
-								},
-							);
-							throw error;
 						},
-					});
+						{
+							signal: abortController.signal,
+						},
+					);
+
+					// Usage data
+					let usage: OpenAI.Completions.CompletionUsage | null = null;
 
 					// Append each chunk to the persistent stream as they come in from OpenRouter
 					let chunkCount = 0;
-					for await (const textPart of result.textStream) {
+					for await (const chunk of stream) {
 						chunkCount++;
 						try {
-							await append(textPart || "");
+							// Check for usage data in the chunk
+							if (chunk.usage) {
+								usage = chunk.usage;
+							}
+
+							// Get the content from the first choice
+							const content = chunk.choices[0]?.delta?.content;
+							if (content) {
+								await append(content);
+							}
 						} catch (appendError) {
 							console.error(
 								`Error appending chunk ${chunkCount}:`,
@@ -217,10 +220,42 @@ export const chat = httpAction(async (ctx, request) => {
 							break;
 						}
 					}
+
+					// Track usage data when the stream finishes
+					if (usage && "cost" in usage) {
+						try {
+							await ctx.runMutation(internal.usage.trackUsage, {
+								userId: message.userId,
+								messageId: message._id,
+								model: message.model || "openai/gpt-4o-mini",
+								promptTokens: usage.prompt_tokens,
+								completionTokens: usage.completion_tokens,
+								totalTokens: usage.total_tokens,
+								cost: usage.cost as number,
+							});
+						} catch (error) {
+							console.error("Error tracking usage:", error);
+						}
+					}
 				} catch (error) {
 					if ((error as Error).name === "AbortError") {
 					} else {
 						console.error("Error in stream callback:", error);
+						// Set stream status to error
+						await ctx.runMutation(
+							streamingComponent.component.lib.setStreamStatus,
+							{
+								streamId: _streamId,
+								status: "error",
+							},
+						);
+						// Clear the pending initial message flag
+						await ctx.runMutation(
+							internal.conversations.clearPendingInitialMessageInternal,
+							{
+								conversationId: message.conversationId,
+							},
+						);
 						throw error;
 					}
 				}

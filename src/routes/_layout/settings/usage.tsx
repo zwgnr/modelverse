@@ -27,6 +27,12 @@ import { api } from "../../../../convex/_generated/api";
 
 export const Route = createFileRoute("/_layout/settings/usage")({
 	component: UsageSettings,
+	loader: async ({ context }) => {
+		Promise.all([
+			context.convexClient.query(api.usage.getUserUsageStats, {}),
+			context.convexClient.query(api.usage.getDetailedUsage, {}),
+		]);
+	},
 });
 
 // Helper function to get provider icon and brand color based on model name
@@ -69,11 +75,13 @@ function getProviderIconWithColor(model: string) {
 }
 
 function UsageSettings() {
-	const { data: user } = useSuspenseQuery(convexQuery(api.auth.getCurrentUser, {}));
+	const { data: usageStats } = useSuspenseQuery(
+		convexQuery(api.usage.getUserUsageStats, {}),
+	);
 
 	// Process model usage data with proper deduplication
 	const processedUsageData =
-		user?.modelUsage?.reduce(
+		usageStats?.modelUsage?.reduce(
 			(acc, usage) => {
 				// Always use getModelDisplayName for consistency
 				const displayName =
@@ -94,7 +102,7 @@ function UsageSettings() {
 					acc.push({
 						model: displayName,
 						count: usage.count,
-						originalModel: usage.model, 
+						originalModel: usage.model,
 					});
 				}
 
@@ -108,7 +116,9 @@ function UsageSettings() {
 		.map((usage) => ({
 			model: usage.model,
 			count: usage.count,
-			percentage: Math.round((usage.count / (user?.totalMessages || 1)) * 100),
+			percentage: Math.round(
+				(usage.count / (usageStats?.totalMessages || 1)) * 100,
+			),
 		}))
 		.sort((a, b) => b.count - a.count);
 
@@ -151,26 +161,6 @@ function UsageSettings() {
 		};
 	});
 
-	// Estimated costs (rough estimates for demonstration)
-	const estimatedCosts = modelUsageData.map((usage) => {
-		const costPerMessage = usage.model.toLowerCase().includes("gpt-4")
-			? 0.01
-			: usage.model.toLowerCase().includes("claude")
-				? 0.008
-				: usage.model.toLowerCase().includes("gemini")
-					? 0.005
-					: 0.003;
-		return {
-			model: usage.model,
-			cost: (usage.count * costPerMessage).toFixed(2),
-		};
-	});
-
-	const totalCost = estimatedCosts.reduce(
-		(sum, item) => sum + parseFloat(item.cost),
-		0,
-	);
-
 	return (
 		<div className="flex min-h-0 flex-1 flex-col space-y-6 overflow-y-auto">
 			{/* Usage by Model */}
@@ -188,10 +178,7 @@ function UsageSettings() {
 					{/* Model Usage Chart */}
 					{modelUsageData.length > 0 ? (
 						<ChartContainer config={chartConfig} className="h-[400px] w-full">
-							<BarChart
-								data={chartDataWithColors}
-								margin={{ left: -40}}
-							>
+							<BarChart data={chartDataWithColors} margin={{ left: -40 }}>
 								<XAxis
 									dataKey="model"
 									tick={{ fontSize: 12 }}
@@ -255,57 +242,6 @@ function UsageSettings() {
 							})}
 						</div>
 					)}
-				</CardContent>
-			</Card>
-
-			{/* Cost Breakdown */}
-			<Card className="p-6">
-				<CardHeader>
-					<CardTitle>Estimated Cost Breakdown</CardTitle>
-					<p className="text-muted-foreground text-sm">
-						Rough estimates based on typical API pricing
-					</p>
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-4">
-						{estimatedCosts.length > 0 ? (
-							<>
-								{estimatedCosts.map((cost) => {
-									const providerInfo = getProviderIconWithColor(cost.model);
-
-									return (
-										<div
-											key={cost.model}
-											className="flex items-center justify-between border-b py-2"
-										>
-											<div className="flex items-center gap-2">
-												{providerInfo && (
-													<providerInfo.icon
-														className={cn("h-4 w-4", providerInfo.colorClass)}
-													/>
-												)}
-												<span className="text-sm">{cost.model}</span>
-											</div>
-											<span className="font-medium text-sm">${cost.cost}</span>
-										</div>
-									);
-								})}
-								<div className="flex items-center justify-between py-2 font-medium">
-									<span className="text-sm">Total Estimated Cost</span>
-									<span className="text-sm">${totalCost.toFixed(2)}</span>
-								</div>
-							</>
-						) : (
-							<div className="py-8 text-center">
-								<p className="text-muted-foreground text-sm">
-									No cost data available yet
-								</p>
-								<p className="text-muted-foreground text-xs">
-									Start using models to see cost estimates
-								</p>
-							</div>
-						)}
-					</div>
 				</CardContent>
 			</Card>
 		</div>
