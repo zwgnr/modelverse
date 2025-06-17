@@ -1,35 +1,41 @@
-
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export function CopyButton({ response }: { response?: string }) {
+interface CopyButtonProps {
+  response?: string;
+}
+
+export function CopyButton({ response }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = async () => {
     if (!response) return;
     try {
       await navigator.clipboard.writeText(response);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy response:", err);
+      console.error("Failed to copy:", err);
     }
-  }, [response]);
-
-  if (!response) return null;
+  };
 
   return (
     <Button
-      aria-label="Copy"
+      aria-label="Copy response"
       variant="ghost"
       size="icon"
       onClick={handleCopy}
-      title={copied ? "Copied!" : "Copy"}
+      disabled={!response}
+      title={copied ? "Copied!" : "Copy response"}
     >
-      {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+      {copied ? (
+        <Check size={16} className="text-green-500" />
+      ) : (
+        <Copy size={16} />
+      )}
     </Button>
   );
 }

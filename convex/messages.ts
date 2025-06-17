@@ -319,4 +319,46 @@ export const cancelStream = mutation({
 	},
 });
 
+export const retry = mutation({
+	args: { 
+		messageId: v.id("messages"),
+		model: modelId,
+	},
+	handler: async (ctx, { messageId, model }) => {
+		const userId = await getAuthenticatedUserId(ctx);
+
+		const message = await ctx.db.get(messageId);
+		if (!message) throw new Error("Message not found");
+		if (message.userId !== userId) throw new Error("Unauthorized");
+
+		// Cancel existing stream if it exists
+		if (message.responseStreamId) {
+			await ctx.runMutation(
+				components.persistentTextStreaming.lib.setStreamStatus,
+				{
+					streamId: message.responseStreamId as StreamId,
+					status: "done",
+				},
+			);
+		}
+
+		// Create a new stream for the retry
+		const responseStreamId = await streamingComponent.createStream(ctx);
+
+		// Update the message with the new model and stream
+		await ctx.db.patch(messageId, {
+			model,
+			responseStreamId,
+			response: undefined, // Clear previous response
+		});
+
+		// Update conversation timestamp
+		await ctx.db.patch(message.conversationId, {
+			updatedAt: Date.now(),
+		});
+
+		return { messageId, streamId: responseStreamId };
+	},
+});
+
 

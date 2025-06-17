@@ -34,6 +34,7 @@ import { CopyButton } from "@/components/chat/copy-button";
 import { FileDisplay } from "@/components/chat/FileDisplay";
 import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
 import { PromptArea } from "@/components/chat/PromptArea";
+import { RetryButton } from "@/components/chat/retry-button";
 import { ScrollToBottomButton } from "@/components/chat/ScrollToBottom";
 import { StreamingMessage } from "@/components/chat/StreamingMessage";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ interface RowProps {
   onStart: () => void;
   onDone: () => void;
   onFork: () => void;
+  onRetry: (messageId: Id<"messages">, model: Infer<typeof modelId>) => void;
 }
 
 const Row = memo(function Row({
@@ -74,8 +76,13 @@ const Row = memo(function Row({
   onStart,
   onDone,
   onFork,
+  onRetry,
 }: RowProps) {
   const hasAiReply = m.responseStreamId || m.response;
+
+  const handleRetry = useCallback((model: Infer<typeof modelId>) => {
+    onRetry(m._id, model);
+  }, [onRetry, m._id]);
 
   return (
     <div className="flex w-full flex-col space-y-2">
@@ -117,6 +124,11 @@ const Row = memo(function Row({
             <div className="flex items-center gap-1 text-muted-foreground text-xs">
               {getModelDisplayName(m.model) ?? m.model}
               <CopyButton response={m.response} />
+              <RetryButton 
+                onRetry={handleRetry}
+                currentModel={m.model}
+                disabled={driven}
+              />
               <Button aria-label="Fork" variant="ghost" size="icon" onClick={onFork} title="Fork">
                 <Split size={16} />
               </Button>
@@ -167,7 +179,7 @@ function ChatConversation() {
   });
 
   // Streaming bookkeeping
-  const [driven, setDriven] = useState(new Set<string>());
+  const [driven, setDriven] = useState<Set<string>>(new Set());
   useEffect(() => {
     const m = messages.at(-1);
     if (m?.responseStreamId && !m.response) {
@@ -180,9 +192,8 @@ function ChatConversation() {
   // Mutations
   const sendMessage = useMutation(api.messages.send);
   const cancelStream = useMutation(api.messages.cancelStream);
-  const branchConversation = useMutation(
-    api.conversations.createBranchedConversation,
-  );
+  const retryMessage = useMutation(api.messages.retry);
+  const branchConversation = useMutation(api.conversations.createBranchedConversation);
   const updateConversationModel = useMutation(api.conversations.updateModel);
 
   const onSendMessage = useCallback(
@@ -221,6 +232,14 @@ function ChatConversation() {
     });
     navigate({ to: "/chat/$chatid", params: { chatid: newId } });
   }, [chatid, branchConversation, navigate]);
+
+  const onRetry = useCallback(
+    async (messageId: Id<"messages">, model: Infer<typeof modelId>) => {
+      const res = await retryMessage({ messageId, model });
+      setDriven((d) => new Set(d).add(res.messageId));
+    },
+    [retryMessage],
+  );
 
   const onModelChange = useCallback(
     async (model: Infer<typeof modelId>) => {
@@ -311,6 +330,7 @@ function ChatConversation() {
                   })
                 }
                 onFork={fork}
+                onRetry={onRetry}
               />
             ))}
           </div>
