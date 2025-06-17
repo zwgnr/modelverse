@@ -82,7 +82,7 @@ export function ConversationRow({
 	return (
 		<div
 			className={cn(
-				"relative min-w-0 overflow-hidden rounded-lg",
+				"relative mr-2.5 min-w-0 overflow-hidden rounded-lg",
 				isActive
 					? "bg-secondary text-secondary-foreground"
 					: "hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-secondary/50",

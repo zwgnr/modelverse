@@ -63,7 +63,7 @@ export function Sidebar({
 	return (
 		<div
 			className={cn(
-				"flex h-screen w-64 flex-col overflow-hidden border-r pt-2 pb-1",
+				"flex h-screen w-64 flex-col overflow-hidden border-r pb-1",
 				!isVisible && "pointer-events-none",
 			)}
 		>
@@ -73,9 +73,9 @@ export function Sidebar({
 			</div>
 
 			<div className="relative min-h-0 flex-1">
-				<div className="sidebar-scroll h-full overflow-y-auto px-4">
+				<div className="sidebar-scroll h-full overflow-y-auto px-4 py-4">
 					{!conversations || conversations.length === 0 ? (
-						<div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+						<div className="flex h-full flex-col items-center justify-center text-center">
 							<div className="mb-4 text-muted-foreground">
 								<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
 							</div>
@@ -84,12 +84,12 @@ export function Sidebar({
 							</h3>
 						</div>
 					) : (
-						<div className="space-y-4">
+						<div className="space-y-6">
 							{/* Pinned Conversations Section */}
 							{conversations.some(conv => conv.isPinned) && (
-								<div className="space-y-2">
-									<div className="flex items-center gap-2 px-2 py-1">
-										<h3 className="font-bold text-muted-foreground text-xs tracking-wider">
+								<div className="space-y-3">
+									<div className="flex items-center gap-2 px-2">
+										<h3 className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
 											Pinned
 										</h3>
 									</div>
@@ -112,10 +112,10 @@ export function Sidebar({
 
 							{/* Regular Conversations Section */}
 							{conversations.some(conv => !conv.isPinned) && (
-								<div className="space-y-2">
+								<div className="space-y-3">
 									{conversations.some(conv => conv.isPinned) && (
-										<div className="flex items-center gap-2 px-2 py-1">
-											<h3 className="font-bold text-muted-foreground text-xs tracking-wider">
+										<div className="flex items-center gap-2 px-2">
+											<h3 className="font-bold text-muted-foreground text-xs uppercase tracking-wider">
 												Recent
 											</h3>
 										</div>

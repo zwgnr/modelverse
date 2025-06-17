@@ -70,7 +70,7 @@ const Row = memo(function Row({
   const hasAiReply = m.responseStreamId || m.response;
 
   return (
-    <div className="flex w-full max-w-4xl flex-col space-y-2">
+    <div className="flex w-full flex-col space-y-2">
       {/* User bubble */}
       <div className="flex justify-end">
         <Bubble className="flex w-fit max-w-2xs items-center bg-secondary text-secondary-foreground">
@@ -271,7 +271,7 @@ function ChatConversation() {
         <AutoScroll ref={viewportRef} deps={[chatid]}>
           <div
             ref={contentRef}                              
-            className="container mx-auto mb-40 max-w-4xl space-y-4"
+            className="container mx-auto mb-40 flex max-w-3xl justify-center space-y-4"
           >
             {messages.map((m) => (
               <Row
