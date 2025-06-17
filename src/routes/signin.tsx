@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
@@ -25,6 +25,11 @@ export function SignInForm() {
 
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	// Set page title for signin page
+	useEffect(() => {
+		document.title = "modelverse";
+	}, []);
 
 	const handleGitHubSignIn = async () => {
 		setSubmitting(true);

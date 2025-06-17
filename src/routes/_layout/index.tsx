@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 
@@ -23,6 +25,11 @@ function IndexComponent() {
 		convexQuery(api.users.getCustomization, {}),
 	);
 
+	// Set page title for new chat/home page
+	useEffect(() => {
+		document.title = "modelverse";
+	}, []);
+
 	const handleNavigateToChat = (conversationId: string) => {
 		router.navigate({
 			to: "/chat/$chatid",
@@ -39,17 +46,17 @@ function IndexComponent() {
 			<div className="w-full max-w-4xl space-y-8 text-center">
 				{hasApiKey ? (
 					<>
-					<div className="space-y-4">
-						<p className="text-3xl text-foreground">
-							What can I help you with?
-						</p>
-					</div>
-					<PromptArea
-						createNewConversation={true}
-						onNavigateToChat={handleNavigateToChat}
-						className="relative"
-						userDefaultModel={customization?.defaultModel}
-					/>
+						<div className="space-y-4">
+							<p className="text-3xl text-foreground">
+								What can I help you with?
+							</p>
+						</div>
+						<PromptArea
+							createNewConversation={true}
+							onNavigateToChat={handleNavigateToChat}
+							className="relative"
+							userDefaultModel={customization?.defaultModel}
+						/>
 					</>
 				) : (
 					<Onboarding />

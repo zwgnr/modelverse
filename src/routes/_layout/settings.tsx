@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 
 import {
@@ -12,6 +14,11 @@ import { cn } from "@/lib/utils";
 
 function SettingsLayout() {
 	const location = useLocation();
+
+	// Set page title for settings
+	useEffect(() => {
+		document.title = "modelverse";
+	}, []);
 	
 	const tabs = [
 		{
