@@ -17,11 +17,18 @@ export const betterAuthComponent = new BetterAuth(components.betterAuth, {
 	authFunctions,
 });
 
+const siteUrl = process.env.SITE_URL;
+if (!siteUrl) {
+	throw new Error(
+		"Please set the SITE_URL environment variable.",
+	);
+}
+
 export const createAuth = (ctx: GenericCtx) =>
 	// Configure your Better Auth instance here
 	betterAuth({
 		// All auth requests will be proxied through your TanStack Start server
-		baseURL: "http://localhost:3000",
+		baseURL: siteUrl,
 		database: convexAdapter(ctx, betterAuthComponent),
 		socialProviders: {
 			github: {
