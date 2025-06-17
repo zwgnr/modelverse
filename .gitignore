@@ -39,10 +39,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# Parcel / Vite / Bun
 .cache/
 .vite/
 .bun/
+.nitro/
 
 # Testing
 jest.config.js
