@@ -99,6 +99,16 @@ export const { createUser, updateUser, deleteUser, createSession } =
 				await ctx.db.delete(conversation._id);
 			}
 
+			// Delete all usage records for this user
+			const usageRecords = await ctx.db
+				.query("usage")
+				.withIndex("by_user", (q) => q.eq("userId", userIdTyped))
+				.collect();
+
+			for (const usage of usageRecords) {
+				await ctx.db.delete(usage._id);
+			}
+
 			// Finally delete the user
 			await ctx.db.delete(userIdTyped);
 		},
