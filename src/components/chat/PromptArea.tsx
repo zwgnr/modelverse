@@ -412,7 +412,7 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						size="icon"
 						onClick={onSubmit}
 						disabled={!canSend || isStreaming}
-						className="h-9 w-9 rounded-xl bg-primary/90 shadow-md shadow-primary/15 hover:bg-primary/80 disabled:bg-primary/40 disabled:shadow-primary/10"
+						className="flex h-9 w-9 items-center justify-center rounded-xl disabled:bg-primary/40"
 					>
 						<Send className="h-4 w-4" />
 					</Button>
