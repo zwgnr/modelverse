@@ -30,6 +30,7 @@ import { getModelDisplayName } from "@/lib/models";
 
 import { AutoScroll } from "@/components/chat/AutoScroll";
 import { Bubble } from "@/components/chat/Bubble";
+import { CopyButton } from "@/components/chat/copy-button";
 import { FileDisplay } from "@/components/chat/FileDisplay";
 import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
 import { PromptArea } from "@/components/chat/PromptArea";
@@ -113,8 +114,9 @@ const Row = memo(function Row({
           </Bubble>
 
           {m.model && (!driven || m.response) && (
-            <div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="flex items-center gap-1 text-muted-foreground text-xs">
               {getModelDisplayName(m.model) ?? m.model}
+              <CopyButton response={m.response} />
               <Button aria-label="Fork" variant="ghost" size="icon" onClick={onFork} title="Fork">
                 <Split size={16} />
               </Button>

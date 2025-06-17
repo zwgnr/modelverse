@@ -35,3 +35,5 @@ export async function decrypt(
 	const decryptedBytes = aesGcm.decrypt(ciphertextWithNonce);
 	return bytesToUtf8(decryptedBytes);
 }
+
+// to do, add job to re-encrypt when key roatates
