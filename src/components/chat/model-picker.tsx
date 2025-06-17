@@ -97,7 +97,7 @@ export function ModelPicker({
 					variant="ghost"
 					aria-expanded={open}
 					className={cn(
-						"group relative h-10 justify-between overflow-hidden px-3 text-left font-medium transition-all data-[state=open]:bg-secondary dark:data-[state=open]:bg-secondary/50",
+						"group relative h-10 justify-between overflow-hidden px-3 text-left font-medium transition-all",
 						className,
 					)}
 				>
@@ -113,7 +113,7 @@ export function ModelPicker({
 							{selectedModel?.name || "Select model…"}
 						</span>
 					</div>
-					<ChevronDown className="h-4 w-4 shrink-0 opacity-0 transition-transform group-hover:opacity-100 group-data-[state=open]:rotate-180" />
+					<ChevronDown className="h-4 w-4 shrink-0 opacity-0 transition-transform group-hover:opacity-100 group-data-[state=open]:rotate-180 group-data-[state=open]:opacity-100" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
@@ -151,13 +151,13 @@ export function ModelPicker({
 												onValueChange?.(model.id);
 												setOpen(false);
 											}}
-											className="group relative cursor-pointer rounded-lg p-4 transition-all duration-200 "
+											className="group"
 										>
-											<div className="flex items-start gap-3">
-												<div className="flex h-8 w-8 items-center justify-center rounded-lg border border-muted transition-colors">
+											<div className="flex items-center justify-between gap-3">
+												<div className="flex size-8 flex-col items-center justify-center rounded-lg">
 													{React.createElement(ProviderIcon, {
 														className: cn(
-															"h-4 w-4 transition-colors",
+															"size-5 transition-colors",
 															isSelected
 																? companyIconColors[model.company]
 																: "text-muted-foreground",

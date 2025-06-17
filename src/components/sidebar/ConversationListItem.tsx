@@ -82,10 +82,10 @@ export function ConversationRow({
 	return (
 		<div
 			className={cn(
-				"relative min-w-0 overflow-hidden rounded-lg",
+				"relative min-w-0 overflow-hidden rounded-lg border border-transparent text-secondary-foreground before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:from-transparent before:via-transparent before:to-transparent hover:border-black/5 hover:bg-black/[0.03] hover:backdrop-blur-md hover:before:from-black/2 dark:hover:border-white/5 dark:hover:bg-white/[0.02] dark:hover:shadow-black/20 dark:hover:before:from-white/2",
 				isActive
-					? "bg-secondary text-secondary-foreground"
-					: "text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-secondary/50",
+					? "border-black/5 bg-black/[0.03] backdrop-blur-md before:from-black/2 dark:border-white/5 dark:bg-white/[0.02] dark:shadow-black/20 dark:before:from-white/2"
+					: "",
 				!isVisible && "pointer-events-none",
 			)}
 		>
@@ -138,15 +138,15 @@ export function ConversationRow({
 						onOpenChange={setActionsPopoverOpen}
 					>
 						<PopoverTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
+							<button
+								type="button"
+								aria-label="Actions"
 								className={cn(
-									"-translate-y-1/2 absolute top-1/2 right-1 z-10 flex h-6 w-6 items-center justify-center p-0 text-muted-foreground opacity-0 transition-all duration-200 hover:scale-110 hover:bg-secondary hover:text-secondary-foreground group-hover:opacity-100 data-[state=open]:opacity-100",
+									"-translate-y-1/2 absolute top-1/2 right-1 z-10 flex size-8 items-center justify-center text-muted-foreground opacity-0 transition-all duration-200 hover:border-none hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100",
 								)}
 							>
-								<MoreVertical className="h-3 w-3" />
-							</Button>
+								<MoreVertical className="h-4 w-4" />
+							</button>
 						</PopoverTrigger>
 						<PopoverContent
 							className="w-40 p-1"
@@ -160,7 +160,7 @@ export function ConversationRow({
 									size="sm"
 									variant="ghost"
 									onClick={handleTogglePin}
-									className="h-8 w-full justify-start text-muted-foreground text-sm transition-all duration-200"
+									className="h-8 w-full justify-start hover:shadow-none"
 								>
 									{conversation.isPinned ? (
 										<PinOff className="mr-2 h-3 w-3" />
@@ -173,7 +173,7 @@ export function ConversationRow({
 									size="sm"
 									variant="ghost"
 									onClick={handleEditStart}
-									className="h-8 w-full justify-start text-muted-foreground text-sm transition-all duration-200"
+									className="h-8 w-full justify-start hover:shadow-none"
 								>
 									<Edit2 className="mr-2 h-3 w-3" />
 									Edit
@@ -182,7 +182,7 @@ export function ConversationRow({
 									size="sm"
 									variant="ghost"
 									onClick={handleDelete}
-									className="h-8 w-full justify-start text-red-600 text-sm transition-all duration-200 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/20"
+									className="h-8 w-full justify-start hover:shadow-none [&>svg]:text-destructive"
 								>
 									<Trash2 className="mr-2 h-3 w-3" />
 									Delete

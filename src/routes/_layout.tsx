@@ -49,10 +49,6 @@ function RouteComponent() {
 		convexQuery(api.auth.getCurrentUser, {}),
 	);
 
-	const { data: customization } = useSuspenseQuery(
-		convexQuery(api.users.getCustomization, {}),
-	);
-
 	const router = useRouter();
 
 	// Memoize chatid extraction to prevent unnecessary re-renders
@@ -150,7 +146,6 @@ function RouteComponent() {
 									onClick={toggleSidebar}
 									variant="ghost"
 									size="icon"
-									className="mr-2 rounded-xl hover:scale-110"
 									title={sidebarVisible ? "Hide sidebar" : "Show sidebar"}
 									aria-label="Toggle sidebar"
 								>
@@ -174,13 +169,8 @@ function RouteComponent() {
 									{/* Search Icon Button */}
 									<Button
 										onClick={handleOpenCommandPalette}
-										variant="ghost"
+										variant="outline"
 										size="icon"
-										className={cn(
-											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all duration-300",
-											"rounded-xl border border-border shadow-xs backdrop-blur-sm hover:shadow-sm",
-											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
-										)}
 										title="Search (⌘K)"
 										aria-label="Search"
 									>
@@ -193,11 +183,6 @@ function RouteComponent() {
 										asChild
 										variant="outline"
 										size="icon"
-										className={cn(
-											"fade-in slide-in-from-left-3 h-10 w-10 animate-in transition-all delay-75 duration-300",
-											"rounded-xl shadow-xs backdrop-blur-sm hover:shadow-sm",
-											"focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0",
-										)}
 										title="New Chat (⌘N)"
 									>
 										<Link to="/">

@@ -156,7 +156,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-[selected=true]:bg-secondary data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 dark:data-[selected=true]:bg-secondary dark:data-[selected=true]:text-secondary-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "relative flex min-w-0 cursor-default select-none items-center gap-2 overflow-hidden rounded-lg border border-transparent px-2 py-1.5 text-secondary-foreground text-sm outline-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:from-transparent before:via-transparent before:to-transparent hover:border-black/5 hover:bg-black/[0.03] hover:backdrop-blur-md hover:before:from-black/2 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 dark:hover:border-white/5 dark:hover:bg-white/[0.02] dark:hover:text-secondary-foreground dark:hover:shadow-black/20 dark:hover:before:from-white/2 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}

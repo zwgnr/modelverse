@@ -357,7 +357,6 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						variant="ghost"
 						size="icon"
 						onClick={openFileDialog}
-						className="h-8 w-8 rounded-lg border border-black/5 bg-transparent text-muted hover:bg-black/10 dark:border-white/5 dark:hover:bg-white/10"
 					>
 						<Paperclip className="h-4 w-4 text-muted-foreground" />
 					</Button>
@@ -375,12 +374,6 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						variant={web ? "default" : "ghost"}
 						size="icon"
 						onClick={onToggleWeb}
-						className={cn(
-							"h-8 w-8 rounded-lg border transition-all duration-200",
-							web
-								? "border-primary/30 bg-primary/20 text-primary shadow-md shadow-primary/10 hover:bg-primary/30"
-								: "border-black/5 bg-transparent hover:bg-black/10! dark:border-white/5 dark:hover:bg-white/10!",
-						)}
 					>
 						<Globe
 							className={cn(
@@ -403,7 +396,6 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 					<Button
 						size="icon"
 						onClick={onStop}
-						className="h-9 w-9 rounded-xl border border-black/10 bg-foreground/90 shadow-md hover:bg-foreground/80 dark:border-white/10"
 					>
 						<Square className="h-4 w-4" />
 					</Button>
@@ -412,7 +404,6 @@ const MemoPreviewAndActions = memo(function PreviewAndActions(p: PreviewProps) {
 						size="icon"
 						onClick={onSubmit}
 						disabled={!canSend || isStreaming}
-						className="flex h-9 w-9 items-center justify-center rounded-xl disabled:bg-primary/40"
 					>
 						<Send className="h-4 w-4" />
 					</Button>

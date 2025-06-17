@@ -31,8 +31,9 @@ export function AccountPopover({
 	return (
 		<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					variant="ghost"
+				<button
+					type="button"
+					aria-label="Account"
 					className="h-8 w-8 rounded-full p-0 transition-all duration-200"
 				>
 					<Avatar className="h-10 w-10">
@@ -50,7 +51,7 @@ export function AccountPopover({
 							)}
 						</AvatarFallback>
 					</Avatar>
-				</Button>
+				</button>
 			</PopoverTrigger>
 			<PopoverContent className="w-64" align="end" side="bottom" sideOffset={8}>
 				<div className="space-y-2">
@@ -71,7 +72,7 @@ export function AccountPopover({
 						<Button
 							asChild
 							variant="ghost"
-							className="h-auto w-full justify-start p-3 transition-all duration-200"
+							className="h-auto w-full justify-start p-3 hover:shadow-none"
 							onClick={() => setPopoverOpen(false)}
 						>
 							<Link to="/settings">
@@ -84,7 +85,7 @@ export function AccountPopover({
 					<Button
 						onClick={onSignOut}
 						variant="ghost"
-						className="h-auto w-full justify-start p-3 text-red-600 text-sm transition-all duration-200 hover:text-red-700"
+						className="h-auto w-full justify-start p-3 text-red-600 text-sm transition-all duration-200 hover:text-red-700 hover:shadow-none"
 					>
 						<LogOut className="mr-2 h-4 w-4" />
 						Sign Out

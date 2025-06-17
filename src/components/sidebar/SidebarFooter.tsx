@@ -2,7 +2,7 @@ import { Github } from "lucide-react";
 
 export function SidebarFooter() {
 	return (
-		<div className="flex-shrink-0 border-border border-t p-3">
+		<div className="flex-shrink-0 border-border border-t p-3 px-4">
 			<div className="mt-2 flex items-center justify-between text-muted-foreground text-xs">
 				<span>v0.1.0</span>
 				<a
