@@ -85,7 +85,7 @@ export function ConversationRow({
 				"relative min-w-0 overflow-hidden rounded-lg",
 				isActive
 					? "bg-secondary text-secondary-foreground"
-					: "hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-secondary/50",
+					: "text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-secondary/50",
 				!isVisible && "pointer-events-none",
 			)}
 		>
