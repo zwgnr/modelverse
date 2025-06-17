@@ -139,7 +139,7 @@ function RouteComponent() {
 			<div className="flex min-w-0 flex-1 flex-col p-0 transition-all duration-300 ease-out">
 				<div className="flex h-full flex-col overflow-hidden bg-card">
 					{/* Header */}
-					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-6 py-5 backdrop-blur-sm">
+					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-6 py-3 backdrop-blur-sm">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<Button
