@@ -10,6 +10,7 @@ out/
 .next/
 coverage/
 *.tsbuildinfo
+.tanstack/
 
 # Logs
 logs/
@@ -27,7 +28,7 @@ pids/
 
 # Misc
 .env
-.env.*.local
+.env.local
 .vscode/
 .idea/
 .DS_Store
