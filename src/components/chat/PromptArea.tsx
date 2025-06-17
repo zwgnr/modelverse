@@ -242,7 +242,7 @@ export function PromptArea(props: PromptAreaProps) {
 				)}
 			>
 				{/*  input container  */}
-				<div className="relative overflow-hidden rounded-4xl border border-black/10 bg-black/[0.01] shadow-black/5 shadow-xl backdrop-blur-md backdrop-saturate-150 before:absolute before:inset-0 before:rounded-4xl before:bg-gradient-to-br before:from-black/2 before:via-transparent before:to-transparent dark:border-white/10 dark:bg-white/[0.01] dark:shadow-black/30 dark:before:from-white/2">
+				<div className="relative overflow-hidden rounded-4xl border border-black/10 shadow-black/5 shadow-xl backdrop-blur-md backdrop-saturate-150 before:absolute before:inset-0 before:rounded-4xl before:bg-gradient-to-br before:from-black/2 before:via-transparent before:to-transparent dark:border-white/10 dark:shadow-black/30 dark:before:from-white/2">
 					{/*  Text area  */}
 					<PromptInput
 						value={text}
