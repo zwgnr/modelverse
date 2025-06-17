@@ -15,9 +15,12 @@ export const Route = createFileRoute("/_layout/")({
 function IndexComponent() {
 	const router = useRouter();
 
-	/* User */
 	const { data: currentUser } = useSuspenseQuery(
 		convexQuery(api.auth.getCurrentUser, {}),
+	);
+
+	const { data: customization } = useSuspenseQuery(
+		convexQuery(api.users.getCustomization, {}),
 	);
 
 	const handleNavigateToChat = (conversationId: string) => {
@@ -45,6 +48,7 @@ function IndexComponent() {
 						createNewConversation={true}
 						onNavigateToChat={handleNavigateToChat}
 						className="relative"
+						userDefaultModel={customization?.defaultModel}
 					/>
 					</>
 				) : (

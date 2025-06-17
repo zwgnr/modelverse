@@ -5,8 +5,6 @@ import { Link } from "@tanstack/react-router";
 
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "convex/_generated/api";
-import type { modelId } from "convex/schema";
-import type { Infer } from "convex/values";
 
 import { MessageSquare, Plus, Search } from "lucide-react";
 
@@ -26,16 +24,12 @@ interface CommandPaletteProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onNewChatWithModel?: (modelId: string) => void;
-	onModelSelect: (modelName: Infer<typeof modelId>) => void;
-	currentModel: string;
 }
 
 export function CommandPalette({
 	open,
 	onOpenChange,
 	onNewChatWithModel,
-	onModelSelect,
-	currentModel,
 }: CommandPaletteProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const { data: conversations } = useSuspenseQuery(
@@ -103,8 +97,6 @@ export function CommandPalette({
 										handleSelect(() => {
 											if (onNewChatWithModel) {
 												onNewChatWithModel(model.id);
-											} else {
-												onModelSelect(model.id);
 											}
 										})
 									}
@@ -119,38 +111,6 @@ export function CommandPalette({
 											</span>
 										</div>
 									</Link>
-								</CommandItem>
-							);
-						})}
-					</CommandGroup>
-
-					<CommandSeparator />
-
-					{/* AI Models */}
-					<CommandGroup heading="AI Models">
-						{models.map((model) => {
-							const Icon = model.icon;
-							const isSelected = currentModel === model.id;
-
-							return (
-								<CommandItem
-									key={model.id}
-									onSelect={() => handleSelect(() => onModelSelect(model.id))}
-								>
-									{Icon && <Icon />}
-									<div className="flex flex-col">
-										<span className="flex items-center gap-2">
-											{model.name}
-											{isSelected && (
-												<span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary text-xs">
-													Current
-												</span>
-											)}
-										</span>
-										<span className="text-muted-foreground text-xs">
-											{model.description}
-										</span>
-									</div>
 								</CommandItem>
 							);
 						})}

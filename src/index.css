@@ -3,10 +3,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
-@theme {
-  --font-geist: 'Geist', 'sans-serif';
-  --font-geist-mono: 'Geist Mono', 'monospace';
-}
 
 html,
 body {
@@ -18,44 +14,16 @@ body {
   box-sizing: border-box;
 }
 
-/* Prevent theme switching flashes */
-html.transitioning * {
-  transition: none !important;
+@theme {
+  --font-geist: 'Geist', 'sans-serif';
+  --font-geist-mono: 'Geist Mono', 'monospace';
 }
 
-/* Prevent color transitions on theme change, but allow other transitions */
-* {
-  transition-property:
-    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
-    outline-offset, width !important;
+@layer base {
+  * {
+    @apply border-border;
+  }
 }
-
-/* Allow specific hover transitions */
-*:hover {
-  transition-property:
-    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
-    outline-offset, background-color, border-color, color !important;
-  transition-duration: 0.15s !important;
-}
-
-/* Force Geist Mono on syntax highlighter */
-pre[class*='language-'],
-code[class*='language-'],
-.token,
-pre.prism-code,
-code.prism-code,
-div[class*='language-'] pre,
-div[class*='language-'] code {
-  font-family:
-    'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
-    monospace !important;
-}
-.shiki,
-.streaming-code {
-  width: 100%;
-  min-width: 0; /* allow it to shrink inside flex */
-}
-
 
 :root {
   color-scheme: light dark;
@@ -171,26 +139,8 @@ div[class*='language-'] code {
   --color-conversation-hover-foreground: var(--conversation-hover-foreground);
 }
 
+
 @custom-variant dark (&:is(.dark *));
-
-/* Shiki dual theme support - make syntax highlighting respond to dark mode */
-
-
-/* Prevent theme switching flashes */
-.shiki {
-  transition: none !important;
-}
-
-/* Ensure consistent height during syntax highlighting load */
-.shiki pre {
-  min-height: 2.5rem;
-}
-
-/* Prevent layout shift during code highlighting */
-pre[class*='language-'],
-.shiki pre {
-  contain: layout style;
-}
 
 @keyframes typing {
   0%,
@@ -348,3 +298,67 @@ pre[class*='language-'],
   background: transparent;
 }
 
+/* Prevent theme switching flashes */
+html.transitioning * {
+  transition: none !important;
+}
+
+/* Prevent color transitions on theme change, but allow other transitions */
+* {
+  transition-property:
+    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
+    outline-offset, width !important;
+}
+
+/* Allow specific hover transitions */
+*:hover {
+  transition-property:
+    transform, opacity, box-shadow, filter, backdrop-filter, border-width, border-radius, outline,
+    outline-offset, background-color, border-color, color !important;
+  transition-duration: 0.15s !important;
+}
+
+/* Force Geist Mono on syntax highlighter */
+pre[class*='language-'],
+code[class*='language-'],
+.token,
+pre.prism-code,
+code.prism-code,
+div[class*='language-'] pre,
+div[class*='language-'] code {
+  font-family:
+    'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
+    monospace !important;
+}
+.shiki,
+.streaming-code {
+  width: 100%;
+  min-width: 0; /* allow it to shrink inside flex */
+}
+
+/* Shiki dual theme support - make syntax highlighting respond to dark mode */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  /* Optional, if you also want font styles */
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* Prevent theme switching flashes */
+.shiki {
+  transition: none !important;
+}
+
+/* Ensure consistent height during syntax highlighting load */
+.shiki pre {
+  min-height: 2.5rem;
+}
+
+/* Prevent layout shift during code highlighting */
+pre[class*='language-'],
+.shiki pre {
+  contain: layout style;
+}

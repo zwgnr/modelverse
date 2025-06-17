@@ -43,11 +43,18 @@ import type { modelId } from "../../../convex/schema";
 
 export const Route = createFileRoute("/_layout/chat/$chatid")({
   loader: async ({ context, params }) => {
-    await context.queryClient.ensureQueryData(
-      convexQuery(api.messages.get, {
-        conversationId: params.chatid as Id<"conversations">,
-      }),
-    );
+    await Promise.all([
+      context.queryClient.ensureQueryData(
+        convexQuery(api.messages.get, {
+          conversationId: params.chatid as Id<"conversations">,
+        }),
+      ),
+      context.queryClient.ensureQueryData(
+        convexQuery(api.conversations.getById, {
+          conversationId: params.chatid as Id<"conversations">,
+        }),
+      ),
+    ]);
   },
   component: ChatConversation,
 });
@@ -124,14 +131,19 @@ function ChatConversation() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  /* Title */
-  const { data: conversations } = useSuspenseQuery(
-    convexQuery(api.conversations.get, {}),
+  const { data: conversation } = useSuspenseQuery(
+    convexQuery(api.conversations.getById, {
+      conversationId: chatid as Id<"conversations">,
+    }),
   );
+
+  const { data: customization } = useSuspenseQuery(
+    convexQuery(api.users.getCustomization, {}),
+  );
+  /* Title */
   const title = useMemo(
-    () =>
-      conversations?.find((c) => c._id === chatid)?.title ?? "modelverse",
-    [conversations, chatid],
+    () => conversation?.title ?? "modelverse",
+    [conversation],
   );
   useEffect(() => {
     document.title = title;
@@ -157,12 +169,11 @@ function ChatConversation() {
   useEffect(() => {
     const m = messages.at(-1);
     if (m?.responseStreamId && !m.response) {
-      const conversation = conversations?.find((c) => c._id === chatid);
       if (conversation?.hasPendingInitialMessage) {
         setDriven((s) => new Set(s).add(m._id));
       }
     }
-  }, [messages, conversations, chatid]);
+  }, [messages, conversation]);
 
   // Mutations
   const sendMessage = useMutation(api.messages.send);
@@ -170,6 +181,7 @@ function ChatConversation() {
   const branchConversation = useMutation(
     api.conversations.createBranchedConversation,
   );
+  const updateConversationModel = useMutation(api.conversations.updateModel);
 
   const onSendMessage = useCallback(
     async (p: {
@@ -207,6 +219,16 @@ function ChatConversation() {
     });
     navigate({ to: "/chat/$chatid", params: { chatid: newId } });
   }, [chatid, branchConversation, navigate]);
+
+  const onModelChange = useCallback(
+    async (model: Infer<typeof modelId>) => {
+      await updateConversationModel({
+        conversationId: chatid as Id<"conversations">,
+        model,
+      });
+    },
+    [chatid, updateConversationModel],
+  );
 
   // Scroll management
   const viewportRef = useRef<HTMLDivElement>(null);       // scroll container
@@ -271,7 +293,7 @@ function ChatConversation() {
         <AutoScroll ref={viewportRef} deps={[chatid]}>
           <div
             ref={contentRef}                              
-            className="container mx-auto mb-40 flex max-w-3xl justify-center space-y-4"
+            className="container mx-auto mb-40 flex max-w-3xl flex-col justify-center space-y-4"
           >
             {messages.map((m) => (
               <Row
@@ -309,6 +331,9 @@ function ChatConversation() {
         onStopStream={stopStream}
         isStreaming={driven.size > 0}
         className="absolute right-0 bottom-0 left-0 z-50"
+        conversationModel={conversation?.model}
+        onModelChange={onModelChange}
+        userDefaultModel={customization?.defaultModel}
       />
     </div>
   );

@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 
 import type { Infer } from "convex/values";
 
-import { atom } from "jotai";
 import { Bot, Brain, Sparkles, Zap } from "lucide-react";
 
 import { MODEL_IDS, type modelId } from "../../convex/schema";
@@ -90,18 +89,6 @@ export const models: Model[] = [
 
 export const DEFAULT_MODEL = MODEL_IDS[0];
 
-// Regular jotai atom for selected model (client-side routing preserves state)
-export const selectedModelAtom = atom<Infer<typeof modelId>>(DEFAULT_MODEL);
-
-// Atom for the default model setting (initialized from database)
-export const defaultModelAtom = atom<Infer<typeof modelId>>(DEFAULT_MODEL);
-
-// Function to set the default model from database
-export const setDefaultModelFromDB = (
-	model: Infer<typeof modelId> | undefined,
-) => {
-	return model || DEFAULT_MODEL;
-};
 
 // Helper function to group models by company
 export const getModelsByCompany = () => {

@@ -33,6 +33,7 @@ import { GeminiIcon } from "../ui/svg/gemini";
 
 interface ModelPickerProps {
 	value?: string;
+	defaultValue?: string;
 	onValueChange?: (value: Infer<typeof modelId>) => void;
 	className?: string;
 }
@@ -65,6 +66,7 @@ const companyAccentColors = {
 };
 
 export function ModelPicker({
+	defaultValue,
 	value,
 	onValueChange,
 	className,
@@ -118,7 +120,7 @@ export function ModelPicker({
 				className="z-50 w-80 rounded-lg border-0 p-0 shadow-xl"
 				align="start"
 			>
-				<Command className="overflow-hidden rounded-lg border border-border">
+				<Command defaultValue={defaultValue} className="overflow-hidden rounded-lg border border-border">
 					<CommandInput placeholder="Search models..." className="border-0" />
 					<CommandList className="max-h-96">
 						<CommandEmpty>No models found.</CommandEmpty>

@@ -12,6 +12,7 @@ import {
 	query,
 } from "./_generated/server";
 import { getAuthenticatedUserId } from "./lib/auth";
+import { modelId } from "./schema";
 
 export const get = query({
 	handler: async (ctx): Promise<Doc<"conversations">[]> => {
@@ -33,8 +34,11 @@ export const get = query({
 });
 
 export const create = mutation({
-	args: { title: v.optional(v.string()) },
-	handler: async (ctx, { title }) => {
+	args: { 
+		title: v.optional(v.string()),
+		model: v.optional(modelId),
+	},
+	handler: async (ctx, { title, model }) => {
 		const userId = await getAuthenticatedUserId(ctx);
 
 		const now = Date.now();
@@ -45,6 +49,7 @@ export const create = mutation({
 			title: conversationTitle,
 			createdAt: now,
 			updatedAt: now,
+			...(model && { model }),
 		});
 
 		return conversationId;
@@ -273,6 +278,7 @@ export const createBranchedConversation = mutation({
 			createdAt: now,
 			updatedAt: now,
 			branchParent: conversationId,
+			...(originalConversation.model && { model: originalConversation.model }),
 		});
 
 		// Copy all messages to the new conversation
@@ -288,5 +294,47 @@ export const createBranchedConversation = mutation({
 		}
 
 		return newConversationId;
+	},
+});
+
+export const updateModel = mutation({
+	args: { 
+		conversationId: v.id("conversations"), 
+		model: modelId 
+	},
+	handler: async (ctx, { conversationId, model }) => {
+		const userId = await getAuthenticatedUserId(ctx);
+
+		// Verify the conversation belongs to the user
+		const conversation = await ctx.db.get(conversationId);
+		if (!conversation || conversation.userId !== userId) {
+			throw new Error("Conversation not found or unauthorized");
+		}
+
+		await ctx.db.patch(conversationId, {
+			model,
+			updatedAt: Date.now(),
+		});
+	},
+});
+
+export const getById = query({
+	args: { conversationId: v.id("conversations") },
+	handler: async (ctx, { conversationId }): Promise<Doc<"conversations"> | null> => {
+		try {
+			const userId = await getAuthenticatedUserId(ctx);
+			
+			const conversation = await ctx.db.get(conversationId);
+			
+			// Verify the conversation belongs to the user
+			if (!conversation || conversation.userId !== userId) {
+				return null;
+			}
+			
+			return conversation;
+		} catch (e) {
+			console.error(e);
+			return null;
+		}
 	},
 });

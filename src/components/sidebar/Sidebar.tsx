@@ -63,7 +63,7 @@ export function Sidebar({
 	return (
 		<div
 			className={cn(
-				"flex h-screen w-64 flex-col overflow-hidden border-r pb-1",
+				"flex h-screen w-64 flex-col overflow-hidden border-border border-r pb-1",
 				!isVisible && "pointer-events-none",
 			)}
 		>

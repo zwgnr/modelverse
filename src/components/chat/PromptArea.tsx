@@ -3,7 +3,6 @@ import {
 	Fragment,
 	memo,
 	useCallback,
-	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -12,7 +11,6 @@ import { useMutation } from "convex/react";
 import type { modelId } from "convex/schema";
 import type { Infer } from "convex/values";
 
-import { useAtom } from "jotai";
 import {
 	FileImage,
 	FileText,
@@ -23,7 +21,7 @@ import {
 	X,
 } from "lucide-react";
 
-import { defaultModelAtom, selectedModelAtom } from "@/lib/models";
+import { DEFAULT_MODEL } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 import { ModelPicker } from "@/components/chat/model-picker";
@@ -57,6 +55,9 @@ interface PromptAreaProps {
 	};
 	createNewConversation?: boolean;
 	onNavigateToChat?: (conversationId: string) => void;
+	conversationModel?: Infer<typeof modelId>;
+	onModelChange?: (model: Infer<typeof modelId>) => void;
+	userDefaultModel?: Infer<typeof modelId>;
 }
 
 export function PromptArea(props: PromptAreaProps) {
@@ -73,20 +74,27 @@ export function PromptArea(props: PromptAreaProps) {
 			streaming: "AI is responding…",
 			withFiles: "Ask about your files…",
 		},
+		conversationModel,
+		onModelChange,
+		userDefaultModel,
 	} = props;
 
 	const [text, setText] = useState("");
 	const [files, setFiles] = useState<{ file: File; dataUrl?: string }[]>([]);
 	const [web, setWeb] = useState(false);
-	const [model, setModel] = useAtom(selectedModelAtom);
-	const [defaultModel] = useAtom(defaultModelAtom);
+	// Use user's default model from database, fallback to DEFAULT_MODEL
+	const defaultModel = userDefaultModel || DEFAULT_MODEL;
+	// For new conversations, track model selection locally
+	const [newConversationModel, setNewConversationModel] = useState<
+		Infer<typeof modelId> | undefined
+	>(undefined);
 
-	// Initialize model with default for new conversations
-	useEffect(() => {
-		if (createNewConversation && !conversationId) {
-			setModel(defaultModel);
-		}
-	}, [createNewConversation, conversationId, defaultModel, setModel]);
+	// Derive the current model based on context
+	const currentModel =
+		conversationModel ||
+		(createNewConversation
+			? newConversationModel || defaultModel
+			: defaultModel);
 
 	const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 	const createConversation = useMutation(api.conversations.create);
@@ -99,8 +107,16 @@ export function PromptArea(props: PromptAreaProps) {
 	const toggleWeb = useCallback(() => setWeb((v) => !v), []);
 
 	const changeModel = useCallback(
-		(val: Infer<typeof modelId>) => setModel(val),
-		[setModel],
+		(val: Infer<typeof modelId>) => {
+			if (createNewConversation) {
+				// For new conversations, update local state
+				setNewConversationModel(val);
+			} else if (onModelChange && conversationId) {
+				// For existing conversations, update the conversation model
+				onModelChange(val);
+			}
+		},
+		[createNewConversation, onModelChange, conversationId],
 	);
 
 	const removeFile = useCallback(
@@ -152,11 +168,13 @@ export function PromptArea(props: PromptAreaProps) {
 		);
 
 		const modelIdToUse = (
-			web && !model.includes(":online") ? `${model}:online` : model
+			web && !currentModel.includes(":online")
+				? `${currentModel}:online`
+				: currentModel
 		) as Infer<typeof modelId>;
 
 		if (createNewConversation && onNavigateToChat) {
-			const newId = await createConversation({});
+			const newId = await createConversation({ model: modelIdToUse });
 			await sendMessage({
 				prompt: text,
 				conversationId: newId,
@@ -190,7 +208,7 @@ export function PromptArea(props: PromptAreaProps) {
 		text,
 		files,
 		web,
-		model,
+		currentModel,
 		createNewConversation,
 		conversationId,
 		onSendMessage,
@@ -252,7 +270,7 @@ export function PromptArea(props: PromptAreaProps) {
 						onFileUpload={handleFileUpload}
 						web={web}
 						onToggleWeb={toggleWeb}
-						model={model}
+						model={currentModel}
 						onModelChange={changeModel}
 						isStreaming={isStreaming}
 						onSubmit={handleSubmit}

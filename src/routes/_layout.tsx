@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { useSuspenseQuery, } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
 	Link,
@@ -10,18 +10,10 @@ import {
 } from "@tanstack/react-router";
 
 import { convexQuery } from "@convex-dev/react-query";
-import type { modelId } from "convex/schema";
-import type { Infer } from "convex/values";
 
-import { useAtom } from "jotai";
 import { MessageCirclePlus, PanelLeft, Search } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
-import {
-	defaultModelAtom,
-	selectedModelAtom,
-	setDefaultModelFromDB,
-} from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 import { AccountPopover } from "@/components/account-popover";
@@ -53,10 +45,6 @@ function RouteComponent() {
 	const [sidebarVisible, setSidebarVisible] = useState(true);
 	const [sidebarToggled, setSidebarToggled] = useState(false);
 	const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-	const [currentModel, setCurrentModel] = useAtom(selectedModelAtom);
-	const [, setDefaultModel] = useAtom(defaultModelAtom);
-
-
 	const { data: currentUser } = useSuspenseQuery(
 		convexQuery(api.auth.getCurrentUser, {}),
 	);
@@ -64,18 +52,6 @@ function RouteComponent() {
 	const { data: customization } = useSuspenseQuery(
 		convexQuery(api.users.getCustomization, {}),
 	);
-
-	// Initialize default model from database
-	useEffect(() => {
-		if (customization) {
-			const dbDefaultModel = setDefaultModelFromDB(customization.defaultModel);
-			setDefaultModel(dbDefaultModel);
-			// Only set current model if it hasn't been set yet (first load)
-			setCurrentModel((prev) =>
-				prev === "openai/gpt-4o-mini" ? dbDefaultModel : prev,
-			);
-		}
-	}, [customization, setDefaultModel, setCurrentModel]);
 
 	const router = useRouter();
 
@@ -112,13 +88,6 @@ function RouteComponent() {
 		});
 	}, [router]);
 
-	const handleModelSelect = useCallback(
-		(modelName: Infer<typeof modelId>) => {
-			setCurrentModel(modelName);
-		},
-		[setCurrentModel],
-	);
-
 	const handleOpenCommandPalette = useCallback(() => {
 		setCommandPaletteOpen(true);
 	}, []);
@@ -129,8 +98,6 @@ function RouteComponent() {
 			<CommandPalette
 				open={commandPaletteOpen}
 				onOpenChange={setCommandPaletteOpen}
-				onModelSelect={handleModelSelect}
-				currentModel={currentModel}
 			/>
 
 			{/* Backdrop for mobile */}
@@ -176,7 +143,7 @@ function RouteComponent() {
 			<div className="flex min-w-0 flex-1 flex-col p-0 transition-all duration-300 ease-out">
 				<div className="flex h-full flex-col overflow-hidden bg-card">
 					{/* Header */}
-					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-4 py-5 backdrop-blur-sm">
+					<div className="sticky top-0 z-10 flex-shrink-0 rounded-t-xl bg-transparent px-6 py-5 backdrop-blur-sm">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<Button
