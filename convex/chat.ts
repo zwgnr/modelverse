@@ -19,7 +19,7 @@ function buildSystemMessage(
 	customInstructions?: string,
 ): string {
 	const currentYear = new Date().getFullYear();
-	let systemMessage = `You are a helpful assistant. The year is ${currentYear}. Do not mention your knowledge cutoff date.`;
+	let systemMessage = `You are a helpful assistant. The year is ${currentYear}. Do not mention your knowledge cutoff date. Respond in markdown.`;
 
 	if (personalityTraits && personalityTraits.length > 0) {
 		const traitsText = personalityTraits

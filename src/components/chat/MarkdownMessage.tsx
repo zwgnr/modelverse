@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { rehypeInlineCodeProperty, useShikiHighlighter } from "react-shiki";
+import rehypeSanitize from "rehype-sanitize";
 
 import { cn } from "@/lib/utils";
 
@@ -53,7 +54,7 @@ const CodeHighlight = ({
 	const isCodeBlock = !inline;
 
 	return isCodeBlock ? (
-		<div className="shiki not-prose group relative [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:px-6 [&_pre]:py-5">
+		<div className="shiki not-prose group relative text-base [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:px-6 [&_pre]:py-5">
 			{language && (
 				<span className="absolute top-2 right-12 text-muted-foreground/85 text-xs tracking-tighter">
 					{language}
@@ -106,7 +107,7 @@ export function MarkdownMessage({ content, className }: MarkdownMessageProps) {
 			)}
 		>
 			<ReactMarkdown
-				rehypePlugins={[rehypeInlineCodeProperty]}
+				rehypePlugins={[rehypeInlineCodeProperty, rehypeSanitize]}
 				components={{
 					code: CodeHighlight,
 				}}

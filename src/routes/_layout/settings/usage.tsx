@@ -28,7 +28,7 @@ import { api } from "../../../../convex/_generated/api";
 export const Route = createFileRoute("/_layout/settings/usage")({
 	component: UsageSettings,
 	loader: async ({ context }) => {
-		Promise.all([
+		await Promise.all([
 			context.convexClient.query(api.usage.getUserUsageStats, {}),
 			context.convexClient.query(api.usage.getDetailedUsage, {}),
 		]);
