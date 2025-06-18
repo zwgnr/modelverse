@@ -9,7 +9,6 @@ import { authClient } from "@/lib/auth-client";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Planet } from "@/components/ui/svg/planet";
 
 export const Route = createFileRoute("/signin")({
@@ -63,7 +62,8 @@ export function SignInForm() {
 				<ThemeToggle />
 			</div>
 
-			<div className="w-full max-w-md space-y-6">
+			<div className="flex w-full max-w-md flex-col items-center gap-4 space-y-6">
+				<div className="flex flex-col items-center gap-4">
 				{/* Branding */}
 				<div className="space-y-2 text-center">
 					<div className="mb-4 flex items-center justify-center gap-2">
@@ -74,15 +74,6 @@ export function SignInForm() {
 					</div>
 				</div>
 
-				{/* Main Card */}
-				<Card className="flex flex-col gap-2 border bg-card p-4">
-					<CardHeader className="space-y-1">
-						<CardTitle className="text-center font-semibold text-xl">
-							Sign In
-						</CardTitle>
-					</CardHeader>
-
-					<CardContent className="flex flex-col items-center space-y-6">
 						{error && (
 							<div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive text-sm">
 								<div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-destructive/20">
@@ -111,9 +102,7 @@ export function SignInForm() {
 								</div>
 							)}
 						</Button>
-					</CardContent>
-				</Card>
-
+						</div>
 				{/* Footer */}
 				<p className="text-center text-muted-foreground text-xs">
 					By continuing, you agree to our{" "}
