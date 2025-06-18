@@ -46,7 +46,7 @@ function IndexComponent() {
 	};
 
 	// Check if user has encrypted OpenRouter API key
-	const hasApiKey = !!currentUser?.openRouterKey;
+	const hasApiKey = currentUser?.hasOpenRouterKey;
 
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center px-4">

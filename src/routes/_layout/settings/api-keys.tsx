@@ -32,7 +32,7 @@ function ApiKeysSettings() {
 	const [openRouterKey, setOpenRouterKey] = useState("");
 	const [showKey, setShowKey] = useState(false);
 
-	const hasApiKey = !!user?.openRouterKey;
+	const hasApiKey = user?.hasOpenRouterKey;
 
 	useEffect(() => {
 		if (hasApiKey) {

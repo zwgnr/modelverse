@@ -4,7 +4,6 @@ import OpenAI from "openai";
 
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
-import { betterAuthComponent } from "./auth";
 import { streamingComponent } from "./streaming";
 
 const cors = {
@@ -37,15 +36,14 @@ function buildSystemMessage(
 
 export const chat = httpAction(async (ctx, request) => {
 	try {
-		const authUser = await betterAuthComponent.getAuthUser(ctx);
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			return new Response("Unauthorized", { status: 401, headers: cors });
+		}
 
 		const body = (await request.json()) as {
 			streamId: string;
 		};
-
-		if (!authUser) {
-			return new Response("Unauthorized", { status: 401, headers: cors });
-		}
 
 		// Find the message with this streamId
 		const message = await ctx.runQuery(internal.messages.getMessageByStreamId, {
@@ -56,13 +54,13 @@ export const chat = httpAction(async (ctx, request) => {
 			throw new Error("Message not found for streamId");
 		}
 
-		if (message.userId !== authUser.userId) {
-			return new Response("Unauthorized", { status: 403, headers: cors });
+		if (identity.subject !== message.userId) {
+			return new Response("Forbidden", { status: 403, headers: cors });
 		}
 
-		// Find the full user document from our database
-		const user = await ctx.runQuery(internal.users.getUserByEmail, {
-			email: authUser.email,
+		// // Find the full user document from our database
+		const user = await ctx.runQuery(internal.users.getUserById, {
+			id: message.userId,
 		});
 
 		if (!user) {

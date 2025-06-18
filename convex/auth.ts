@@ -19,9 +19,7 @@ export const betterAuthComponent = new BetterAuth(components.betterAuth, {
 
 const siteUrl = process.env.SITE_URL;
 if (!siteUrl) {
-	throw new Error(
-		"Please set the SITE_URL environment variable.",
-	);
+	throw new Error("Please set the SITE_URL environment variable.");
 }
 
 export const createAuth = (ctx: GenericCtx) =>
@@ -50,6 +48,7 @@ export const { createUser, updateUser, deleteUser, createSession } =
 		onCreateUser: async (ctx, user) => {
 			return ctx.db.insert("users", {
 				email: user.email,
+				image: user.image,
 				useBYOK: true,
 			});
 		},
@@ -57,7 +56,7 @@ export const { createUser, updateUser, deleteUser, createSession } =
 		// Delete the user when they are deleted from Better Auth
 		onDeleteUser: async (ctx, userId) => {
 			const userIdTyped = userId as Id<"users">;
-			
+
 			// Delete all user's conversations and their messages
 			const conversations = await ctx.db
 				.query("conversations")
@@ -68,7 +67,9 @@ export const { createUser, updateUser, deleteUser, createSession } =
 				// Delete all messages in each conversation
 				const messages = await ctx.db
 					.query("messages")
-					.withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+					.withIndex("by_conversation", (q) =>
+						q.eq("conversationId", conversation._id),
+					)
 					.collect();
 
 				// Collect all file storage IDs to delete
@@ -117,15 +118,18 @@ export const { createUser, updateUser, deleteUser, createSession } =
 export const getCurrentUser = query({
 	args: {},
 	handler: async (ctx) => {
-		const userMetadata = await betterAuthComponent.getAuthUser(ctx);
-		if (!userMetadata) {
-			return null;
-		}
-		const user = await ctx.db.get(userMetadata.userId as Id<"users">);
-		
+		const idn = (await ctx.auth.getUserIdentity())?.subject as Id<"users">;
+		if (!idn) return null;
+		const data = await ctx.db.get(idn);
+
 		return {
-			...user,
-			...userMetadata,
+			_creationTime: data?._creationTime,
+			name: data?.name,
+			email: data?.email,
+			image: data?.image,
+			useBYOK: data?.useBYOK,
+			defaultModel: data?.defaultModel,
+			hasOpenRouterKey: !!data?.openRouterKey,
 		};
 	},
 });

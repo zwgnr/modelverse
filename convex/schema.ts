@@ -31,6 +31,7 @@ export default defineSchema({
 	users: defineTable({
 		name: v.optional(v.string()),
 		email: v.optional(v.string()),
+		image: v.optional(v.string()), // Avatar image URL from GitHub
 		openRouterKey: v.optional(v.string()),
 		openRouterKeyId: v.optional(v.string()),
 		useBYOK: v.optional(v.boolean()),

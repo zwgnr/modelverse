@@ -51,12 +51,12 @@ export const get = internalQuery({
 	},
 });
 
-export const getUserByEmail = internalQuery({
-	args: { email: v.string() },
+export const getUserById = internalQuery({
+	args: { id: v.id("users") },
 	handler: async (ctx, args) => {
 		return await ctx.db
 			.query("users")
-			.withIndex("by_email", (q) => q.eq("email", args.email))
+			.withIndex("by_id", (q) => q.eq("_id", args.id))
 			.unique();
 	},
 });
