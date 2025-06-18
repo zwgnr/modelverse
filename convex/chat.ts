@@ -3,6 +3,7 @@ import type { StreamId } from "@convex-dev/persistent-text-streaming";
 import OpenAI from "openai";
 
 import { internal } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
 import { httpAction } from "./_generated/server";
 import { streamingComponent } from "./streaming";
 
@@ -121,7 +122,7 @@ export const chat = httpAction(async (ctx, request) => {
 						},
 					);
 					const userMessagesFiltered = userMessages.filter(
-						(m: any) =>
+						(m: Doc<"messages">) =>
 							m.role === "user" && m.messageOrder < message.messageOrder,
 					);
 					const associatedUserMessage =

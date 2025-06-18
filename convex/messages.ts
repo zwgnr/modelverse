@@ -6,7 +6,12 @@ import { v } from "convex/values";
 
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { internalQuery, mutation, query } from "./_generated/server";
+import {
+	internalQuery,
+	mutation,
+	type QueryCtx,
+	query,
+} from "./_generated/server";
 import { getAuthenticatedUserId } from "./lib/auth";
 import { modelId } from "./schema";
 import { streamingComponent } from "./streaming";
@@ -252,14 +257,23 @@ export const getConversationHistory = internalQuery({
 });
 
 // Helper function to build user message content including files
-async function buildUserMessageContent(ctx: any, message: any) {
+async function buildUserMessageContent(
+	ctx: QueryCtx,
+	message: Doc<"messages">,
+) {
 	if (!message.files || message.files.length === 0) {
 		// No files, just return the text
 		return message.content;
 	}
 
 	// Build content array with text and images
-	const contentParts = [];
+	const contentParts: Array<
+		| { type: "text"; text: string }
+		| {
+				type: "image_url";
+				image_url: { url: string; detail: "high" | "low" | "auto" };
+		  }
+	> = [];
 
 	// Add text content first
 	if (message.content?.trim()) {
