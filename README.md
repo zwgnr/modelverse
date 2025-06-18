@@ -4,11 +4,27 @@
 
 ---
 
+<img width="1865" alt="Screenshot 2025-06-18 at 12 41 41 PM" src="https://github.com/user-attachments/assets/860d84e6-8869-4a05-b192-6d179a596232" />
 
 
-Modelverse is an **open‑source, multi‑model chat application** powered by [Convex](https://convex.dev), [TanStack Start](https://tanstack.com/start), open router and better-auth.  
+Modelverse is an **open‑source, multi‑model chat application**  
 
 Bring your own [OpenRouter](https://openrouter.ai) API key and instantly switch between GPT‑4o, Claude, Gemini 2.5, Grok 3, DeepSeek and many more. All from a single chat UI.
+
+
+## Powered by
+
+<img width="24" alt="Screenshot 2025-06-18 at 12 41 41 PM" src="https://github.com/user-attachments/assets/93bfae26-4ec1-45b0-a21b-97c86151fa02" /> [Tanstack Start](https://tanstack.com/start/latest) 
+
+<img width="24" alt="Screenshot 2025-06-18 at 12 41 41 PM" src="https://github.com/user-attachments/assets/eaa85ba6-544e-40ae-89af-cfd1cea4c443" /> [Convex](https://www.convex.dev/) 
+
+<img width="24" alt="Screenshot 2025-06-18 at 12 41 41 PM" src="https://github.com/user-attachments/assets/7c85ec86-f372-4592-8ecb-0f9f318acf9c" /> [Better Auth](https://www.better-auth.com/) 
+
+[Open Router](https://openrouter.ai/)
+
+
+
+
 
 
 ---
@@ -19,7 +35,7 @@ Bring your own [OpenRouter](https://openrouter.ai) API key and instantly switch 
 * 🌐 **Web search toggle** 
 * 🧑‍💻 **GitHub OAuth** via `@convex-dev/better-auth`
 * 🔒 **API‑key encryption** 
-* 📡 **Real‑time streaming** with `@convex-dev/persistent-text-streaming`
+* 📡 **Resumable streaming** with `@convex-dev/persistent-text-streaming`
 * 🔄 **SSR** 
 * 🛠 **TypeScript everywhere** – strict types from DB → server → client
 
