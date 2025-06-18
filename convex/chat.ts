@@ -44,25 +44,6 @@ export const chat = httpAction(async (ctx, request) => {
 		};
 
 		if (!authUser) {
-			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
-				streamId: body.streamId as StreamId,
-				status: "error",
-			});
-			// Find the message to get the conversation ID for clearing pending flag
-			const message = await ctx.runQuery(
-				internal.messages.getMessageByStreamId,
-				{
-					streamId: body.streamId as StreamId,
-				},
-			);
-			if (message) {
-				await ctx.runMutation(
-					internal.conversations.clearPendingInitialMessageInternal,
-					{
-						conversationId: message.conversationId,
-					},
-				);
-			}
 			return new Response("Unauthorized", { status: 401, headers: cors });
 		}
 
@@ -76,16 +57,6 @@ export const chat = httpAction(async (ctx, request) => {
 		}
 
 		if (message.userId !== authUser.userId) {
-			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
-				streamId: body.streamId as StreamId,
-				status: "error",
-			});
-			await ctx.runMutation(
-				internal.conversations.clearPendingInitialMessageInternal,
-				{
-					conversationId: message.conversationId,
-				},
-			);
 			return new Response("Unauthorized", { status: 403, headers: cors });
 		}
 
@@ -95,16 +66,6 @@ export const chat = httpAction(async (ctx, request) => {
 		});
 
 		if (!user) {
-			await ctx.runMutation(streamingComponent.component.lib.setStreamStatus, {
-				streamId: body.streamId as StreamId,
-				status: "error",
-			});
-			await ctx.runMutation(
-				internal.conversations.clearPendingInitialMessageInternal,
-				{
-					conversationId: message.conversationId,
-				},
-			);
 			return new Response("User not found in database", {
 				status: 404,
 				headers: cors,
@@ -153,6 +114,22 @@ export const chat = httpAction(async (ctx, request) => {
 							messageId: message._id,
 						},
 					);
+
+					// Find the associated user message to get the model
+					const userMessages = await ctx.runQuery(
+						internal.messages.getInternal,
+						{
+							conversationId: message.conversationId,
+						},
+					);
+					const userMessagesFiltered = userMessages.filter(
+						(m: any) =>
+							m.role === "user" && m.messageOrder < message.messageOrder,
+					);
+					const associatedUserMessage =
+						userMessagesFiltered[userMessagesFiltered.length - 1];
+					const modelToUse =
+						associatedUserMessage?.model || "openai/gpt-4o-mini";
 					let apiKey = process.env.OPEN_ROUTER_API_KEY;
 					if (user.useBYOK) {
 						const byokKey = await ctx.runAction(
@@ -171,7 +148,7 @@ export const chat = httpAction(async (ctx, request) => {
 					// Start the stream request to OpenRouter
 					const stream = await openai.chat.completions.create(
 						{
-							model: message.model || "openai/gpt-4o-mini",
+							model: modelToUse,
 							messages: [
 								{
 									role: "system",
@@ -227,7 +204,7 @@ export const chat = httpAction(async (ctx, request) => {
 							await ctx.runMutation(internal.usage.trackUsage, {
 								userId: message.userId,
 								messageId: message._id,
-								model: message.model || "openai/gpt-4o-mini",
+								model: modelToUse,
 								promptTokens: usage.prompt_tokens,
 								completionTokens: usage.completion_tokens,
 								totalTokens: usage.total_tokens,
@@ -241,21 +218,6 @@ export const chat = httpAction(async (ctx, request) => {
 					if ((error as Error).name === "AbortError") {
 					} else {
 						console.error("Error in stream callback:", error);
-						// Set stream status to error
-						await ctx.runMutation(
-							streamingComponent.component.lib.setStreamStatus,
-							{
-								streamId: _streamId,
-								status: "error",
-							},
-						);
-						// Clear the pending initial message flag
-						await ctx.runMutation(
-							internal.conversations.clearPendingInitialMessageInternal,
-							{
-								conversationId: message.conversationId,
-							},
-						);
 						throw error;
 					}
 				}

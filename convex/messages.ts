@@ -4,7 +4,7 @@ import {
 } from "@convex-dev/persistent-text-streaming";
 import { v } from "convex/values";
 
-import { components, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { getAuthenticatedUserId } from "./lib/auth";
@@ -24,9 +24,10 @@ export const get = query({
 
 			return await ctx.db
 				.query("messages")
-				.withIndex("by_conversation", (q) =>
+				.withIndex("by_conversation_order", (q) =>
 					q.eq("conversationId", conversationId),
 				)
+				.order("asc")
 				.collect();
 		} catch (e) {
 			console.error(e);
@@ -57,33 +58,43 @@ export const send = mutation({
 		if (!conversation) throw new Error("Conversation not found");
 		if (conversation.userId !== userId) throw new Error("Unauthorized");
 
-		const isFirstMessage =
-			(
-				await ctx.db
-					.query("messages")
-					.withIndex("by_conversation", (q) =>
-						q.eq("conversationId", conversationId),
-					)
-					.collect()
-			).length === 0;
+		// Get the current message count to determine order
+		const existingMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_conversation", (q) =>
+				q.eq("conversationId", conversationId),
+			)
+			.collect();
 
-		// Create a stream for the response
-		const responseStreamId = await streamingComponent.createStream(ctx);
+		const isFirstMessage = existingMessages.length === 0;
+		const nextMessageOrder = existingMessages.length;
 
-		const messageId = await ctx.db.insert("messages", {
+		// Insert the user message
+		const userMessageId = await ctx.db.insert("messages", {
 			userId,
 			conversationId,
-			prompt,
+			role: "user",
+			content: prompt,
 			model,
 			files,
+			messageOrder: nextMessageOrder,
+		});
+
+		// Create a stream for the assistant response
+		const responseStreamId = await streamingComponent.createStream(ctx);
+
+		// Insert the assistant message with streaming
+		const assistantMessageId = await ctx.db.insert("messages", {
+			userId,
+			conversationId,
+			role: "assistant",
+			content: "", // Will be filled by streaming
 			responseStreamId,
-			// `response` is omitted initially
+			messageOrder: nextMessageOrder + 1,
 		});
 
 		await ctx.db.patch(conversationId, {
 			updatedAt: Date.now(),
-			// Set pending flag if this is the first message (from index page flow)
-			...(isFirstMessage ? { hasPendingInitialMessage: true } : {}),
 		});
 
 		if (isFirstMessage) {
@@ -94,7 +105,11 @@ export const send = mutation({
 			});
 		}
 
-		return { messageId, streamId: responseStreamId };
+		return {
+			userMessageId,
+			assistantMessageId,
+			streamId: responseStreamId,
+		};
 	},
 });
 
@@ -106,16 +121,10 @@ export const saveResponse = mutation({
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
 		if (message.userId !== userId) throw new Error("Unauthorized");
+		if (message.role !== "assistant")
+			throw new Error("Can only save response to assistant messages");
 
-		await ctx.db.patch(messageId, { response });
-
-		// Clear the pending initial message flag if this conversation has it set
-		const conversation = await ctx.db.get(message.conversationId);
-		if (conversation?.hasPendingInitialMessage) {
-			await ctx.db.patch(message.conversationId, {
-				hasPendingInitialMessage: false,
-			});
-		}
+		await ctx.db.patch(messageId, { content: response });
 	},
 });
 
@@ -134,6 +143,19 @@ export const getMessageByStreamId = internalQuery({
 	},
 });
 
+export const getInternal = internalQuery({
+	args: { conversationId: v.id("conversations") },
+	handler: async (ctx, { conversationId }) => {
+		return await ctx.db
+			.query("messages")
+			.withIndex("by_conversation_order", (q) =>
+				q.eq("conversationId", conversationId),
+			)
+			.order("asc")
+			.collect();
+	},
+});
+
 export const finalizeStreamedResponse = mutation({
 	args: { messageId: v.id("messages") },
 	handler: async (ctx, { messageId }) => {
@@ -142,9 +164,11 @@ export const finalizeStreamedResponse = mutation({
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
 		if (message.userId !== userId) throw new Error("Unauthorized");
+		if (message.role !== "assistant")
+			throw new Error("Can only finalize assistant messages");
 
-		// Only finalize if we have a stream ID and no response yet
-		if (!message.responseStreamId || message.response) {
+		// Only finalize if we have a stream ID and no content yet
+		if (!message.responseStreamId || message.content) {
 			return;
 		}
 
@@ -155,19 +179,11 @@ export const finalizeStreamedResponse = mutation({
 		);
 
 		if (streamBody.status === "done" && streamBody.text) {
-			// Save the final text to the response field but keep the stream ID linked
+			// Save the final text to the content field but keep the stream ID linked
 			await ctx.db.patch(messageId, {
-				response: streamBody.text,
+				content: streamBody.text,
 				// Keep responseStreamId linked for now
 			});
-
-			// Clear the pending initial message flag if this conversation has it set
-			const conversation = await ctx.db.get(message.conversationId);
-			if (conversation?.hasPendingInitialMessage) {
-				await ctx.db.patch(message.conversationId, {
-					hasPendingInitialMessage: false,
-				});
-			}
 		}
 	},
 });
@@ -178,55 +194,55 @@ export const getConversationHistory = internalQuery({
 		messageId: v.id("messages"),
 	},
 	handler: async (ctx, args) => {
-		// Get all messages for this conversation
+		// Get all messages for this conversation up to the specified message
 		const messages = await ctx.db
 			.query("messages")
-			.withIndex("by_conversation", (q) =>
+			.withIndex("by_conversation_order", (q) =>
 				q.eq("conversationId", args.conversationId),
 			)
+			.order("asc")
 			.collect();
 
-		// Sort by creation time
-		messages.sort((a, b) => a._creationTime - b._creationTime);
+		// Find the target message to determine cutoff point
+		const targetMessageIndex = messages.findIndex(
+			(m) => m._id === args.messageId,
+		);
 
 		// Build conversation history, excluding the current message being processed
 		const history = [];
-		for (const message of messages) {
-			if (message._id === args.messageId) {
-				// Add the user message but not the response (since we're generating it)
+		const messagesToInclude =
+			targetMessageIndex >= 0
+				? messages.slice(0, targetMessageIndex)
+				: messages;
+
+		for (const message of messagesToInclude) {
+			if (message.role === "user") {
 				const userContent = await buildUserMessageContent(ctx, message);
 				history.push({
 					role: "user" as const,
 					content: userContent,
 				});
-				break;
-			}
+			} else if (message.role === "assistant") {
+				// Get content from stream or content field
+				let content = message.content;
+				if (message.responseStreamId && !content) {
+					const streamBody = await streamingComponent.getStreamBody(
+						ctx,
+						message.responseStreamId as StreamId,
+					);
+					content = streamBody.text || "";
+				}
 
-			// Add user message
-			const userContent = await buildUserMessageContent(ctx, message);
-			history.push({
-				role: "user" as const,
-				content: userContent,
-			});
-
-			// Add assistant response if it exists
-			if (message.responseStreamId) {
-				// Get the response from the stream
-				const streamBody = await streamingComponent.getStreamBody(
-					ctx,
-					message.responseStreamId as StreamId,
-				);
-				if (streamBody.text) {
+				if (content) {
 					history.push({
 						role: "assistant" as const,
-						content: streamBody.text,
+						content,
 					});
 				}
-			} else if (message.response) {
-				// Fallback to old response field
+			} else if (message.role === "system") {
 				history.push({
-					role: "assistant" as const,
-					content: message.response,
+					role: "system" as const,
+					content: message.content,
 				});
 			}
 		}
@@ -239,17 +255,17 @@ export const getConversationHistory = internalQuery({
 async function buildUserMessageContent(ctx: any, message: any) {
 	if (!message.files || message.files.length === 0) {
 		// No files, just return the text
-		return message.prompt;
+		return message.content;
 	}
 
 	// Build content array with text and images
 	const contentParts = [];
 
 	// Add text content first
-	if (message.prompt?.trim()) {
+	if (message.content?.trim()) {
 		contentParts.push({
 			type: "text",
-			text: message.prompt,
+			text: message.content,
 		});
 	}
 
@@ -261,8 +277,11 @@ async function buildUserMessageContent(ctx: any, message: any) {
 				const fileUrl = await ctx.storage.getUrl(file.storageId);
 				if (fileUrl) {
 					contentParts.push({
-						type: "image",
-						image: fileUrl,
+						type: "image_url",
+						image_url: {
+							url: fileUrl,
+							detail: "high",
+						},
 					});
 				}
 			} catch (error) {
@@ -273,6 +292,7 @@ async function buildUserMessageContent(ctx: any, message: any) {
 
 	return contentParts;
 }
+
 export const cancelStream = mutation({
 	args: { messageId: v.id("messages") },
 	handler: async (ctx, { messageId }) => {
@@ -282,45 +302,29 @@ export const cancelStream = mutation({
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
 		if (message.userId !== userId) throw new Error("Unauthorized");
+		if (message.role !== "assistant")
+			throw new Error("Can only cancel assistant message streams");
 
 		// Nothing to cancel if there's no streaming response in progress
 		if (!message.responseStreamId) {
 			return;
 		}
 
-		// Mark the underlying stream as done so that future appends fail and the
-		// streaming loop will terminate early.
-		await ctx.runMutation(
-			components.persistentTextStreaming.lib.setStreamStatus,
-			{
-				streamId: message.responseStreamId as StreamId,
-				status: "done",
-			},
-		);
-
 		// Fetch the text that has been streamed so far and persist it to the
-		// message's `response` field so that the partial answer is preserved.
+		// message's `content` field so that the partial answer is preserved.
 		const streamBody = await streamingComponent.getStreamBody(
 			ctx,
 			message.responseStreamId as StreamId,
 		);
 
 		if (streamBody.text) {
-			await ctx.db.patch(messageId, { response: streamBody.text });
-		}
-
-		// Clear the pending initial message flag if this conversation has it set
-		const conversation = await ctx.db.get(message.conversationId);
-		if (conversation?.hasPendingInitialMessage) {
-			await ctx.db.patch(message.conversationId, {
-				hasPendingInitialMessage: false,
-			});
+			await ctx.db.patch(messageId, { content: streamBody.text });
 		}
 	},
 });
 
 export const retry = mutation({
-	args: { 
+	args: {
 		messageId: v.id("messages"),
 		model: modelId,
 	},
@@ -330,27 +334,36 @@ export const retry = mutation({
 		const message = await ctx.db.get(messageId);
 		if (!message) throw new Error("Message not found");
 		if (message.userId !== userId) throw new Error("Unauthorized");
-
-		// Cancel existing stream if it exists
-		if (message.responseStreamId) {
-			await ctx.runMutation(
-				components.persistentTextStreaming.lib.setStreamStatus,
-				{
-					streamId: message.responseStreamId as StreamId,
-					status: "done",
-				},
-			);
-		}
+		if (message.role !== "assistant")
+			throw new Error("Can only retry assistant messages");
 
 		// Create a new stream for the retry
 		const responseStreamId = await streamingComponent.createStream(ctx);
 
-		// Update the message with the new model and stream
+		// Update the message with the new stream
 		await ctx.db.patch(messageId, {
-			model,
 			responseStreamId,
-			response: undefined, // Clear previous response
+			content: "", // Clear previous content
 		});
+
+		// Update the associated user message's model
+		const userMessage = await ctx.db
+			.query("messages")
+			.withIndex("by_conversation_order", (q) =>
+				q.eq("conversationId", message.conversationId),
+			)
+			.filter((q) =>
+				q.and(
+					q.eq(q.field("role"), "user"),
+					q.lt(q.field("messageOrder"), message.messageOrder),
+				),
+			)
+			.order("desc")
+			.first();
+
+		if (userMessage) {
+			await ctx.db.patch(userMessage._id, { model });
+		}
 
 		// Update conversation timestamp
 		await ctx.db.patch(message.conversationId, {
@@ -360,5 +373,3 @@ export const retry = mutation({
 		return { messageId, streamId: responseStreamId };
 	},
 });
-
-

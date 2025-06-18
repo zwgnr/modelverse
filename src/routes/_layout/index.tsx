@@ -5,6 +5,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { convexQuery } from "@convex-dev/react-query";
 
+import { conversationCreation } from "@/lib/utils";
+
 import { Onboarding } from "@/components/chat/onboarding";
 import { PromptArea } from "@/components/chat/PromptArea";
 
@@ -28,6 +30,11 @@ function IndexComponent() {
 	// Set page title for new chat/home page
 	useEffect(() => {
 		document.title = "modelverse";
+	}, []);
+
+	// Clean up any stale conversation creation state when on the home page
+	useEffect(() => {
+		conversationCreation.clearNewConversationState();
 	}, []);
 
 	const handleNavigateToChat = (conversationId: string) => {

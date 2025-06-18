@@ -61,7 +61,6 @@ export default defineSchema({
 		title: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number(),
-		hasPendingInitialMessage: v.optional(v.boolean()),
 		isPinned: v.optional(v.boolean()),
 		branchParent: v.optional(v.id("conversations")),
 		model: v.optional(modelId), // active convo model
@@ -73,9 +72,11 @@ export default defineSchema({
 	messages: defineTable({
 		userId: v.id("users"),
 		conversationId: v.id("conversations"),
-		prompt: v.string(),
-		response: v.optional(v.string()),
+		role: v.union(v.literal("system"), v.literal("user"), v.literal("assistant")),
+		content: v.string(),
+		// For assistant messages, track streaming state
 		responseStreamId: v.optional(StreamIdValidator),
+		// For user messages, track model and files
 		model: v.optional(modelId),
 		files: v.optional(
 			v.array(
@@ -86,7 +87,11 @@ export default defineSchema({
 				}),
 			),
 		),
+		// Order messages within conversation
+		messageOrder: v.number(),
 	})
 		.index("by_conversation", ["conversationId"])
-		.index("by_stream", ["responseStreamId"]),
+		.index("by_conversation_order", ["conversationId", "messageOrder"])
+		.index("by_stream", ["responseStreamId"])
+		.index("by_role", ["role"]),
 });

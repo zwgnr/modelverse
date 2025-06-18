@@ -103,7 +103,7 @@ export const deleteConversation = mutation({
 		// Delete all messages in this conversation
 		const messages = await ctx.db
 			.query("messages")
-			.withIndex("by_conversation", (q) =>
+			.withIndex("by_conversation_order", (q) =>
 				q.eq("conversationId", conversationId),
 			)
 			.collect();
@@ -143,31 +143,6 @@ export const updateTitleInternal = internalMutation({
 		await ctx.db.patch(conversationId, {
 			title,
 			updatedAt: Date.now(),
-		});
-	},
-});
-
-export const clearPendingInitialMessageInternal = internalMutation({
-	args: { conversationId: v.id("conversations") },
-	handler: async (ctx, { conversationId }) => {
-		await ctx.db.patch(conversationId, {
-			hasPendingInitialMessage: false,
-		});
-	},
-});
-
-export const clearPendingInitialMessage = mutation({
-	args: { conversationId: v.id("conversations") },
-	handler: async (ctx, { conversationId }) => {
-		const userId = await getAuthenticatedUserId(ctx);
-
-		const conversation = await ctx.db.get(conversationId);
-		if (!conversation || conversation.userId !== userId) {
-			throw new Error("Conversation not found or unauthorized");
-		}
-
-		await ctx.db.patch(conversationId, {
-			hasPendingInitialMessage: false,
 		});
 	},
 });
@@ -265,9 +240,10 @@ export const createBranchedConversation = mutation({
 		// Get all messages from the original conversation
 		const messages = await ctx.db
 			.query("messages")
-			.withIndex("by_conversation", (q) =>
+			.withIndex("by_conversation_order", (q) =>
 				q.eq("conversationId", conversationId),
 			)
+			.order("asc")
 			.collect();
 
 		const now = Date.now();
@@ -284,14 +260,20 @@ export const createBranchedConversation = mutation({
 		});
 
 		// Copy all messages to the new conversation
+		// Sort by message order to maintain conversation flow
+		messages.sort((a, b) => a.messageOrder - b.messageOrder);
+		
 		for (const message of messages) {
 			await ctx.db.insert("messages", {
 				userId,
 				conversationId: newConversationId,
-				prompt: message.prompt,
-				response: message.response,
+				role: message.role,
+				content: message.content,
 				model: message.model,
 				files: message.files,
+				messageOrder: message.messageOrder,
+				// Don't copy streams for assistant messages - they should be re-generated if needed
+				...(message.role === "assistant" && message.responseStreamId ? {} : {}),
 			});
 		}
 

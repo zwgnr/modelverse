@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import { DEFAULT_MODEL } from "@/lib/models";
-import { cn } from "@/lib/utils";
+import { cn, conversationCreation } from "@/lib/utils";
 
 import { ModelPicker } from "@/components/chat/model-picker";
 import { Button } from "@/components/ui/button";
@@ -175,12 +175,16 @@ export function PromptArea(props: PromptAreaProps) {
 
 		if (createNewConversation && onNavigateToChat) {
 			const newId = await createConversation({ model: modelIdToUse });
-			await sendMessage({
+			const { streamId } = await sendMessage({
 				prompt: text,
 				conversationId: newId,
 				model: modelIdToUse,
 				files: fileData,
 			});
+			
+			// Flash the conversation creation info to session storage
+			conversationCreation.setNewConversationCreated(newId, streamId);
+			
 			setText("");
 			setFiles([]);
 			onNavigateToChat(newId);
