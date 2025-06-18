@@ -95,26 +95,10 @@ function RouteComponent() {
 				open={commandPaletteOpen}
 				onOpenChange={setCommandPaletteOpen}
 			/>
-
-			{/* Backdrop for mobile */}
-			{sidebarVisible && (
-				<button
-					type="button"
-					className={cn(
-						"fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden",
-						sidebarToggled && "fade-in animate-in duration-300",
-					)}
-					onClick={() => {
-						setSidebarVisible(false);
-						setSidebarToggled(true);
-					}}
-				/>
-			)}
-
 			{/* Sidebar */}
 			<div
 				className={cn(
-					"relative z-50 flex-shrink-0 overflow-hidden transition-all duration-300 ease-out",
+					"relative z-50 hidden flex-shrink-0 overflow-hidden transition-all duration-300 ease-out sm:block",
 					sidebarVisible ? "w-64" : "w-0",
 				)}
 			>

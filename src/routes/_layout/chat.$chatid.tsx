@@ -81,7 +81,7 @@ const MessageRow = memo(function MessageRow({
 	if (message.role === "user") {
 		return (
 			<div className="flex justify-end">
-				<Bubble className="flex w-fit max-w-2xs items-center bg-secondary text-secondary-foreground">
+				<Bubble className="flex w-fit max-w-md items-center overflow-hidden bg-secondary text-secondary-foreground">
 					{DOMPurify.sanitize(message.content)}
 					{!!message.files?.length && (
 						<div className="mt-3 space-y-2">
