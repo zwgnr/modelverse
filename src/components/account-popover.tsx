@@ -15,9 +15,13 @@ import {
 
 interface AccountPopoverProps {
 	currentUser: {
-		email?: string | null;
-		image?: string;
-		name?: string;
+		_creationTime: number | null;
+		email: string | null;
+		image: string | null;
+		name: string | null;
+		hasOpenRouterKey: boolean | null;
+		useBYOK: boolean | null;
+		defaultModel: string | null;
 	} | null;
 	onSignOut: () => void;
 }

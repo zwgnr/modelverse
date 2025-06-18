@@ -119,7 +119,15 @@ export const getCurrentUser = query({
 	args: {},
 	handler: async (ctx) => {
 		const idn = (await ctx.auth.getUserIdentity())?.subject as Id<"users">;
-		if (!idn) return null;
+		if (!idn) return {
+			_creationTime: null,
+			name: null,
+			email: null,
+			image: null,
+			useBYOK: null,
+			defaultModel: null,
+			hasOpenRouterKey: null,
+		};
 		const data = await ctx.db.get(idn);
 
 		return {

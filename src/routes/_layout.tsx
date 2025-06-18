@@ -176,7 +176,19 @@ function RouteComponent() {
 								</div>
 							</div>
 							<AccountPopover
-								currentUser={currentUser}
+								currentUser={
+									currentUser
+										? {
+												_creationTime: currentUser._creationTime ?? null,
+												email: currentUser.email ?? null,
+												image: currentUser.image ?? null,
+												name: currentUser.name ?? null,
+												hasOpenRouterKey: currentUser.hasOpenRouterKey ?? null,
+												useBYOK: currentUser.useBYOK ?? null,
+												defaultModel: currentUser.defaultModel ?? null,
+											}
+										: null
+								}
 								onSignOut={handleSignOut}
 							/>
 						</div>

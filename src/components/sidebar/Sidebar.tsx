@@ -5,7 +5,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
 import { useMutation } from "convex/react";
 
-import { MessageCirclePlus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -76,12 +75,12 @@ export function Sidebar({
 				<div className="sidebar-scroll h-full overflow-y-auto px-4 py-4">
 					{!conversations || conversations.length === 0 ? (
 						<div className="flex h-full flex-col items-center justify-center text-center">
-							<div className="mb-4 text-muted-foreground">
+							{/* <div className="mb-4 text-muted-foreground">
 								<MessageCirclePlus className="mx-auto mb-2 h-12 w-12 opacity-50" />
 							</div>
 							<h3 className="mb-2 font-medium text-foreground text-sm">
 								No conversations yet
-							</h3>
+							</h3> */}
 						</div>
 					) : (
 						<div className="space-y-6">

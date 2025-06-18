@@ -45,13 +45,17 @@ function IndexComponent() {
 		});
 	};
 
-	// Check if user has encrypted OpenRouter API key
 	const hasApiKey = currentUser?.hasOpenRouterKey;
-
+	
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center px-4">
 			<div className="w-full max-w-4xl space-y-8 text-center">
-				{hasApiKey ? (
+				{hasApiKey === null ? (
+					<div className="flex flex-col items-center justify-center">
+						<div className="h-10 w-10 animate-spin rounded-full border-gray-900 border-t-2 border-b-2 dark:border-white" />
+						<p className="text-gray-500 text-sm">Loading...</p>
+					</div>
+				) : hasApiKey ? (
 					<>
 						<div className="space-y-4">
 							<p className="text-3xl text-foreground">
