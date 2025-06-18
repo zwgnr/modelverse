@@ -38,10 +38,10 @@ export function SignInForm() {
 			await authClient.signIn.social(
 				{
 					provider: "github",
+					callbackURL: "/"
 				},
 				{
 					onSuccess: () => {
-						navigate({ to: (search.redirect as string) || "/" });
 					},
 					onError: (error) => {
 						setError(error.error.message);
