@@ -26,7 +26,7 @@ import { FileDisplay } from "@/components/chat/FileDisplay";
 import { MarkdownMessage } from "@/components/chat/MarkdownMessage";
 import { PromptArea } from "@/components/chat/PromptArea";
 import { RetryButton } from "@/components/chat/retry-button";
-import { ScrollToBottomButton } from "@/components/chat/ScrollToBottom";
+import { ScrollToBottomButton } from "@/components/chat/scroll-to-bottom";
 import { StreamingMessage } from "@/components/chat/StreamingMessage";
 import { Button } from "@/components/ui/button";
 

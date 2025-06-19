@@ -6,7 +6,7 @@ export function ScrollToBottomButton({ onClick }: { onClick: () => void }) {
 				onClick={onClick}
 				variant="secondary"
 				size="sm"
-				className="rounded-full shadow-lg"
+				className="rounded-full bg-muted text-secondary-foreground shadow-lg dark:bg-muted dark:text-secondary-foreground"
 			>
 			↓ Scroll to bottom
 		</Button>
